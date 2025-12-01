@@ -1,0 +1,201 @@
+.sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  background: var(--card-bg);
+  border-right: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 20px;
+  gap: 20px;
+  position: relative;
+  transition: width 0.25s ease;
+  border-radius: 0;
+}
+
+.collapsed {
+  width: 88px;
+  min-width: 88px;
+}
+
+.toggleBtn {
+  position: absolute;
+  top: 20px;
+  right: -12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
+
+.toggleBtn:hover {
+  background: #f1f5f9;
+}
+
+.branding {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.logoMark {
+  width: 42px;
+  height: 42px;
+  border-radius: 0;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.brandTitle {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.brandTag {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+}
+
+.sectionLabel {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.16em;
+  color: var(--text-soft);
+  margin-top: 8px;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 0;
+  color: var(--text-strong);
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.menuItem:hover {
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary);
+}
+
+.active {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.24);
+}
+
+.icon {
+  width: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.focusCard {
+  padding: 14px;
+  border-radius: 0;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.focusCard h3 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.progressTrack {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.3);
+  overflow: hidden;
+  margin: 4px 0;
+}
+
+.progressTrack span {
+  display: block;
+  height: 100%;
+  background: var(--primary);
+}
+
+.footerSection {
+  margin-top: auto;
+}
+
+.logoutBtn {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 0;
+  background: #e11d48;
+  color: white;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s ease;
+}
+
+.logoutBtn:hover {
+  background: #be123c;
+}
+
+.collapsed .branding div,
+.collapsed .sectionLabel,
+.collapsed .label {
+  display: none;
+}
+
+.collapsed .branding {
+  justify-content: center;
+}
+
+.collapsed .focusCard p,
+.collapsed .focusCard h3,
+.collapsed .focusCard small {
+  display: none;
+}
+
+.collapsed .focusCard {
+  padding: 12px 8px;
+}
+
+.collapsed .focusCard {
+  align-items: center;
+  text-align: center;
+}
+
+.collapsed .logoutBtn {
+  justify-content: center;
+}
+
+.collapsed .menuItem {
+  justify-content: center;
+}

@@ -1,0 +1,274 @@
+/* -------- GLOBAL SECTION SPACING -------- */
+section {
+  width: 100%;
+}
+
+/* -------- HERO SECTION -------- */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 60px;
+  min-height: 90vh;
+  padding: 0 5%;
+  background: linear-gradient(180deg, #fafafa, #f2f2f2);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.heroText {
+  width: 50%;
+}
+
+.heroText h1 {
+  font-size: 3.2rem;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 12px;
+  color: #111;
+}
+
+.heroText p {
+  font-size: 1.15rem;
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.getStartedButton {
+  padding: 14px 26px;
+  border: 2px solid rgb(30, 175, 83);
+  cursor: pointer;
+  background-color: rgb(30, 175, 83);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.getStartedButton:hover {
+  background-color: transparent;
+  color: rgb(30, 175, 83);
+}
+
+.learnMoreButton {
+  padding: 14px 26px;
+  border: 2px solid #222;
+  cursor: pointer;
+  background-color: transparent;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #222;
+}
+
+.learnMoreButton:hover {
+  background-color: #222;
+  color: #fff;
+}
+
+.heroImage img {
+  width: 100%;
+  max-width: 850px;
+  height: auto;
+  border: 1px solid #ddd;
+}
+
+/* -------- FEATURES SECTION -------- */
+.features {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  background-color: #fff;
+  padding: 5% 0;
+}
+
+.features h2 {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  color: #111;
+}
+
+.features p {
+  font-size: 1.15rem;
+  color: #555;
+  max-width: 650px;
+  margin: 0 auto 2.5rem auto;
+  line-height: 1.6;
+}
+
+.featureList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.featureItem {
+  background-color: #fafafa;
+  border: 1px solid #e3e3e3;
+  width: clamp(250px, 30%, 300px);
+  padding-bottom: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.featureItem img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.featureItem h3 {
+  margin-top: 1rem;
+  font-size: 1.1rem;
+  color: #222;
+}
+
+.featureItem p {
+  padding: 0 1rem;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.featureItem:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.09);
+}
+
+/* -------- TEAM SECTION -------- */
+.team {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f8f8f8;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+  gap: 1rem;
+  padding: 5% 0;
+}
+
+.team h2 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.team p {
+  width: 100%;
+  color: #666;
+  max-width: 600px;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  font-size: 1.15rem;
+}
+
+.teamList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.teamItem {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  width: 260px;
+  padding-bottom: 1rem;
+  transition: transform 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.teamItem img {
+  width: 100%;
+  height: 225px;
+  object-fit: cover;
+  border-bottom: 1px solid #ddd;
+}
+
+.teamItem h3 {
+  margin-top: 1rem;
+  font-size: 1.15rem;
+  color: #222;
+}
+
+.teamItem h4 {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: #777;
+  font-weight: 400;
+}
+
+.teamItem:hover {
+  transform: translateY(-6px);
+}
+
+.socials {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.8rem;
+}
+
+.socials svg {
+  width: 24px;
+  height: 24px;
+  color: #444;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.socials svg:hover {
+  color: #000;
+}
+
+/* -------- GET STARTED SECTION -------- */
+.getStarted {
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  border-top: 1px solid #e0e0e0;
+  gap: 1.5rem;
+}
+
+.getStarted h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.getStarted p {
+  color: #555;
+  max-width: 600px;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  font-size: 1.25rem;
+}
+
+.getStarted button {
+  padding: 14px 26px;
+  border: 2px solid rgb(30, 175, 83);
+  background: rgb(30, 175, 83);
+  color: white;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.getStarted button:hover {
+  background: transparent;
+  color: rgb(30, 175, 83);
+}

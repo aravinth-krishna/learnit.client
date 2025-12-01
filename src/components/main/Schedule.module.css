@@ -1,0 +1,300 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.kicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--text-soft);
+}
+
+.pageHeader h1 {
+  margin: 6px 0 0;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.primaryBtn {
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: white;
+  padding: 8px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.primaryBtn:hover {
+  background: var(--accent-dark);
+  border-color: var(--accent-dark);
+}
+
+.lightBtn {
+  border-radius: 0;
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--text-strong);
+  padding: 8px 18px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: border 0.2s ease;
+}
+
+.lightBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.calendarCard {
+  border: 1px solid var(--card-border);
+  border-radius: 0;
+  background: var(--card-bg);
+  padding: 18px;
+}
+
+.aiRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.aiCard {
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.aiCard ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+}
+
+.deepWorkList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.deepWorkList span {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: var(--text-soft);
+}
+
+.deepWorkList strong {
+  font-size: 0.95rem;
+}
+
+.productivityBadge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--accent);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 80px;
+}
+
+.productivityBadge span {
+  font-size: 0.7rem;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metricsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.metricCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  padding: 12px;
+  border-radius: 0;
+  text-align: center;
+}
+
+.metricCard span {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.metricCard strong {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.cardHeader h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.aiBadge,
+.nextBadge {
+  font-size: 0.7rem;
+  background: var(--accent);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.insightsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.insight {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px;
+  background: var(--bg);
+  border-radius: 0;
+}
+
+.insight p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.applyBtn {
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.applyBtn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.sessionItem {
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sessionMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sessionMeta span {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: var(--text-soft);
+}
+
+.sessionMeta small {
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-style: italic;
+}
+
+.sessionItem strong {
+  font-size: 0.95rem;
+  color: var(--text-strong);
+}
+
+.sessionType {
+  font-size: 0.75rem;
+  color: var(--text-soft);
+  background: var(--surface);
+  padding: 2px 6px;
+  border-radius: 0;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.quickActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.quickBtn {
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-strong);
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0;
+  transition: all 0.2s ease;
+}
+
+.quickBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 720px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

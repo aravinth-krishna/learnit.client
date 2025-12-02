@@ -201,6 +201,33 @@ class ApiService {
   async getProgressDashboard() {
     return this.request('/api/progress/dashboard');
   }
+
+  // Course Management
+  async editCourse(courseId, courseData) {
+    return this.request(`/api/courses/${courseId}/edit`, {
+      method: 'PUT',
+      body: JSON.stringify(courseData),
+    });
+  }
+
+  // Session Management
+  async startStudySession(courseId, moduleId = null) {
+    const params = moduleId ? `?moduleId=${moduleId}` : '';
+    return this.request(`/api/courses/${courseId}/sessions/start${params}`, {
+      method: 'POST',
+    });
+  }
+
+  async stopStudySession(sessionId, notes = '') {
+    return this.request(`/api/courses/sessions/${sessionId}/stop`, {
+      method: 'PUT',
+      body: JSON.stringify(notes),
+    });
+  }
+
+  async getCourseSessions(courseId) {
+    return this.request(`/api/courses/${courseId}/sessions`);
+  }
 }
 
 export default new ApiService();

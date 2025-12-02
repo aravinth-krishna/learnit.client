@@ -2,6 +2,7 @@ import { useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import styles from "./Signin.module.css";
+import api from "../../services/api";
 
 function Signin() {
   const navigate = useNavigate();
@@ -12,26 +13,22 @@ function Signin() {
     password: "",
   });
 
+  const [error, setError] = useState("");
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    const res = await fetch("https://localhost:7271/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    if (!res.ok) {
-      alert("Invalid credentials");
-      return;
+    try {
+      const data = await api.login(form.email, form.password);
+      login(data.token);
+      navigate("/app/course");
+    } catch (err) {
+      setError(err.message || "Invalid credentials");
     }
-
-    const data = await res.json();
-    login(data.token); // STORE JWT
-    navigate("/app/course"); // REDIRECT
   };
 
   return (
@@ -39,6 +36,8 @@ function Signin() {
       <h1>Log In</h1>
       <p>Enter your credentials to access your account.</p>
 
+      {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+      
       <form onSubmit={handleSubmit}>
         <label>Email</label>
         <input
@@ -46,6 +45,7 @@ function Signin() {
           type="email"
           placeholder="john.doe@example.com"
           required
+          value={form.email}
           onChange={handleChange}
         />
 
@@ -55,6 +55,7 @@ function Signin() {
           type="password"
           placeholder="********"
           required
+          value={form.password}
           onChange={handleChange}
         />
 

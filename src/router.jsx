@@ -37,9 +37,9 @@ const router = createBrowserRouter([
   {
     path: "/app",
     element: (
-      // <RequireAuth>
-      <Layout />
-      // </RequireAuth>
+      <RequireAuth>
+        <Layout />
+      </RequireAuth>
     ),
     children: [
       { path: "course", element: <Course /> },

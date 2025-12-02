@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styles from "./Signup.module.css";
+import api from "../../services/api";
 
 function Signup() {
   const navigate = useNavigate();
@@ -12,25 +13,27 @@ function Signup() {
     confirmPassword: "",
   });
 
+  const [error, setError] = useState("");
+
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
 
-    await fetch("https://localhost:7271/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-
-    alert("Account created! Please login.");
-    navigate("/auth/login");
+    try {
+      await api.register(form.fullName, form.email, form.password);
+      alert("Account created! Please login.");
+      navigate("/auth/login");
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+    }
   };
 
   return (
@@ -40,17 +43,31 @@ function Signup() {
         Join Learnit to optimize your study routines and track your progress.
       </p>
 
+      {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+      
       <form onSubmit={handleSubmit}>
         <label>Full Name</label>
-        <input name="fullName" onChange={handleChange} required />
+        <input 
+          name="fullName" 
+          value={form.fullName}
+          onChange={handleChange} 
+          required 
+        />
 
         <label>Email</label>
-        <input name="email" type="email" onChange={handleChange} required />
+        <input 
+          name="email" 
+          type="email" 
+          value={form.email}
+          onChange={handleChange} 
+          required 
+        />
 
         <label>Password</label>
         <input
           name="password"
           type="password"
+          value={form.password}
           onChange={handleChange}
           required
         />
@@ -59,6 +76,7 @@ function Signup() {
         <input
           name="confirmPassword"
           type="password"
+          value={form.confirmPassword}
           onChange={handleChange}
           required
         />

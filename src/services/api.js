@@ -170,6 +170,32 @@ class ApiService {
       method: 'DELETE',
     });
   }
+
+  // Profile API
+  async getProfile() {
+    return this.request('/api/profile');
+  }
+
+  async updateProfile(profileData) {
+    return this.request('/api/profile/info', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  async updatePreferences(preferencesData) {
+    return this.request('/api/profile/preferences', {
+      method: 'PUT',
+      body: JSON.stringify(preferencesData),
+    });
+  }
+
+  async changePassword(passwordData) {
+    return this.request('/api/profile/password', {
+      method: 'PUT',
+      body: JSON.stringify(passwordData),
+    });
+  }
 }
 
 export default new ApiService();

@@ -8,10 +8,10 @@
   align-items: center;
 
   padding: 1rem 2rem;
-  background-color: #1f1f1f;
-  color: white;
+  background-color: var(--surface);
+  color: var(--text-strong);
 
-  border-bottom: 1px solid #2d2d2d;
+  border-bottom: 1px solid var(--border);
 }
 
 /* LOGO */
@@ -32,14 +32,14 @@
 .navLinks a {
   position: relative;
   font-size: 1rem;
-  color: #e5e5e5;
+  color: var(--text-soft);
   text-decoration: none;
   padding: 6px 0;
   transition: color 0.25s ease;
 }
 
 .navLinks a:hover {
-  color: #ffffff;
+  color: var(--text-strong);
 }
 
 .navLinks a::after {
@@ -49,7 +49,7 @@
   bottom: -2px;
   width: 0%;
   height: 2px;
-  background-color: #2ecc71;
+  background-color: var(--accent);
   transition: width 0.25s ease;
 }
 
@@ -83,8 +83,8 @@
   right: 0;
   top: 42px;
 
-  background: #2b2b2b;
-  border: 1px solid #3a3a3a;
+  background: var(--surface);
+  border: 1px solid var(--border);
 
   display: flex;
   flex-direction: column;
@@ -105,7 +105,7 @@
 }
 
 .dropdown a:hover {
-  background: #3a3a3a;
+  background: var(--bg);
 }
 
 .logoutButton {

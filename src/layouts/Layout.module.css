@@ -8,6 +8,17 @@
   --primary-dark: #1d4ed8;
 }
 
+/* Dark mode variables for layout */
+[data-theme="dark"] {
+  --app-bg: #0f172a;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+  --text-strong: #f8fafc;
+  --text-soft: #94a3b8;
+  --primary: #22d3ee;
+  --primary-dark: #0891b2;
+}
+
 .dashboard {
   display: flex;
   min-height: 100vh;

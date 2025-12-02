@@ -27,6 +27,11 @@ class ApiService {
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
+      // Handle 204 No Content responses
+      if (response.status === 204) {
+        return null;
+      }
+
       return await response.json();
     } catch (error) {
       console.error('API request failed:', error);
@@ -114,6 +119,25 @@ class ApiService {
 
   async getCourseStats() {
     return this.request('/api/courses/stats');
+  }
+
+  // Profile API
+  async getProfile() {
+    return this.request('/api/profile');
+  }
+
+  async updateProfile(profileData) {
+    return this.request('/api/profile', {
+      method: 'PUT',
+      body: JSON.stringify(profileData),
+    });
+  }
+
+  async changePassword(currentPassword, newPassword) {
+    return this.request('/api/profile/password', {
+      method: 'PUT',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    });
   }
 }
 

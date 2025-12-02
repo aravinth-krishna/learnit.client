@@ -2,9 +2,9 @@
   max-width: 500px;
   margin: 6.5rem auto;
   padding: 2rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border);
   border-radius: 0; /* keeps your non-rounded aesthetic */
-  background-color: #fafafa;
+  background-color: var(--surface);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -13,11 +13,11 @@
 .signin h1 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
-  color: #111;
+  color: var(--text-strong);
 }
 
 .signin p {
-  color: #555;
+  color: var(--text-soft);
   margin-bottom: 1.5rem;
 }
 
@@ -29,14 +29,15 @@
 
 .signin form label {
   font-weight: 600;
-  color: #333;
+  color: var(--text-strong);
 }
 
 .signin form input {
   padding: 0.6rem 0.8rem;
   font-size: 1rem;
-  border: 1px solid #ccc;
-  background-color: #fff;
+  border: 1px solid var(--border);
+  background-color: var(--card-bg);
+  color: var(--text-strong);
   outline: none;
   transition: border-color 0.2s ease;
 }
@@ -69,7 +70,7 @@
 }
 
 .extra a {
-  color: #0070f3;
+  color: var(--accent);
   text-decoration: none;
 }
 

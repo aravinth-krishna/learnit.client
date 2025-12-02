@@ -197,9 +197,9 @@
 }
 
 .chipActive {
-  background: #111;
-  color: #fff;
-  border-color: #111;
+  background: var(--text-strong);
+  color: var(--card-bg);
+  border-color: var(--text-strong);
 }
 
 .layout {
@@ -354,7 +354,7 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -399,8 +399,8 @@
 }
 
 .tabActive {
-  background: #111;
-  color: #fff;
+  background: var(--text-strong);
+  color: var(--card-bg);
 }
 
 .tabDisabled {
@@ -423,7 +423,7 @@
 }
 
 .iconBtn:hover {
-  color: #000;
+  color: var(--text-strong);
 }
 
 .errorMessage {

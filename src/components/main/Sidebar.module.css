@@ -36,7 +36,7 @@
 }
 
 .toggleBtn:hover {
-  background: #f1f5f9;
+  background: var(--surface);
 }
 
 .branding {
@@ -64,6 +64,7 @@
   margin: 0;
   font-size: 1.2rem;
   font-weight: 700;
+  color: var(--text-strong);
 }
 
 .brandTag {
@@ -116,24 +117,26 @@
 .focusCard {
   padding: 14px;
   border-radius: 0;
-  background: #f8fafc;
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: var(--surface);
+  border: 1px solid var(--card-border);
   display: flex;
   flex-direction: column;
   gap: 6px;
   font-size: 0.9rem;
+  color: var(--text-strong);
 }
 
 .focusCard h3 {
   margin: 0;
   font-size: 1.3rem;
+  color: var(--text-strong);
 }
 
 .progressTrack {
   width: 100%;
   height: 6px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.3);
+  background: var(--border);
   overflow: hidden;
   margin: 4px 0;
 }

@@ -18,9 +18,13 @@ export default function Schedule() {
   const [editingEvent, setEditingEvent] = useState(null);
   const [editForm, setEditForm] = useState({
     title: "",
+    start: "",
+    end: "",
+    allDay: false,
     linkToModule: "",
     unlinkFromModule: false,
   });
+  const [notification, setNotification] = useState("");
 
   useEffect(() => {
     loadEvents();
@@ -222,7 +226,8 @@ export default function Schedule() {
       );
     } catch (err) {
       console.error("Failed to move event", err);
-      alert(err.message || "Failed to update event");
+      setNotification(`Failed to update event: ${err.message || "Unknown error"}`);
+      setTimeout(() => setNotification(""), 5000);
       info.revert();
     }
   }
@@ -254,9 +259,31 @@ export default function Schedule() {
       );
     } catch (err) {
       console.error("Failed to resize event", err);
-      alert(err.message || "Failed to update event");
+      setNotification(`Failed to update event: ${err.message || "Unknown error"}`);
+      setTimeout(() => setNotification(""), 5000);
       info.revert();
     }
+  }
+
+  // Hover effects for better UX
+  function handleEventMouseEnter(info) {
+    const el = info.el;
+    el.style.cursor = 'pointer';
+    el.style.transform = 'scale(1.02)';
+    el.style.transition = 'transform 0.1s ease';
+  }
+
+  function handleEventMouseLeave(info) {
+    const el = info.el;
+    el.style.cursor = 'default';
+    el.style.transform = 'scale(1)';
+  }
+
+  // Add drag indicator to events
+  function handleEventDidMount(info) {
+    // Add a subtle drag indicator
+    const eventEl = info.el;
+    eventEl.title = `${info.event.title} - Click to edit, drag to reschedule`;
   }
 
   // Open edit modal for event
@@ -276,6 +303,9 @@ export default function Schedule() {
 
     setEditForm({
       title: event.title,
+      start: new Date(event.start).toISOString().slice(0, 16),
+      end: event.end ? new Date(event.end).toISOString().slice(0, 16) : "",
+      allDay: event.allDay || false,
       linkToModule: "",
       unlinkFromModule: false,
     });
@@ -286,6 +316,27 @@ export default function Schedule() {
   // Handle saving changes from the edit modal
   const handleSaveEvent = async () => {
     if (!editingEvent) return;
+
+    // Validation
+    if (!editForm.title.trim()) {
+      setError("Event title is required");
+      return;
+    }
+
+    if (!editForm.start) {
+      setError("Start time is required");
+      return;
+    }
+
+    const startDate = new Date(editForm.start);
+    const endDate = editForm.end ? new Date(editForm.end) : null;
+
+    if (endDate && startDate >= endDate) {
+      setError("End time must be after start time");
+      return;
+    }
+
+    setError("");
 
     try {
       // Handle unlinking from module first
@@ -299,13 +350,22 @@ export default function Schedule() {
         await handleLinkToModule(editingEvent.id, moduleId);
       }
 
-      // Update title if changed
-      if (editForm.title !== editingEvent.title) {
+      // Check if any event properties changed
+      const startChanged = editForm.start !== new Date(editingEvent.start).toISOString().slice(0, 16);
+      const endChanged = editForm.end !== (editingEvent.end ? new Date(editingEvent.end).toISOString().slice(0, 16) : "");
+      const allDayChanged = editForm.allDay !== (editingEvent.allDay || false);
+      const titleChanged = editForm.title !== editingEvent.title;
+
+      // Update event if any properties changed
+      if (titleChanged || startChanged || endChanged || allDayChanged) {
+        const startDate = editForm.start ? new Date(editForm.start) : null;
+        const endDate = editForm.end ? new Date(editForm.end) : null;
+
         await updateEventOnServer(editingEvent.id, {
           title: editForm.title,
-          startUtc: editingEvent.start,
-          endUtc: editingEvent.end,
-          allDay: editingEvent.allDay,
+          start: startDate,
+          end: endDate,
+          allDay: editForm.allDay,
         });
 
         // Update local state
@@ -315,6 +375,11 @@ export default function Schedule() {
               ? {
                   ...e,
                   title: editForm.title,
+                  start: startDate,
+                  end: endDate,
+                  allDay: editForm.allDay,
+                  startUtc: startDate?.toISOString(),
+                  endUtc: endDate?.toISOString(),
                 }
               : e
           )
@@ -373,6 +438,12 @@ export default function Schedule() {
 
   return (
     <section className={styles.page}>
+      {notification && (
+        <div className={styles.notification}>
+          {notification}
+        </div>
+      )}
+
       <div className={styles.pageHeader}>
         <div>
           <p className={styles.kicker}>AI-powered scheduling</p>
@@ -432,11 +503,18 @@ export default function Schedule() {
           selectMirror={true}
           nowIndicator={true}
           allDaySlot={false}
+          dragScroll={true}
+          eventStartEditable={true}
+          eventDurationEditable={true}
+          eventResizableFromStart={true}
           select={handleSelect}
           dateClick={handleDateClick}
           eventDrop={handleEventDrop}
           eventResize={handleEventResize}
           eventClick={handleEventClick}
+          eventMouseEnter={handleEventMouseEnter}
+          eventMouseLeave={handleEventMouseLeave}
+          eventDidMount={handleEventDidMount}
           headerToolbar={{
             left: "prev,next today",
             center: "title",
@@ -445,10 +523,11 @@ export default function Schedule() {
           slotMinTime="06:00:00"
           slotMaxTime="23:00:00"
           slotDuration="00:30:00"
+          snapDuration="00:15:00"
           height="70vh"
           eventDisplay="block"
-          eventBackgroundColor="var(--primary)"
-          eventBorderColor="var(--primary)"
+          eventBackgroundColor="#1eaf53"
+          eventBorderColor="#1eaf53"
           eventTextColor="white"
           dayHeaderFormat={{ weekday: "short" }}
           slotLabelFormat={{
@@ -599,6 +678,35 @@ export default function Schedule() {
                 />
               </label>
 
+              <div className={styles.formGrid}>
+                <label>
+                  Start Time *
+                  <input
+                    type="datetime-local"
+                    value={editForm.start}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, start: e.target.value }))}
+                    required
+                  />
+                </label>
+                <label>
+                  End Time
+                  <input
+                    type="datetime-local"
+                    value={editForm.end}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, end: e.target.value }))}
+                  />
+                </label>
+              </div>
+
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={editForm.allDay}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, allDay: e.target.checked }))}
+                />
+                All-day event
+              </label>
+
               {/* Course Module Information */}
               {editingEvent.courseModule && (
                 <div className={styles.moduleInfo}>
@@ -642,22 +750,6 @@ export default function Schedule() {
                 </label>
               )}
 
-              {/* Event Details */}
-              <div className={styles.eventDetails}>
-                <div>
-                  <strong>Start:</strong> {editingEvent.start?.toLocaleString()}
-                </div>
-                <div>
-                  <strong>End:</strong> {editingEvent.end?.toLocaleString() || 'No end time'}
-                </div>
-                <div>
-                  <strong>Duration:</strong> {
-                    editingEvent.start && editingEvent.end
-                      ? `${Math.round((editingEvent.end - editingEvent.start) / (1000 * 60))} minutes`
-                      : 'All day'
-                  }
-                </div>
-              </div>
 
               {error && (
                 <div className={styles.errorMessage}>

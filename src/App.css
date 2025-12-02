@@ -72,3 +72,54 @@ select {
   outline: none;
   background: none;
 }
+
+/* Dark Mode Styles */
+.dark-mode {
+  --bg: #1a1a1a;
+  --surface: #2d2d2d;
+  --muted: #9b9b9b;
+  --text-soft: #9b9b9b;
+  --border: #404040;
+  --text-strong: #f0f0f0;
+  /* Layout module variables */
+  --app-bg: #1a1a1a;
+  --card-bg: #2d2d2d;
+  --card-border: #404040;
+  /* Keep accent colors visible in dark mode */
+  --accent: #1eaf53;
+  --accent-dark: #129341;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+}
+
+.dark-mode body {
+  background-color: var(--bg);
+  color: var(--text-strong);
+}
+
+/* Ensure all text elements adapt to dark mode */
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode h4,
+.dark-mode h5,
+.dark-mode h6,
+.dark-mode p,
+.dark-mode span,
+.dark-mode label {
+  color: var(--text-strong);
+}
+
+/* Input and select elements in dark mode */
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+  background-color: var(--card-bg);
+  color: var(--text-strong);
+  border-color: var(--border);
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+  color: var(--text-soft);
+}

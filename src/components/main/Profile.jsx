@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import styles from "./Profile.module.css";
 import api from "../../services/api";
-import { useTheme } from "../../context/ThemeContext.jsx";
 
 function Profile() {
-  const { isDarkMode, setDarkMode } = useTheme();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
   const [profile, setProfile] = useState({
     fullName: "",
@@ -18,106 +18,136 @@ function Profile() {
     darkMode: false,
   });
 
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+  // Load dark mode from localStorage on mount
+  const [darkMode, setDarkMode] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    return saved ? JSON.parse(saved) : false;
   });
 
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [activeSection, setActiveSection] = useState("profile");
+  const [loading, setLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const [originalData, setOriginalData] = useState(null);
 
+  // Apply dark mode class to document when darkMode changes
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark-mode");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+    }
+    localStorage.setItem("darkMode", JSON.stringify(darkMode));
+  }, [darkMode]);
+
+  // Load profile data on mount
   useEffect(() => {
     loadProfile();
   }, []);
 
-  // Sync theme context when preferences are loaded
-  useEffect(() => {
-    setDarkMode(preferences.darkMode);
-  }, [preferences.darkMode, setDarkMode]);
-
   const loadProfile = async () => {
     try {
       setLoading(true);
-      const data = await api.getProfile();
-      setProfile(data.profile);
-      setPreferences(data.preferences);
-    } catch (err) {
-      setError("Failed to load profile");
-      console.error(err);
+      const profile = await api.getProfile();
+      setName(profile.fullName || "");
+      setEmail(profile.email || "");
+      setStudySpeed(profile.studySpeed || "normal");
+      setMaxSession(String(profile.maxSessionMinutes || 60));
+      setWeeklyLimit(profile.weeklyLimitHours || 10);
+      const isDark = profile.darkMode || false;
+      setDarkMode(isDark);
+      setOriginalData(profile);
+    } catch (error) {
+      setMessage({ type: "error", text: error.message || "Failed to load profile" });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleProfileUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      setSaving(true);
-      setError("");
-      setSuccess("");
-
-      await api.updateProfile(profile);
-      setSuccess("Profile updated successfully!");
-    } catch (err) {
-      setError(err.message || "Failed to update profile");
-    } finally {
-      setSaving(false);
-    }
+  const handleDarkModeToggle = () => {
+    setDarkMode((prev) => !prev);
   };
 
-  const handlePreferencesUpdate = async (e) => {
-    e.preventDefault();
+  const handleSave = async () => {
     try {
-      setSaving(true);
-      setError("");
-      setSuccess("");
+      setLoading(true);
+      setMessage({ type: "", text: "" });
 
-      await api.updatePreferences(preferences);
-      setSuccess("Preferences updated successfully!");
-    } catch (err) {
-      setError(err.message || "Failed to update preferences");
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError("New passwords do not match");
-      return;
-    }
-
-    if (passwordData.newPassword.length < 6) {
-      setError("Password must be at least 6 characters long");
-      return;
-    }
-
-    try {
-      setSaving(true);
-      setError("");
-      setSuccess("");
-
-      await api.changePassword(passwordData);
-      setSuccess("Password changed successfully!");
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+      await api.updateProfile({
+        fullName: name,
+        studySpeed: studySpeed,
+        maxSessionMinutes: parseInt(maxSession) || 60,
+        weeklyLimitHours: weeklyLimit,
+        darkMode: darkMode,
       });
-    } catch (err) {
-      setError(err.message || "Failed to change password");
+
+      setMessage({ type: "success", text: "Profile updated successfully!" });
+      
+      // Reload profile to get updated data
+      await loadProfile();
+      
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    } catch (error) {
+      setMessage({ type: "error", text: error.message || "Failed to update profile" });
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
 
-  if (loading) {
+  const handlePasswordChange = async () => {
+    if (!oldPass || !newPass || !confirmPass) {
+      setMessage({ type: "error", text: "Please fill in all password fields" });
+      return;
+    }
+
+    if (newPass !== confirmPass) {
+      setMessage({ type: "error", text: "New password and confirm password do not match" });
+      return;
+    }
+
+    if (newPass.length < 6) {
+      setMessage({ type: "error", text: "New password must be at least 6 characters" });
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      setMessage({ type: "", text: "" });
+
+      await api.changePassword(oldPass, newPass);
+
+      setMessage({ type: "success", text: "Password changed successfully!" });
+      
+      // Clear password fields
+      setOldPass("");
+      setNewPass("");
+      setConfirmPass("");
+      
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+    } catch (error) {
+      setMessage({ type: "error", text: error.message || "Failed to change password" });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleDiscard = () => {
+    if (originalData) {
+      setName(originalData.fullName || "");
+      setEmail(originalData.email || "");
+      setStudySpeed(originalData.studySpeed || "normal");
+      setMaxSession(String(originalData.maxSessionMinutes || 60));
+      setWeeklyLimit(originalData.weeklyLimitHours || 10);
+      setDarkMode(originalData.darkMode || false);
+    }
+    setOldPass("");
+    setNewPass("");
+    setConfirmPass("");
+    setMessage({ type: "", text: "" });
+  };
+
+  if (loading && !originalData) {
     return (
       <section className={styles.profile}>
         <div className={styles.pageHeader}>
@@ -126,7 +156,7 @@ function Profile() {
             <h1>Your profile</h1>
           </div>
         </div>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{ textAlign: "center", padding: "2rem", color: "var(--text-soft)" }}>
           Loading profile...
         </div>
       </section>
@@ -142,63 +172,148 @@ function Profile() {
         </div>
       </div>
 
-      {(error || success) && (
-        <div className={error ? styles.errorMessage : styles.successMessage}>
-          {error || success}
+      {message.text && (
+        <div
+          style={{
+            padding: "1rem",
+            marginBottom: "1rem",
+            borderRadius: "4px",
+            backgroundColor: message.type === "error" ? "#fee" : "#efe",
+            color: message.type === "error" ? "#c33" : "#3c3",
+            border: `1px solid ${message.type === "error" ? "#c33" : "#3c3"}`,
+          }}
+        >
+          {message.text}
         </div>
       )}
 
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${activeSection === 'profile' ? styles.active : ''}`}
-          onClick={() => setActiveSection('profile')}
-        >
-          Profile Info
-        </button>
-        <button
-          className={`${styles.tab} ${activeSection === 'preferences' ? styles.active : ''}`}
-          onClick={() => setActiveSection('preferences')}
-        >
-          Preferences
-        </button>
-        <button
-          className={`${styles.tab} ${activeSection === 'security' ? styles.active : ''}`}
-          onClick={() => setActiveSection('security')}
-        >
-          Security
-        </button>
-      </div>
+      <div className={styles.grid}>
+        <section className={styles.card}>
+          <div className={styles.cardHeader}>
+            <p className={styles.kicker}>Basics</p>
+            <h2>User information</h2>
+          </div>
 
-      {activeSection === 'profile' && (
-        <div className={styles.grid}>
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <p className={styles.kicker}>Basics</p>
-              <h2>User information</h2>
-            </div>
+          <label>
+            Full Name
+            <input
+              type="text"
+              value={name}
+              placeholder="Your name"
+              onChange={(e) => setName(e.target.value)}
+              disabled={loading}
+            />
+          </label>
 
-            <form onSubmit={handleProfileUpdate}>
-              <label>
-                Full Name
-                <input
-                  type="text"
-                  value={profile.fullName}
-                  placeholder="Your name"
-                  onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
-                  required
-                />
-              </label>
+          <label>
+            Email Address
+            <input
+              type="email"
+              value={email}
+              placeholder="Your email"
+              readOnly
+              style={{ backgroundColor: "var(--surface)", cursor: "not-allowed", opacity: 0.7 }}
+            />
+          </label>
+        </section>
 
-              <label>
-                Email Address
-                <input
-                  type="email"
-                  value={profile.email}
-                  placeholder="Your email"
-                  onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
-                  required
-                />
-              </label>
+        <section className={styles.card}>
+          <div className={styles.cardHeader}>
+            <p className={styles.kicker}>Security</p>
+            <h2>Password</h2>
+          </div>
+
+          <label>
+            Current Password
+            <input
+              type="password"
+              value={oldPass}
+              placeholder="••••••••"
+              onChange={(e) => setOldPass(e.target.value)}
+              disabled={passwordLoading}
+            />
+          </label>
+
+          <label>
+            New Password
+            <input
+              type="password"
+              value={newPass}
+              placeholder="••••••••"
+              onChange={(e) => setNewPass(e.target.value)}
+              disabled={passwordLoading}
+            />
+          </label>
+
+          <label>
+            Confirm Password
+            <input
+              type="password"
+              value={confirmPass}
+              placeholder="••••••••"
+              onChange={(e) => setConfirmPass(e.target.value)}
+              disabled={passwordLoading}
+            />
+          </label>
+
+          <button
+            className={styles.dangerBtn}
+            type="button"
+            onClick={handlePasswordChange}
+            disabled={passwordLoading || !oldPass || !newPass || !confirmPass}
+          >
+            {passwordLoading ? "Updating..." : "Update password"}
+          </button>
+        </section>
+
+        <section className={styles.card}>
+          <div className={styles.cardHeader}>
+            <p className={styles.kicker}>Preferences</p>
+            <h2>Study pacing</h2>
+          </div>
+
+          <label>
+            Preferred Study Speed
+            <select
+              value={studySpeed}
+              onChange={(e) => setStudySpeed(e.target.value)}
+              disabled={loading}
+            >
+              <option value="slow">Slow & Deep</option>
+              <option value="normal">Balanced</option>
+              <option value="fast">Fast Paced</option>
+            </select>
+          </label>
+
+          <label>
+            Max Session Time (minutes)
+            <input
+              value={maxSession}
+              onChange={(e) => setMaxSession(e.target.value)}
+              type="number"
+              placeholder="60"
+              disabled={loading}
+            />
+          </label>
+
+          <label className={styles.rangeLabel}>
+            Weekly Study Limit: <strong>{weeklyLimit} hrs</strong>
+            <input
+              type="range"
+              min="1"
+              max="40"
+              value={weeklyLimit}
+              onChange={(e) => setWeeklyLimit(Number(e.target.value))}
+              disabled={loading}
+            />
+          </label>
+        </section>
+
+        <section className={styles.card}>
+          <div className={styles.cardHeader}>
+            <p className={styles.kicker}>Display</p>
+            <h2>Theme</h2>
+          </div>
 
               <div className={styles.cardActions}>
                 <button
@@ -221,6 +336,16 @@ function Profile() {
               <p className={styles.kicker}>Study</p>
               <h2>Learning preferences</h2>
             </div>
+            <label className={styles.switch}>
+              <input
+                type="checkbox"
+                checked={darkMode}
+                onChange={handleDarkModeToggle}
+                disabled={loading}
+              />
+              <span className={styles.slider}></span>
+            </label>
+          </div>
 
             <form onSubmit={handlePreferencesUpdate}>
               <label>
@@ -235,142 +360,24 @@ function Profile() {
                 </select>
               </label>
 
-              <label>
-                Max Session Time (minutes)
-                <input
-                  value={preferences.maxSessionMinutes}
-                  onChange={(e) => setPreferences(prev => ({ ...prev, maxSessionMinutes: Number(e.target.value) }))}
-                  type="number"
-                  min="15"
-                  max="240"
-                  placeholder="60"
-                />
-              </label>
-
-              <label className={styles.rangeLabel}>
-                Weekly Study Limit: <strong>{preferences.weeklyStudyLimitHours} hrs</strong>
-                <input
-                  type="range"
-                  min="1"
-                  max="40"
-                  value={preferences.weeklyStudyLimitHours}
-                  onChange={(e) => setPreferences(prev => ({ ...prev, weeklyStudyLimitHours: Number(e.target.value) }))}
-                />
-              </label>
-
-              <div className={styles.cardActions}>
-                <button
-                  type="submit"
-                  className={styles.primaryBtn}
-                  disabled={saving}
-                >
-                  {saving ? "Updating..." : "Update Preferences"}
-                </button>
-              </div>
-            </form>
-          </section>
-
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <p className={styles.kicker}>Display</p>
-              <h2>Theme settings</h2>
-            </div>
-
-            <div className={styles.toggleRow}>
-              <div>
-                <p>Dark mode</p>
-                <small>Great for late study sessions.</small>
-              </div>
-              <label className={styles.switch}>
-                <input
-                  type="checkbox"
-                  checked={isDarkMode}
-                  onChange={async (e) => {
-                    const enabled = e.target.checked;
-                    setDarkMode(enabled); // Immediate UI update
-                    setPreferences(prev => ({ ...prev, darkMode: enabled }));
-
-                    // Update backend
-                    try {
-                      await api.updatePreferences({ ...preferences, darkMode: enabled });
-                    } catch (err) {
-                      // Revert on error
-                      setDarkMode(!enabled);
-                      setPreferences(prev => ({ ...prev, darkMode: !enabled }));
-                      setError("Failed to update theme preference");
-                      setTimeout(() => setError(""), 3000);
-                    }
-                  }}
-                />
-                <span className={styles.slider}></span>
-              </label>
-            </div>
-
-            <div className={styles.displayNote}>
-              <span />
-              <p>Changes apply immediately across the entire app.</p>
-            </div>
-          </section>
-        </div>
-      )}
-
-      {activeSection === 'security' && (
-        <div className={styles.grid}>
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <p className={styles.kicker}>Security</p>
-              <h2>Change password</h2>
-            </div>
-
-            <form onSubmit={handlePasswordChange}>
-              <label>
-                Current Password
-                <input
-                  type="password"
-                  value={passwordData.currentPassword}
-                  placeholder="••••••••"
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                  required
-                />
-              </label>
-
-              <label>
-                New Password
-                <input
-                  type="password"
-                  value={passwordData.newPassword}
-                  placeholder="••••••••"
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                  required
-                  minLength="6"
-                />
-              </label>
-
-              <label>
-                Confirm New Password
-                <input
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  placeholder="••••••••"
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                  required
-                  minLength="6"
-                />
-              </label>
-
-              <div className={styles.cardActions}>
-                <button
-                  type="submit"
-                  className={styles.dangerBtn}
-                  disabled={saving}
-                >
-                  {saving ? "Changing..." : "Change Password"}
-                </button>
-              </div>
-            </form>
-          </section>
-        </div>
-      )}
+      <div className={styles.actionsRow}>
+        <button
+          className={styles.secondaryBtn}
+          type="button"
+          onClick={handleDiscard}
+          disabled={loading}
+        >
+          Discard changes
+        </button>
+        <button
+          className={styles.primaryBtn}
+          type="button"
+          onClick={handleSave}
+          disabled={loading}
+        >
+          {loading ? "Saving..." : "Save all"}
+        </button>
+      </div>
     </section>
   );
 }

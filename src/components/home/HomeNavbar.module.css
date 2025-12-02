@@ -1,6 +1,6 @@
 .homeNavbar {
-  background-color: #fff;
-  border-bottom: 1px solid #dedede;
+  background-color: var(--surface, #fff);
+  border-bottom: 1px solid var(--border, #dedede);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -15,6 +15,7 @@
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  color: var(--text-strong, #111);
 }
 
 .center {
@@ -26,6 +27,7 @@
 .center li {
   font-size: 16px;
   font-weight: 400;
+  color: var(--text-strong, #111);
 }
 
 .center li:hover {
@@ -45,7 +47,7 @@
   font-weight: 600;
   text-transform: uppercase;
   background: transparent;
-  border: 2px solid #0070f3;
+  border: 2px solid var(--accent, #0070f3);
   padding: 0;
 }
 
@@ -61,21 +63,21 @@
 }
 
 .signinButton {
-  background-color: #0070f3;
+  background-color: var(--accent, #0070f3);
   color: #fff;
-  border: 2px solid #0070f3;
+  border: 2px solid var(--accent, #0070f3);
 }
 
 .signinButton:hover {
-  background-color: #005bb5;
+  background-color: var(--accent-dark, #005bb5);
 }
 
 .signupButton {
-  color: #0070f3;
+  color: var(--accent, #0070f3);
   background: transparent;
 }
 
 .signupButton:hover {
-  background-color: #0070f3;
+  background-color: var(--accent, #0070f3);
   color: #fff;
 }

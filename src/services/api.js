@@ -27,6 +27,11 @@ class ApiService {
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
+      // Handle 204 No Content responses
+      if (response.status === 204) {
+        return null;
+      }
+
       return await response.json();
     } catch (error) {
       console.error('API request failed:', error);
@@ -116,117 +121,23 @@ class ApiService {
     return this.request('/api/courses/stats');
   }
 
-  // Schedule API
-  async getScheduleEvents(params = {}) {
-    const queryParams = new URLSearchParams();
-    if (params.from) queryParams.append('from', params.from);
-    if (params.to) queryParams.append('to', params.to);
-
-    const queryString = queryParams.toString();
-    const endpoint = `/api/schedule${queryString ? `?${queryString}` : ''}`;
-    return this.request(endpoint);
-  }
-
-  async createScheduleEvent(event) {
-    return this.request('/api/schedule', {
-      method: 'POST',
-      body: JSON.stringify(event),
-    });
-  }
-
-  async updateScheduleEvent(id, event) {
-    return this.request(`/api/schedule/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(event),
-    });
-  }
-
-  async deleteScheduleEvent(id) {
-    return this.request(`/api/schedule/${id}`, {
-      method: 'DELETE',
-    });
-  }
-
-  // Course-Schedule Integration
-  async getAvailableModules() {
-    return this.request('/api/schedule/available-modules');
-  }
-
-  async autoScheduleModules(startDateTime = null) {
-    return this.request('/api/schedule/auto-schedule', {
-      method: 'POST',
-      body: JSON.stringify({ startDateTime }),
-    });
-  }
-
-  async linkEventToModule(eventId, moduleId) {
-    return this.request(`/api/schedule/${eventId}/link-module/${moduleId}`, {
-      method: 'POST',
-    });
-  }
-
-  async unlinkEventFromModule(eventId) {
-    return this.request(`/api/schedule/${eventId}/unlink-module`, {
-      method: 'DELETE',
-    });
-  }
-
   // Profile API
   async getProfile() {
     return this.request('/api/profile');
   }
 
   async updateProfile(profileData) {
-    return this.request('/api/profile/info', {
+    return this.request('/api/profile', {
       method: 'PUT',
       body: JSON.stringify(profileData),
     });
   }
 
-  async updatePreferences(preferencesData) {
-    return this.request('/api/profile/preferences', {
-      method: 'PUT',
-      body: JSON.stringify(preferencesData),
-    });
-  }
-
-  async changePassword(passwordData) {
+  async changePassword(currentPassword, newPassword) {
     return this.request('/api/profile/password', {
       method: 'PUT',
-      body: JSON.stringify(passwordData),
+      body: JSON.stringify({ currentPassword, newPassword }),
     });
-  }
-
-  // Progress API
-  async getProgressDashboard() {
-    return this.request('/api/progress/dashboard');
-  }
-
-  // Course Management
-  async editCourse(courseId, courseData) {
-    return this.request(`/api/courses/${courseId}/edit`, {
-      method: 'PUT',
-      body: JSON.stringify(courseData),
-    });
-  }
-
-  // Session Management
-  async startStudySession(courseId, moduleId = null) {
-    const params = moduleId ? `?moduleId=${moduleId}` : '';
-    return this.request(`/api/courses/${courseId}/sessions/start${params}`, {
-      method: 'POST',
-    });
-  }
-
-  async stopStudySession(sessionId, notes = '') {
-    return this.request(`/api/courses/sessions/${sessionId}/stop`, {
-      method: 'PUT',
-      body: JSON.stringify(notes),
-    });
-  }
-
-  async getCourseSessions(courseId) {
-    return this.request(`/api/courses/${courseId}/sessions`);
   }
 }
 

@@ -1,17 +1,18 @@
 .homeFooter {
-  background-color: #fff;
-  border-top: 1px solid #e0e0e0;
+  background-color: var(--surface, #fff);
+  border-top: 1px solid var(--border, #e0e0e0);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 22px 32px;
-  color: #444;
+  color: var(--text-soft, #444);
 }
 
 .homeFooter h1 {
   font-size: 22px;
   letter-spacing: -0.5px;
   font-weight: 700;
+  color: var(--text-strong, #111);
 }
 
 .socials {
@@ -24,11 +25,11 @@
 .socials svg {
   width: 24px;
   height: 24px;
-  color: #444;
+  color: var(--text-soft, #444);
   transition: color 0.2s ease;
   cursor: pointer;
 }
 
 .socials svg:hover {
-  color: #000;
+  color: var(--text-strong, #000);
 }

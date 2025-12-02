@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styles from "./Sidebar.module.css";
+import { useLogout } from "../../hooks/useLogout";
 
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { IoIosLogOut } from "react-icons/io";
@@ -12,6 +13,7 @@ import { CgProfile } from "react-icons/cg";
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+  const { logout } = useLogout();
 
   const menuItems = useMemo(
     () => [
@@ -96,7 +98,12 @@ const Sidebar = () => {
       </div>
 
       <div className={styles.footerSection}>
-        <button className={styles.logoutBtn} type="button">
+        <button 
+          className={styles.logoutBtn} 
+          type="button"
+          onClick={logout}
+          aria-label="Logout"
+        >
           <span className={styles.icon}>
             <IoIosLogOut size={20} />
           </span>

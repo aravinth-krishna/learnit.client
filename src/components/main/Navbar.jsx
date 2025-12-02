@@ -1,16 +1,14 @@
 import styles from "./Navbar.module.css";
 import { CgProfile } from "react-icons/cg";
-import { Link, useNavigate } from "react-router-dom";
-import { useState, useRef, useEffect, useContext } from "react";
+import { Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 import { IoIosLogOut } from "react-icons/io";
-import { AuthContext } from "../../context/AuthContext";
-import api from "../../services/api";
+import { useLogout } from "../../hooks/useLogout";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef();
-  const navigate = useNavigate();
-  const { logout } = useContext(AuthContext);
+  const { logout } = useLogout();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -24,14 +22,9 @@ function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    try {
-      await api.logout();
-    } catch (err) {
-      console.error("Logout error:", err);
-    } finally {
-      logout();
-      navigate("/auth/login");
-    }
+    // Close dropdown before logging out
+    setOpen(false);
+    await logout();
   };
 
   return (

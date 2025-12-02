@@ -49,9 +49,28 @@ class ApiService {
   }
 
   async logout() {
-    return this.request('/api/auth/logout', {
-      method: 'POST',
-    });
+    const token = localStorage.getItem('token');
+    
+    // If no token exists, skip API call
+    if (!token) {
+      return { message: 'Already logged out' };
+    }
+
+    try {
+      return await this.request('/api/auth/logout', {
+        method: 'POST',
+      });
+    } catch (error) {
+      // If logout fails due to 401 (unauthorized) or network error, it's okay
+      // since the token might be expired or server unreachable - we'll still logout locally
+      if (error.message.includes('401') || error.message.includes('Failed to fetch')) {
+        console.log('Logout API call failed, proceeding with local logout:', error.message);
+        return { message: 'Logged out successfully' };
+      }
+      // For other errors, still proceed with logout but log the error
+      console.warn('Logout API error:', error.message);
+      return { message: 'Logged out successfully' };
+    }
   }
 }
 

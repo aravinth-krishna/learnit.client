@@ -292,9 +292,288 @@
   transform: translateY(-1px);
 }
 
+.dangerBtn {
+  border: 1px solid #ff4444;
+  background: #ff4444;
+  color: white;
+  padding: 8px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+.dangerBtn:hover {
+  background: #cc0000;
+  border-color: #cc0000;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  margin: 0;
+}
+
+.moduleInfo {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.moduleInfo h4 {
+  margin: 0 0 8px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.moduleCard {
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0;
+  margin-bottom: 8px;
+}
+
+.moduleCard strong {
+  display: block;
+  color: var(--text-strong);
+}
+
+.moduleCard small {
+  color: var(--accent);
+  font-style: italic;
+}
+
+.eventDetails {
+  margin: 16px 0;
+  padding: 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.eventDetails div {
+  margin-bottom: 4px;
+  font-size: 0.9rem;
+}
+
+.eventDetails div:last-child {
+  margin-bottom: 0;
+}
+
+.rightActions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Modal Styles - matching Course component theme */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+  z-index: 20;
+  overflow-y: auto;
+}
+
+.modal {
+  width: min(640px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-radius: 4px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.modalHeader .kicker {
+  font-size: 0.9rem;
+  color: var(--accent);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 4px 0;
+}
+
+.modalHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+}
+
+.iconBtn:hover {
+  color: var(--text-strong);
+  background: var(--bg);
+}
+
+.modalForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalForm label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-strong);
+}
+
+.modalForm input,
+.modalForm select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-strong);
+  font-size: 0.9rem;
+  border-radius: 4px;
+  transition: border-color 0.15s ease;
+}
+
+.modalForm input:focus,
+.modalForm select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-strong);
+  cursor: pointer;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.formActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.primaryBtn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.primaryBtn:hover {
+  background: var(--accent-dark);
+}
+
+.secondaryBtn {
+  background: transparent;
+  color: var(--text-strong);
+  border: 1px solid var(--border);
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.secondaryBtn:hover {
+  background: var(--bg);
+  border-color: var(--text-strong);
+}
+
+.dangerBtn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dangerBtn:hover {
+  background: #c82333;
+}
+
+.errorMessage {
+  padding: 12px;
+  border: 1px solid #ff4444;
+  background: #ffe6e6;
+  color: #cc0000;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 720px) {
   .pageHeader {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .modal {
+    padding: 20px;
+  }
+
+  .formActions {
+    flex-direction: column-reverse;
+  }
+
+  .rightActions {
+    width: 100%;
+  }
+
+  .primaryBtn,
+  .secondaryBtn,
+  .dangerBtn {
+    flex: 1;
+    text-align: center;
   }
 }

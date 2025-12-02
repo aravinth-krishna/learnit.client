@@ -115,6 +115,61 @@ class ApiService {
   async getCourseStats() {
     return this.request('/api/courses/stats');
   }
+
+  // Schedule API
+  async getScheduleEvents(params = {}) {
+    const queryParams = new URLSearchParams();
+    if (params.from) queryParams.append('from', params.from);
+    if (params.to) queryParams.append('to', params.to);
+
+    const queryString = queryParams.toString();
+    const endpoint = `/api/schedule${queryString ? `?${queryString}` : ''}`;
+    return this.request(endpoint);
+  }
+
+  async createScheduleEvent(event) {
+    return this.request('/api/schedule', {
+      method: 'POST',
+      body: JSON.stringify(event),
+    });
+  }
+
+  async updateScheduleEvent(id, event) {
+    return this.request(`/api/schedule/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(event),
+    });
+  }
+
+  async deleteScheduleEvent(id) {
+    return this.request(`/api/schedule/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Course-Schedule Integration
+  async getAvailableModules() {
+    return this.request('/api/schedule/available-modules');
+  }
+
+  async autoScheduleModules(startDateTime = null) {
+    return this.request('/api/schedule/auto-schedule', {
+      method: 'POST',
+      body: JSON.stringify({ startDateTime }),
+    });
+  }
+
+  async linkEventToModule(eventId, moduleId) {
+    return this.request(`/api/schedule/${eventId}/link-module/${moduleId}`, {
+      method: 'POST',
+    });
+  }
+
+  async unlinkEventFromModule(eventId) {
+    return this.request(`/api/schedule/${eventId}/unlink-module`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export default new ApiService();

@@ -72,6 +72,49 @@ class ApiService {
       return { message: 'Logged out successfully' };
     }
   }
+
+  // Courses API
+  async getCourses(params = {}) {
+    const queryParams = new URLSearchParams();
+    if (params.search) queryParams.append('search', params.search);
+    if (params.priority) queryParams.append('priority', params.priority);
+    if (params.difficulty) queryParams.append('difficulty', params.difficulty);
+    if (params.duration) queryParams.append('duration', params.duration);
+    if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+    if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+
+    const queryString = queryParams.toString();
+    const endpoint = `/api/courses${queryString ? `?${queryString}` : ''}`;
+    return this.request(endpoint);
+  }
+
+  async getCourse(id) {
+    return this.request(`/api/courses/${id}`);
+  }
+
+  async createCourse(courseData) {
+    return this.request('/api/courses', {
+      method: 'POST',
+      body: JSON.stringify(courseData),
+    });
+  }
+
+  async updateCourse(id, courseData) {
+    return this.request(`/api/courses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(courseData),
+    });
+  }
+
+  async deleteCourse(id) {
+    return this.request(`/api/courses/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async getCourseStats() {
+    return this.request('/api/courses/stats');
+  }
 }
 
 export default new ApiService();

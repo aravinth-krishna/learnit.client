@@ -1,7 +1,8 @@
 import styles from "./Course.module.css";
-import { FaFilter, FaSearch } from "react-icons/fa";
-import { useMemo, useState } from "react";
+import { FaFilter, FaSearch, FaSort } from "react-icons/fa";
+import { useEffect, useState } from "react";
 import { IoIosAdd } from "react-icons/io";
+import api from "../../services/api";
 
 const filterGroups = {
   priority: ["Low", "Medium", "High"],
@@ -9,86 +10,99 @@ const filterGroups = {
   duration: ["< 1 hour", "1-3 hours", "> 3 hours"],
 };
 
-const catalog = [
-  {
-    title: "React Basics",
-    description: "Learn the fundamentals of modern React.",
-    hoursRemaining: 12,
-    imageSrc: "/src/assets/default-course.png",
-    priority: "Medium",
-    difficulty: "Beginner",
-    duration: "1-3 hours",
-  },
-  {
-    title: "Advanced JavaScript",
-    description: "Deep dive into closures, scopes, and patterns.",
-    hoursRemaining: 8,
-    imageSrc: "/src/assets/default-course.png",
-    priority: "High",
-    difficulty: "Advanced",
-    duration: "> 3 hours",
-  },
-  {
-    title: "Web Development",
-    description: "Full-stack web development toolkit.",
-    hoursRemaining: 15,
-    imageSrc: "/src/assets/default-course.png",
-    priority: "Medium",
-    difficulty: "Intermediate",
-    duration: "> 3 hours",
-  },
-  {
-    title: "Design Systems",
-    description: "Crafting consistent UI experiences.",
-    hoursRemaining: 6,
-    imageSrc: "/src/assets/default-course.png",
-    priority: "Low",
-    difficulty: "Beginner",
-    duration: "< 1 hour",
-  },
+const sortOptions = [
+  { value: "createdAt", label: "Date Created" },
+  { value: "title", label: "Title" },
+  { value: "priority", label: "Priority" },
+  { value: "difficulty", label: "Difficulty" },
+  { value: "hours", label: "Total Hours" },
 ];
-
-const quickStats = [
-  { label: "Active courses", value: "04" },
-  { label: "Weekly focus", value: "12 hrs" },
-  { label: "Next milestone", value: "UI Systems · Thu" },
-];
-
-const aiPlan = {
-  summary:
-    "You have 3 deep-work blocks this week. AI suggests pairing React Basics with Advanced JS for better retention.",
-  focusToday: ["React Basics – Components", "JavaScript – Async Exercises"],
-  backlog: ["Machine Learning intro outline", "DBMS schema revision"],
-};
 
 function Course() {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [stats, setStats] = useState({
+    activeCourses: "00",
+    weeklyFocus: "0 hrs",
+    nextMilestone: "No courses yet",
+  });
+
   const [search, setSearch] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     priority: [],
     difficulty: [],
     duration: [],
   });
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
+
   const [showCreate, setShowCreate] = useState(false);
   const [createMode, setCreateMode] = useState("manual");
   const [modules, setModules] = useState([{ title: "", duration: "" }]);
-  const [aiPrompt, setAiPrompt] = useState(
-    "Build a 3 week plan for Machine Learning foundations."
-  );
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    subjectArea: "",
+    learningObjectives: "",
+    difficulty: "",
+    priority: "",
+    totalEstimatedHours: "",
+    targetCompletionDate: "",
+  });
+  const [submitting, setSubmitting] = useState(false);
 
-  const filteredCourses = useMemo(() => {
-    return catalog.filter((course) => {
-      const matchesSearch =
-        course.title.toLowerCase().includes(search.toLowerCase()) ||
-        course.description.toLowerCase().includes(search.toLowerCase());
+  // Fetch courses
+  useEffect(() => {
+    fetchCourses();
+    fetchStats();
+  }, [search, selectedFilters, sortBy, sortOrder]);
 
-      const matchesFilters = Object.entries(selectedFilters).every(
-        ([group, values]) =>
-          values.length === 0 || values.includes(course[group])
-      );
+  const fetchCourses = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-      return matchesSearch && matchesFilters;
-    });
-  }, [search, selectedFilters]);
+      const params = {
+        search: search || undefined,
+        priority: selectedFilters.priority.length > 0 
+          ? selectedFilters.priority.join(",") 
+          : undefined,
+        difficulty: selectedFilters.difficulty.length > 0
+          ? selectedFilters.difficulty.join(",")
+          : undefined,
+        duration: selectedFilters.duration.length > 0
+          ? selectedFilters.duration[0] // API expects single duration value
+          : undefined,
+        sortBy,
+        sortOrder,
+      };
+
+      // Remove undefined values
+      Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
+
+      const data = await api.getCourses(params);
+      setCourses(data);
+    } catch (err) {
+      setError(err.message || "Failed to load courses");
+      console.error("Error fetching courses:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const data = await api.getCourseStats();
+      setStats({
+        activeCourses: data.activeCourses,
+        weeklyFocus: data.weeklyFocus,
+        nextMilestone: data.nextMilestone,
+      });
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+    }
+  };
 
   const toggleFilter = (group, option) => {
     setSelectedFilters((prev) => {
@@ -98,13 +112,14 @@ function Course() {
       } else {
         set.add(option);
       }
-
       return { ...prev, [group]: Array.from(set) };
     });
   };
 
-  const resetFilters = () =>
+  const resetFilters = () => {
     setSelectedFilters({ priority: [], difficulty: [], duration: [] });
+    setSearch("");
+  };
 
   const handleModuleChange = (index, field, value) => {
     setModules((prev) =>
@@ -120,27 +135,95 @@ function Course() {
   const removeModule = (index) =>
     setModules((prev) => prev.filter((_, i) => i !== index));
 
-  const handleManualSubmit = (e) => {
-    e.preventDefault();
-    alert("Course saved with modules (mock).");
-    setShowCreate(false);
-    setModules([{ title: "", duration: "" }]);
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAiGenerate = (e) => {
+  const handleManualSubmit = async (e) => {
     e.preventDefault();
-    alert("AI generation requested with prompt:\n" + aiPrompt);
-    setShowCreate(false);
+    setSubmitting(true);
+    setError("");
+
+    try {
+      // Validate modules
+      const validModules = modules.filter(
+        (m) => m.title.trim() !== "" && m.duration !== ""
+      );
+
+      if (validModules.length === 0) {
+        setError("Please add at least one module");
+        setSubmitting(false);
+        return;
+      }
+
+      const courseData = {
+        title: formData.title,
+        description: formData.description,
+        subjectArea: formData.subjectArea,
+        learningObjectives: formData.learningObjectives,
+        difficulty: formData.difficulty,
+        priority: formData.priority,
+        totalEstimatedHours: parseInt(formData.totalEstimatedHours) || 0,
+        targetCompletionDate: formData.targetCompletionDate || null,
+        modules: validModules.map((m) => ({
+          title: m.title,
+          estimatedHours: parseInt(m.duration) || 0,
+        })),
+      };
+
+      await api.createCourse(courseData);
+      
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        subjectArea: "",
+        learningObjectives: "",
+        difficulty: "",
+        priority: "",
+        totalEstimatedHours: "",
+        targetCompletionDate: "",
+      });
+      setModules([{ title: "", duration: "" }]);
+      setShowCreate(false);
+      
+      // Refresh courses
+      await fetchCourses();
+      await fetchStats();
+    } catch (err) {
+      setError(err.message || "Failed to create course");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteCourse = async (id) => {
+    if (!confirm("Are you sure you want to delete this course?")) return;
+
+    try {
+      await api.deleteCourse(id);
+      await fetchCourses();
+      await fetchStats();
+    } catch (err) {
+      setError(err.message || "Failed to delete course");
+    }
+  };
+
+  const getDurationCategory = (hours) => {
+    if (hours < 1) return "< 1 hour";
+    if (hours <= 3) return "1-3 hours";
+    return "> 3 hours";
   };
 
   return (
     <section className={styles.page}>
       <header className={styles.pageHero}>
         <div>
-          <p className={styles.kicker}>AI planner</p>
+          <p className={styles.kicker}>Course Management</p>
           <h1>Course workspace</h1>
           <p className={styles.subtle}>
-            Curate modules, track effort, and let AI balance your study load.
+            Create, organize, and track your learning courses.
           </p>
         </div>
 
@@ -163,13 +246,25 @@ function Course() {
         </div>
       </header>
 
+      {error && !loading && (
+        <div className={styles.errorMessage} style={{ color: 'red', padding: '12px', border: '1px solid red', background: '#ffe6e6' }}>
+          {error}
+        </div>
+      )}
+
       <div className={styles.statsRow}>
-        {quickStats.map((item) => (
-          <div key={item.label} className={styles.statCard}>
-            <span>{item.label}</span>
-            <strong>{item.value}</strong>
-          </div>
-        ))}
+        <div className={styles.statCard}>
+          <span>Active courses</span>
+          <strong>{stats.activeCourses}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span>Weekly focus</span>
+          <strong>{stats.weeklyFocus}</strong>
+        </div>
+        <div className={styles.statCard}>
+          <span>Next milestone</span>
+          <strong>{stats.nextMilestone}</strong>
+        </div>
       </div>
 
       <div className={styles.searchRow}>
@@ -177,14 +272,35 @@ function Course() {
           <FaSearch className={styles.searchIcon} />
           <input
             type="text"
-            placeholder="Search or jump to a module"
+            placeholder="Search courses..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        <div className={styles.sortControls}>
+          <FaSort />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className={styles.sortSelect}
+          >
+            {sortOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+            className={styles.sortSelect}
+          >
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
         <span className={styles.resultSummary}>
-          {filteredCourses.length} course
-          {filteredCourses.length === 1 ? "" : "s"} in focus
+          {loading ? "Loading..." : `${courses.length} course${courses.length === 1 ? "" : "s"}`}
         </span>
       </div>
 
@@ -220,74 +336,34 @@ function Course() {
 
       <div className={styles.layout}>
         <div className={styles.primaryColumn}>
-          <div className={styles.aiSummary}>
-            <div>
-              <p className={styles.kicker}>AI summary</p>
-              <p>{aiPlan.summary}</p>
+          {loading ? (
+            <div className={styles.emptyState}>
+              <p>Loading courses...</p>
             </div>
-            <div className={styles.focusLists}>
-              <div>
-                <h4>Today</h4>
-                <ul>
-                  {aiPlan.focusToday.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4>Backlog nudges</h4>
-                <ul>
-                  {aiPlan.backlog.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
+          ) : courses.length === 0 ? (
+            <div className={styles.emptyState}>
+              <p>No courses found. Create your first course to get started!</p>
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={() => setShowCreate(true)}
+              >
+                Create Course
+              </button>
             </div>
-          </div>
-
-          <div className={styles.courseGrid}>
-            {filteredCourses.length === 0 && (
-              <div className={styles.emptyState}>
-                <p>No courses match your filters.</p>
-                <button
-                  type="button"
-                  className={styles.secondaryBtn}
-                  onClick={resetFilters}
-                >
-                  Reset filters
-                </button>
-              </div>
-            )}
-
-            {filteredCourses.map((course) => (
-              <CourseCard key={course.title} {...course} />
-            ))}
-          </div>
+          ) : (
+            <div className={styles.courseGrid}>
+              {courses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  {...course}
+                  duration={getDurationCategory(course.totalEstimatedHours)}
+                  onDelete={handleDeleteCourse}
+                />
+              ))}
+            </div>
+          )}
         </div>
-
-        <aside className={styles.aiPanel}>
-          <div className={styles.panelSection}>
-            <h3>Quick plan</h3>
-            <p>
-              Plug availability and let the planner auto-build a balanced study
-              queue with suggested durations.
-            </p>
-            <button className={styles.primaryBtn} type="button">
-              Generate schedule
-            </button>
-          </div>
-
-          <div className={styles.panelSection}>
-            <h3>Import syllabus</h3>
-            <p>
-              Drop a link or markdown outline and AI will split it into
-              sessions.
-            </p>
-            <button className={styles.secondaryBtn} type="button">
-              Paste outline
-            </button>
-          </div>
-        </aside>
       </div>
 
       {showCreate && (
@@ -296,46 +372,59 @@ function Course() {
             <div className={styles.modalHeader}>
               <div>
                 <p className={styles.kicker}>Create course</p>
-                <h2>Kick off a new track</h2>
+                <h2>Add a new course</h2>
               </div>
               <button
                 className={styles.iconBtn}
                 type="button"
-                onClick={() => setShowCreate(false)}
+                onClick={() => {
+                  setShowCreate(false);
+                  setError("");
+                }}
               >
                 ×
               </button>
             </div>
 
             <div className={styles.modalTabs}>
-              {["manual", "ai"].map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  className={`${styles.tab} ${
-                    createMode === mode ? styles.tabActive : ""
-                  }`}
-                  onClick={() => setCreateMode(mode)}
-                >
-                  {mode === "manual" ? "Build manually" : "Ask AI"}
-                </button>
-              ))}
+              <button
+                type="button"
+                className={`${styles.tab} ${styles.tabActive}`}
+                onClick={() => setCreateMode("manual")}
+              >
+                Build manually
+              </button>
+              <button
+                type="button"
+                className={`${styles.tab} ${styles.tabDisabled}`}
+                disabled
+                title="AI features coming soon"
+              >
+                Ask AI (Coming Soon)
+              </button>
             </div>
 
-            {createMode === "manual" ? (
+            {createMode === "manual" && (
               <form className={styles.modalForm} onSubmit={handleManualSubmit}>
                 <div className={styles.formGrid}>
                   <label>
                     Course title *
                     <input
                       type="text"
+                      name="title"
                       placeholder="e.g. Machine Learning Foundations"
+                      value={formData.title}
+                      onChange={handleInputChange}
                       required
                     />
                   </label>
                   <label>
                     Subject area
-                    <select>
+                    <select
+                      name="subjectArea"
+                      value={formData.subjectArea}
+                      onChange={handleInputChange}
+                    >
                       <option value="">Select category</option>
                       <option>Programming</option>
                       <option>Data Science</option>
@@ -351,17 +440,35 @@ function Course() {
                 </div>
 
                 <label>
+                  Description
+                  <textarea
+                    name="description"
+                    placeholder="Brief description of the course"
+                    rows={2}
+                    value={formData.description}
+                    onChange={handleInputChange}
+                  />
+                </label>
+
+                <label>
                   Learning objectives
                   <textarea
-                    placeholder="What will you achieve? e.g. Build ML models, understand algorithms, deploy applications"
+                    name="learningObjectives"
+                    placeholder="What will you achieve? e.g. Build ML models, understand algorithms"
                     rows={2}
+                    value={formData.learningObjectives}
+                    onChange={handleInputChange}
                   />
                 </label>
 
                 <div className={styles.formGrid}>
                   <label>
                     Difficulty level
-                    <select>
+                    <select
+                      name="difficulty"
+                      value={formData.difficulty}
+                      onChange={handleInputChange}
+                    >
                       <option value="">Select difficulty</option>
                       <option>Beginner</option>
                       <option>Intermediate</option>
@@ -370,7 +477,11 @@ function Course() {
                   </label>
                   <label>
                     Priority
-                    <select>
+                    <select
+                      name="priority"
+                      value={formData.priority}
+                      onChange={handleInputChange}
+                    >
                       <option value="">Select priority</option>
                       <option>High</option>
                       <option>Medium</option>
@@ -381,12 +492,25 @@ function Course() {
 
                 <div className={styles.formGrid}>
                   <label>
-                    Total estimated hours
-                    <input type="number" min="1" placeholder="24" />
+                    Total estimated hours *
+                    <input
+                      type="number"
+                      name="totalEstimatedHours"
+                      min="1"
+                      placeholder="24"
+                      value={formData.totalEstimatedHours}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </label>
                   <label>
                     Target completion
-                    <input type="date" />
+                    <input
+                      type="date"
+                      name="targetCompletionDate"
+                      value={formData.targetCompletionDate}
+                      onChange={handleInputChange}
+                    />
                   </label>
                 </div>
 
@@ -431,40 +555,28 @@ function Course() {
                   ))}
                 </div>
 
+                {error && (
+                  <div style={{ color: 'red', fontSize: '0.9rem' }}>{error}</div>
+                )}
+
                 <div className={styles.formActions}>
                   <button
                     className={styles.secondaryBtn}
                     type="button"
-                    onClick={() => setShowCreate(false)}
+                    onClick={() => {
+                      setShowCreate(false);
+                      setError("");
+                    }}
+                    disabled={submitting}
                   >
                     Cancel
                   </button>
-                  <button className={styles.primaryBtn} type="submit">
-                    Save course
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <form className={styles.modalForm} onSubmit={handleAiGenerate}>
-                <p className={styles.subtle}>
-                  Describe the skills, timeframe, or existing syllabus you want
-                  AI to shape into modules.
-                </p>
-                <textarea
-                  rows={6}
-                  value={aiPrompt}
-                  onChange={(e) => setAiPrompt(e.target.value)}
-                />
-                <div className={styles.formActions}>
                   <button
-                    className={styles.secondaryBtn}
-                    type="button"
-                    onClick={() => setShowCreate(false)}
+                    className={styles.primaryBtn}
+                    type="submit"
+                    disabled={submitting}
                   >
-                    Cancel
-                  </button>
-                  <button className={styles.primaryBtn} type="submit">
-                    Generate with AI
+                    {submitting ? "Saving..." : "Save course"}
                   </button>
                 </div>
               </form>
@@ -477,24 +589,42 @@ function Course() {
 }
 
 function CourseCard({
+  id,
   title,
   description,
   hoursRemaining,
-  imageSrc,
+  totalEstimatedHours,
   priority,
   difficulty,
+  duration,
+  onDelete,
 }) {
   return (
     <article className={styles.courseCard}>
-      <img src={imageSrc} alt="" />
+      <div className={styles.cardImage}>
+        <div className={styles.imagePlaceholder}>
+          {title.charAt(0).toUpperCase()}
+        </div>
+      </div>
       <div className={styles.cardBody}>
-        <div className={styles.cardMeta}>
-          <span>{priority}</span>
-          <span>{difficulty}</span>
+        <div className={styles.cardHeader}>
+          <div className={styles.cardMeta}>
+            {priority && <span>{priority}</span>}
+            {difficulty && <span>{difficulty}</span>}
+          </div>
+          <button
+            className={styles.deleteBtn}
+            onClick={() => onDelete(id)}
+            title="Delete course"
+          >
+            ×
+          </button>
         </div>
         <h3>{title}</h3>
-        <p>{description}</p>
-        <span className={styles.hours}>{hoursRemaining} hrs remaining</span>
+        <p>{description || "No description provided"}</p>
+        <span className={styles.hours}>
+          {hoursRemaining || totalEstimatedHours} hrs remaining
+        </span>
       </div>
     </article>
   );

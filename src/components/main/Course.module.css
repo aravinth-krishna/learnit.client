@@ -128,6 +128,21 @@
   font-size: 0.9rem;
 }
 
+.sortControls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sortSelect {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  background: var(--surface);
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: 0;
+}
+
 .filtersBar {
   border: 1px solid var(--border);
   background: var(--surface);
@@ -240,6 +255,28 @@
   flex-direction: column;
 }
 
+.cardImage {
+  height: 140px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--border);
+}
+
+.imagePlaceholder {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
 .courseCard img {
   height: 140px;
   object-fit: cover;
@@ -251,6 +288,31 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.deleteBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.deleteBtn:hover {
+  color: #ff4444;
 }
 
 .cardMeta {
@@ -339,6 +401,37 @@
 .tabActive {
   background: #111;
   color: #fff;
+}
+
+.tabDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  color: #000;
+}
+
+.errorMessage {
+  padding: 12px;
+  border: 1px solid #ff4444;
+  background: #ffe6e6;
+  color: #cc0000;
+  border-radius: 4px;
 }
 
 .modalForm {

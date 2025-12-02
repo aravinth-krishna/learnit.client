@@ -196,6 +196,11 @@ class ApiService {
       body: JSON.stringify(passwordData),
     });
   }
+
+  // Progress API
+  async getProgressDashboard() {
+    return this.request('/api/progress/dashboard');
+  }
 }
 
 export default new ApiService();

@@ -6,13 +6,17 @@ function Profile() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  const [oldPass, setOldPass] = useState("");
-  const [newPass, setNewPass] = useState("");
-  const [confirmPass, setConfirmPass] = useState("");
+  const [profile, setProfile] = useState({
+    fullName: "",
+    email: "",
+  });
 
-  const [studySpeed, setStudySpeed] = useState("normal");
-  const [maxSession, setMaxSession] = useState("60");
-  const [weeklyLimit, setWeeklyLimit] = useState(10);
+  const [preferences, setPreferences] = useState({
+    studySpeed: "normal",
+    maxSessionMinutes: 60,
+    weeklyStudyLimitHours: 10,
+    darkMode: false,
+  });
 
   // Load dark mode from localStorage on mount
   const [darkMode, setDarkMode] = useState(() => {
@@ -311,10 +315,26 @@ function Profile() {
             <h2>Theme</h2>
           </div>
 
-          <div className={styles.toggleRow}>
-            <div>
-              <p>Dark mode</p>
-              <small>Great for late study sessions.</small>
+              <div className={styles.cardActions}>
+                <button
+                  type="submit"
+                  className={styles.primaryBtn}
+                  disabled={saving}
+                >
+                  {saving ? "Updating..." : "Update Profile"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {activeSection === 'preferences' && (
+        <div className={styles.grid}>
+          <section className={styles.card}>
+            <div className={styles.cardHeader}>
+              <p className={styles.kicker}>Study</p>
+              <h2>Learning preferences</h2>
             </div>
             <label className={styles.switch}>
               <input
@@ -327,12 +347,18 @@ function Profile() {
             </label>
           </div>
 
-          <div className={styles.displayNote}>
-            <span />
-            <p>UI adapts automatically to device preferences.</p>
-          </div>
-        </section>
-      </div>
+            <form onSubmit={handlePreferencesUpdate}>
+              <label>
+                Preferred Study Speed
+                <select
+                  value={preferences.studySpeed}
+                  onChange={(e) => setPreferences(prev => ({ ...prev, studySpeed: e.target.value }))}
+                >
+                  <option value="slow">Slow & Deep</option>
+                  <option value="normal">Balanced</option>
+                  <option value="fast">Fast Paced</option>
+                </select>
+              </label>
 
       <div className={styles.actionsRow}>
         <button

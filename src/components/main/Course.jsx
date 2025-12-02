@@ -38,8 +38,11 @@ function Course() {
   const [sortOrder, setSortOrder] = useState("desc");
 
   const [showCreate, setShowCreate] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
   const [createMode, setCreateMode] = useState("manual");
   const [modules, setModules] = useState([{ title: "", duration: "" }]);
+  const [externalLinks, setExternalLinks] = useState([{ platform: "", title: "", url: "" }]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -49,7 +52,11 @@ function Course() {
     priority: "",
     totalEstimatedHours: "",
     targetCompletionDate: "",
+    notes: "",
   });
+  const [activeSessions, setActiveSessions] = useState({});
+  const [sessionNotes, setSessionNotes] = useState("");
+  const [sessionStartTime, setSessionStartTime] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Fetch courses
@@ -140,6 +147,79 @@ function Course() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingCourse) return;
+
+    setSubmitting(true);
+    setError("");
+
+    try {
+      // Validate modules
+      const validModules = modules.filter(
+        (m) => m.title.trim() !== "" && m.duration !== ""
+      );
+
+      if (validModules.length === 0) {
+        setError("Please add at least one module");
+        setSubmitting(false);
+        return;
+      }
+
+      // Validate external links
+      const validLinks = externalLinks.filter(
+        (l) => l.platform.trim() !== "" && l.title.trim() !== "" && l.url.trim() !== ""
+      );
+
+      const courseData = {
+        title: formData.title,
+        description: formData.description,
+        subjectArea: formData.subjectArea,
+        learningObjectives: formData.learningObjectives,
+        difficulty: formData.difficulty,
+        priority: formData.priority,
+        totalEstimatedHours: parseInt(formData.totalEstimatedHours) || 0,
+        targetCompletionDate: formData.targetCompletionDate || null,
+        notes: formData.notes,
+        modules: validModules.map((m) => ({
+          title: m.title,
+          estimatedHours: parseInt(m.duration) || 0,
+        })),
+        externalLinks: validLinks.map((l) => ({
+          platform: l.platform,
+          title: l.title,
+          url: l.url,
+        })),
+      };
+
+      await api.editCourse(editingCourse.id, courseData);
+
+      // Refresh courses and close modal
+      await fetchCourses();
+      setShowEdit(false);
+      setEditingCourse(null);
+
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        subjectArea: "",
+        learningObjectives: "",
+        difficulty: "",
+        priority: "",
+        totalEstimatedHours: "",
+        targetCompletionDate: "",
+        notes: "",
+      });
+      setModules([{ title: "", duration: "" }]);
+      setExternalLinks([{ platform: "", title: "", url: "" }]);
+    } catch (err) {
+      setError(err.message || "Failed to update course");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleManualSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -195,6 +275,83 @@ function Course() {
       setError(err.message || "Failed to create course");
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleEditCourse = async (courseId) => {
+    try {
+      const course = await api.getCourse(courseId);
+      setEditingCourse(course);
+
+      // Populate form with course data
+      setFormData({
+        title: course.title,
+        description: course.description,
+        subjectArea: course.subjectArea,
+        learningObjectives: course.learningObjectives,
+        difficulty: course.difficulty,
+        priority: course.priority,
+        totalEstimatedHours: course.totalEstimatedHours.toString(),
+        targetCompletionDate: course.targetCompletionDate ? course.targetCompletionDate.split('T')[0] : "",
+        notes: course.notes || "",
+      });
+
+      setModules(course.modules.map(m => ({
+        title: m.title,
+        duration: m.estimatedHours.toString()
+      })));
+
+      setExternalLinks(course.externalLinks.length > 0
+        ? course.externalLinks.map(l => ({
+            platform: l.platform,
+            title: l.title,
+            url: l.url
+          }))
+        : [{ platform: "", title: "", url: "" }]
+      );
+
+      setShowEdit(true);
+    } catch (err) {
+      setError("Failed to load course for editing");
+      console.error(err);
+    }
+  };
+
+  const handleStartSession = async (courseId, moduleId = null) => {
+    try {
+      const session = await api.startStudySession(courseId, moduleId);
+      setActiveSessions(prev => ({
+        ...prev,
+        [courseId]: session
+      }));
+      setSessionStartTime(new Date());
+    } catch (err) {
+      setError("Failed to start session");
+      console.error(err);
+    }
+  };
+
+  const handleStopSession = async (courseId) => {
+    try {
+      const session = activeSessions[courseId];
+      if (!session) return;
+
+      await api.stopStudySession(session.id, sessionNotes);
+
+      setActiveSessions(prev => {
+        const newSessions = { ...prev };
+        delete newSessions[courseId];
+        return newSessions;
+      });
+
+      setSessionNotes("");
+      setSessionStartTime(null);
+
+      // Refresh courses to update progress
+      await fetchCourses();
+    } catch (err) {
+      setError("Failed to stop session");
+      console.error(err);
     }
   };
 
@@ -359,6 +516,12 @@ function Course() {
                   {...course}
                   duration={getDurationCategory(course.totalEstimatedHours)}
                   onDelete={handleDeleteCourse}
+                  onEdit={handleEditCourse}
+                  activeSession={activeSessions[course.id]}
+                  onStartSession={handleStartSession}
+                  onStopSession={handleStopSession}
+                  sessionNotes={sessionNotes}
+                  onSessionNotesChange={setSessionNotes}
                 />
               ))}
             </div>
@@ -584,6 +747,285 @@ function Course() {
           </div>
         </div>
       )}
+
+      {/* EDIT COURSE MODAL */}
+      {showEdit && editingCourse && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <div>
+                <p className={styles.kicker}>Edit course</p>
+                <h2>Update course details</h2>
+              </div>
+              <button
+                className={styles.iconBtn}
+                type="button"
+                onClick={() => {
+                  setShowEdit(false);
+                  setEditingCourse(null);
+                  setError("");
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={handleEditSubmit}>
+              <div className={styles.formGrid}>
+                <label>
+                  Course title *
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    placeholder="Enter course title"
+                    required
+                  />
+                </label>
+                <label>
+                  Subject area
+                  <input
+                    type="text"
+                    name="subjectArea"
+                    value={formData.subjectArea}
+                    onChange={handleInputChange}
+                    placeholder="e.g., Web Development, Data Science"
+                  />
+                </label>
+              </div>
+
+              <label>
+                Description
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  placeholder="Brief description of the course"
+                  rows="3"
+                />
+              </label>
+
+              <label>
+                Learning objectives
+                <textarea
+                  name="learningObjectives"
+                  value={formData.learningObjectives}
+                  onChange={handleInputChange}
+                  placeholder="What will you learn?"
+                  rows="3"
+                />
+              </label>
+
+              <div className={styles.formGrid}>
+                <label>
+                  Difficulty *
+                  <select
+                    name="difficulty"
+                    value={formData.difficulty}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select difficulty</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                  </select>
+                </label>
+                <label>
+                  Priority *
+                  <select
+                    name="priority"
+                    value={formData.priority}
+                    onChange={handleInputChange}
+                    required
+                  >
+                    <option value="">Select priority</option>
+                    <option value="Low">Low</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className={styles.formGrid}>
+                <label>
+                  Total hours *
+                  <input
+                    type="number"
+                    name="totalEstimatedHours"
+                    value={formData.totalEstimatedHours}
+                    onChange={handleInputChange}
+                    placeholder="120"
+                    min="1"
+                    required
+                  />
+                </label>
+                <label>
+                  Target completion
+                  <input
+                    type="date"
+                    name="targetCompletionDate"
+                    value={formData.targetCompletionDate}
+                    onChange={handleInputChange}
+                  />
+                </label>
+              </div>
+
+              <label>
+                Course notes
+                <textarea
+                  name="notes"
+                  value={formData.notes}
+                  onChange={handleInputChange}
+                  placeholder="Additional notes, resources, or reminders"
+                  rows="3"
+                />
+              </label>
+
+              {/* External Links Section */}
+              <div className={styles.section}>
+                <div className={styles.modulesHeader}>
+                  <span>External links</span>
+                  <button
+                    type="button"
+                    onClick={() => setExternalLinks(prev => [...prev, { platform: "", title: "", url: "" }])}
+                  >
+                    + Add link
+                  </button>
+                </div>
+
+                {externalLinks.map((link, index) => (
+                  <div key={index} className={styles.moduleRow}>
+                    <div className={styles.formGrid}>
+                      <select
+                        value={link.platform}
+                        onChange={(e) => {
+                          const newLinks = [...externalLinks];
+                          newLinks[index].platform = e.target.value;
+                          setExternalLinks(newLinks);
+                        }}
+                        placeholder="Platform"
+                      >
+                        <option value="">Select platform</option>
+                        <option value="Udemy">Udemy</option>
+                        <option value="Coursera">Coursera</option>
+                        <option value="YouTube">YouTube</option>
+                        <option value="Website">Website</option>
+                        <option value="GitHub">GitHub</option>
+                        <option value="Documentation">Documentation</option>
+                      </select>
+                      <input
+                        type="text"
+                        value={link.title}
+                        onChange={(e) => {
+                          const newLinks = [...externalLinks];
+                          newLinks[index].title = e.target.value;
+                          setExternalLinks(newLinks);
+                        }}
+                        placeholder="Link title"
+                      />
+                    </div>
+                    <input
+                      type="url"
+                      value={link.url}
+                      onChange={(e) => {
+                        const newLinks = [...externalLinks];
+                        newLinks[index].url = e.target.value;
+                        setExternalLinks(newLinks);
+                      }}
+                      placeholder="https://..."
+                    />
+                    {externalLinks.length > 1 && (
+                      <button
+                        type="button"
+                        className={styles.removeBtn}
+                        onClick={() => setExternalLinks(prev => prev.filter((_, i) => i !== index))}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Course Modules Section */}
+              <div className={styles.section}>
+                <div className={styles.modulesHeader}>
+                  <span>Course modules *</span>
+                  <button type="button" onClick={addModule}>
+                    + Add module
+                  </button>
+                </div>
+
+                {modules.map((module, index) => (
+                  <div key={index} className={styles.moduleRow}>
+                    <input
+                      type="text"
+                      value={module.title}
+                      onChange={(e) => {
+                        const newModules = [...modules];
+                        newModules[index].title = e.target.value;
+                        setModules(newModules);
+                      }}
+                      placeholder="Module title"
+                      required
+                    />
+                    <input
+                      type="number"
+                      value={module.duration}
+                      onChange={(e) => {
+                        const newModules = [...modules];
+                        newModules[index].duration = e.target.value;
+                        setModules(newModules);
+                      }}
+                      placeholder="Hours"
+                      min="0.5"
+                      step="0.5"
+                      required
+                    />
+                    {modules.length > 1 && (
+                      <button
+                        type="button"
+                        className={styles.removeBtn}
+                        onClick={() => removeModule(index)}
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {error && (
+                <div style={{ color: 'red', fontSize: '0.9rem' }}>{error}</div>
+              )}
+
+              <div className={styles.formActions}>
+                <button
+                  className={styles.secondaryBtn}
+                  type="button"
+                  onClick={() => {
+                    setShowEdit(false);
+                    setEditingCourse(null);
+                    setError("");
+                  }}
+                  disabled={submitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  className={styles.primaryBtn}
+                  type="submit"
+                  disabled={submitting}
+                >
+                  {submitting ? "Updating..." : "Update course"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -598,9 +1040,15 @@ function CourseCard({
   difficulty,
   duration,
   onDelete,
+  onEdit,
+  activeSession,
+  onStartSession,
+  onStopSession,
+  sessionNotes,
+  onSessionNotesChange,
 }) {
   return (
-    <article className={styles.courseCard}>
+    <article className={styles.courseCard} onClick={() => onEdit(id)}>
       <div className={styles.cardImage}>
         <div className={styles.imagePlaceholder}>
           {title.charAt(0).toUpperCase()}
@@ -612,19 +1060,72 @@ function CourseCard({
             {priority && <span>{priority}</span>}
             {difficulty && <span>{difficulty}</span>}
           </div>
-          <button
-            className={styles.deleteBtn}
-            onClick={() => onDelete(id)}
-            title="Delete course"
-          >
-            ×
-          </button>
+          <div className={styles.cardActions}>
+            <button
+              className={styles.editBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(id);
+              }}
+              title="Edit course"
+            >
+              ✏️
+            </button>
+            <button
+              className={styles.deleteBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(id);
+              }}
+              title="Delete course"
+            >
+              ×
+            </button>
+          </div>
         </div>
         <h3>{title}</h3>
         <p>{description || "No description provided"}</p>
         <span className={styles.hours}>
           {hoursRemaining || totalEstimatedHours} hrs remaining
         </span>
+
+        {/* Session Controls */}
+        <div className={styles.sessionControls}>
+          {activeSession ? (
+            <div className={styles.activeSession}>
+              <div className={styles.sessionTimer}>
+                <span className={styles.timerIcon}>⏱️</span>
+                <span>Session active</span>
+              </div>
+              <textarea
+                className={styles.sessionNotesInput}
+                value={sessionNotes}
+                onChange={(e) => onSessionNotesChange(e.target.value)}
+                placeholder="Session notes..."
+                rows="2"
+              />
+              <button
+                className={styles.stopSessionBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onStopSession(id);
+                }}
+              >
+                Stop Session
+              </button>
+            </div>
+          ) : (
+            <button
+              className={styles.startSessionBtn}
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartSession(id);
+              }}
+            >
+              ▶️ Start Session
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

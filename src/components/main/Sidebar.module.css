@@ -156,7 +156,7 @@
   padding: 10px 12px;
   border: none;
   border-radius: 0;
-  background: #e11d48;
+  background: #f43f5e;
   color: white;
   display: flex;
   gap: 10px;
@@ -167,7 +167,7 @@
 }
 
 .logoutBtn:hover {
-  background: #be123c;
+  background: #e11d48;
 }
 
 .collapsed .branding div,

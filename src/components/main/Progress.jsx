@@ -10,35 +10,64 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { useState } from "react";
-
-// Dummy weekly study data
-const weeklyData = [
-  { day: "Mon", scheduled: 2, completed: 2 },
-  { day: "Tue", scheduled: 3, completed: 2.5 },
-  { day: "Wed", scheduled: 2, completed: 1 },
-  { day: "Thu", scheduled: 2.5, completed: 2 },
-  { day: "Fri", scheduled: 2, completed: 2 },
-  { day: "Sat", scheduled: 4, completed: 3.5 },
-  { day: "Sun", scheduled: 1, completed: 0.5 },
-];
-
-const courses = [
-  { name: "React Basics", progress: 65 },
-  { name: "DSA Foundations", progress: 40 },
-  { name: "Machine Learning Intro", progress: 20 },
-  { name: "DBMS Essentials", progress: 80 },
-];
-
-const heatmap = Array.from({ length: 60 }, () => Math.floor(Math.random() * 4));
+import { useState, useEffect } from "react";
+import api from "../../services/api";
 
 function Progress() {
-  const [currentStreak] = useState(12);
-  const [longestStreak] = useState(21);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const totalScheduled = weeklyData.reduce((a, b) => a + b.scheduled, 0);
-  const totalCompleted = weeklyData.reduce((a, b) => a + b.completed, 0);
-  const completionRate = Math.round((totalCompleted / totalScheduled) * 100);
+  useEffect(() => {
+    loadProgressData();
+  }, []);
+
+  const loadProgressData = async () => {
+    try {
+      setLoading(true);
+      const data = await api.getProgressDashboard();
+      setDashboardData(data);
+    } catch (err) {
+      setError("Failed to load progress data");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <section className={styles.page}>
+        <div className={styles.pageHeader}>
+          <div>
+            <p className={styles.kicker}>Insights</p>
+            <h1>Progress overview</h1>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', padding: '40px' }}>
+          Loading progress data...
+        </div>
+      </section>
+    );
+  }
+
+  if (error || !dashboardData) {
+    return (
+      <section className={styles.page}>
+        <div className={styles.pageHeader}>
+          <div>
+            <p className={styles.kicker}>Insights</p>
+            <h1>Progress overview</h1>
+          </div>
+        </div>
+        <div style={{ textAlign: 'center', padding: '40px', color: 'red' }}>
+          {error || "Failed to load progress data"}
+        </div>
+      </section>
+    );
+  }
+
+  const { stats, weeklyData, courseProgress, activityHeatmap } = dashboardData;
 
   const aiRecommendations = [
     "Shift ML sessions earlier in the week when focus is higher.",
@@ -54,22 +83,19 @@ function Progress() {
           <h1>Progress overview</h1>
         </div>
         <span className={styles.subtitle}>
-          Updated {new Date().toLocaleDateString()}
+          Updated {new Date(stats.lastUpdated).toLocaleDateString()}
         </span>
       </div>
 
       {/* METRICS */}
       <div className={styles.metricsRow}>
         {[
-          ["🔥 Current Streak", `${currentStreak} days`],
-          ["🏆 Longest Streak", `${longestStreak} days`],
-          ["📅 Scheduled Hours", `${totalScheduled} hrs`],
-          ["⏳ Completed Hours", `${totalCompleted} hrs`],
-          ["📊 Completion Rate", `${completionRate}%`],
-          [
-            "⚡ Efficiency",
-            `${Math.min(100, Math.round(completionRate * 1.1))}%`,
-          ],
+          ["🔥 Current Streak", `${stats.currentStreak} days`],
+          ["🏆 Longest Streak", `${stats.longestStreak} days`],
+          ["📅 Scheduled Hours", `${stats.totalScheduledHours} hrs`],
+          ["⏳ Completed Hours", `${stats.totalCompletedHours} hrs`],
+          ["📊 Completion Rate", `${stats.completionRate}%`],
+          ["⚡ Efficiency", `${stats.efficiency}%`],
         ].map(([title, value], i) => (
           <div className={styles.metric} key={i}>
             <span>{title}</span>
@@ -82,9 +108,9 @@ function Progress() {
       <div className={styles.section}>
         <h2>Overall Progress</h2>
         <div className={styles.progressBarOuter}>
-          <div className={styles.progressBarInner} style={{ width: "58%" }} />
+          <div className={styles.progressBarInner} style={{ width: `${stats.overallProgress}%` }} />
         </div>
-        <p className={styles.progressLabel}>58% Completed</p>
+        <p className={styles.progressLabel}>{stats.overallProgress}% Completed</p>
       </div>
 
       {/* CHARTS */}
@@ -121,7 +147,7 @@ function Progress() {
       <div className={styles.section}>
         <h2>Study Activity Heatmap</h2>
         <div className={styles.heatmap}>
-          {heatmap.map((val, i) => (
+          {activityHeatmap.map((val, i) => (
             <div
               key={i}
               className={styles.heatBox}
@@ -140,34 +166,26 @@ function Progress() {
         </div>
       </div>
 
-      {/* COURSES + AI TIPS */}
-      <div className={styles.aiRow}>
+      {/* COURSE PROGRESS */}
+      <div className={styles.grid}>
         <div className={styles.section}>
           <h2>Course Progress</h2>
           <div className={styles.courseGrid}>
-            {courses.map((c, i) => (
-              <div className={styles.courseCard} key={i}>
-                <span className={styles.courseName}>{c.name}</span>
+            {courseProgress.map((c, i) => (
+              <div className={styles.courseCard} key={c.id}>
+                <span className={styles.courseName}>{c.title}</span>
                 <div className={styles.courseProgressBarOuter}>
                   <div
                     className={styles.courseProgressBarInner}
-                    style={{ width: `${c.progress}%` }}
+                    style={{ width: `${c.progressPercentage}%` }}
                   />
                 </div>
-                <span className={styles.coursePercent}>{c.progress}%</span>
+                <span className={styles.coursePercent}>{c.progressPercentage}%</span>
               </div>
             ))}
           </div>
         </div>
 
-        <div className={styles.section}>
-          <h2>AI recommendations</h2>
-          <ul className={styles.aiList}>
-            {aiRecommendations.map((tip) => (
-              <li key={tip}>{tip}</li>
-            ))}
-          </ul>
-        </div>
       </div>
     </section>
   );

@@ -6,7 +6,7 @@ import Signin from "./components/auth/Signin.jsx";
 import Signup from "./components/auth/Signup.jsx";
 
 import Course from "./components/main/Course.jsx";
-import CourseDetails from "./components/main/CourseDetails.jsx";
+import CourseDetails from "./components/course/CourseDetails.jsx";
 import Schedule from "./components/main/Schedule.jsx";
 import Progress from "./components/main/Progress.jsx";
 import Profile from "./components/main/Profile.jsx";

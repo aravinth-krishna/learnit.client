@@ -1,0 +1,198 @@
+.tree {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.module {
+  border: 1px solid var(--border);
+  background: var(--background);
+  transition: all 0.2s;
+}
+
+.module:hover {
+  border-color: var(--accent);
+}
+
+.completed {
+  background: rgba(40, 167, 69, 0.03);
+  border-color: rgba(40, 167, 69, 0.2);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  min-height: 60px;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.expandBtn {
+  padding: 4px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  min-width: 24px;
+}
+
+.expandBtn:hover {
+  color: var(--accent);
+}
+
+.spacer {
+  width: 24px;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.strikethrough {
+  text-decoration: line-through;
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.badges {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.hours {
+  padding: 4px 8px;
+  background: rgba(0, 123, 255, 0.1);
+  color: var(--accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.done {
+  padding: 4px 8px;
+  background: rgba(40, 167, 69, 0.1);
+  color: #155724;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.desc {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.notes {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--accent);
+  background: rgba(0, 123, 255, 0.05);
+  padding: 6px 10px;
+}
+
+.editBtn {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.editBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.editForm {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.editForm input,
+.editForm textarea {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.editForm textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
+.actions button {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.actions button:first-child {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.children {
+  border-left: 2px solid var(--border);
+  margin-left: 32px;
+  padding-left: 16px;
+}
+
+.empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+}
+
+.empty span {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 8px;
+}

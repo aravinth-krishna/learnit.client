@@ -48,6 +48,10 @@ export const courseApi = {
     return http.patch(`/api/courses/modules/${moduleId}/toggle-completion`, {});
   },
 
+  async createModule(courseId, payload) {
+    return http.post(`/api/courses/${courseId}/modules`, payload);
+  },
+
   // External Links
   async addExternalLink(courseId, link) {
     return http.post(`/api/courses/${courseId}/external-links`, link);

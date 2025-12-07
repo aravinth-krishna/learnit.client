@@ -139,7 +139,6 @@ function Course() {
           onCancel={() => setShowCreate(false)}
         />
       )}
-
       {showEdit && editingCourse && (
         <EditCourseModal
           course={editingCourse}

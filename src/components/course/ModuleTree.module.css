@@ -1,17 +1,98 @@
 .tree {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--text-strong);
+}
+
+.primaryBtn {
+  display: inline-flex;
+  align-items: center;
   gap: 8px;
+  padding: 10px 14px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.primaryBtn:hover {
+  background: var(--accent-dark);
+}
+
+.error {
+  border: 1px solid #f5c2c7;
+  background: #f8d7da;
+  color: #842029;
+  padding: 10px 12px;
+}
+
+.addCard {
+  border: 1px dashed var(--border);
+  background: var(--background);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.addHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.addGrid,
+.editGrid {
+  display: grid;
+  grid-template-columns: 2fr 120px;
+  gap: 10px;
+}
+
+.addCard input,
+.addCard textarea,
+.editForm input,
+.editForm textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.addCard textarea,
+.editForm textarea {
+  resize: vertical;
 }
 
 .module {
   border: 1px solid var(--border);
   background: var(--background);
-  transition: all 0.2s;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .module:hover {
   border-color: var(--accent);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
 }
 
 .completed {
@@ -23,15 +104,15 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 16px;
-  min-height: 60px;
+  padding: 14px;
 }
 
 .controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-shrink: 0;
+  margin-top: 2px;
 }
 
 .expandBtn {
@@ -62,7 +143,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   min-width: 0;
 }
 
@@ -71,6 +152,20 @@
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+}
+
+.titleGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bullet {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.6;
 }
 
 .title {
@@ -125,16 +220,23 @@
   padding: 6px 10px;
 }
 
-.editBtn {
-  padding: 6px 10px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  flex-shrink: 0;
+.rowActions {
+  display: flex;
+  gap: 10px;
 }
 
-.editBtn:hover {
+.inlineBtn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  padding: 6px 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inlineBtn:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -146,30 +248,19 @@
   gap: 10px;
 }
 
-.editForm input,
-.editForm textarea {
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  font-family: inherit;
-  font-size: 0.95rem;
-}
-
-.editForm textarea {
-  resize: vertical;
-  min-height: 60px;
-}
-
 .actions {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .actions button {
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
   background: var(--surface);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .actions button:first-child {
@@ -180,8 +271,11 @@
 
 .children {
   border-left: 2px solid var(--border);
-  margin-left: 32px;
+  margin-left: 28px;
   padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .empty {
@@ -195,4 +289,17 @@
   font-size: 2rem;
   display: block;
   margin-bottom: 8px;
+}
+
+@media (max-width: 640px) {
+  .addGrid,
+  .editGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }

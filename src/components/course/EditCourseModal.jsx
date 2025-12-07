@@ -34,7 +34,7 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
         notes: course.notes || "",
       });
       setModules(
-        course.modules.map((m) => ({
+        (course.modules || []).map((m) => ({
           id: m.id,
           title: m.title,
           duration: m.estimatedHours.toString(),
@@ -65,11 +65,13 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
       await onSave({
         ...formData,
         totalEstimatedHours: parseInt(formData.totalEstimatedHours) || 0,
-        modules: validModules.map((m) => ({
-          title: m.title,
-          estimatedHours: parseInt(m.duration) || 0,
-          parentModuleId: m.parentModuleId,
-        })),
+        modules: modules
+          .filter((m) => m.title.trim() && m.duration)
+          .map((m) => ({
+            title: m.title,
+            estimatedHours: parseInt(m.duration) || 0,
+            parentModuleId: m.parentModuleId,
+          })),
         externalLinks,
       });
     } finally {

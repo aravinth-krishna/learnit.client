@@ -44,7 +44,7 @@ function CreateCourseModal({ onSave, onCancel, loading }) {
         modules: validModules.map((m) => ({
           title: m.title,
           estimatedHours: parseInt(m.duration) || 0,
-          parentModuleId: m.parentModuleId,
+          parentModuleId: m.parentModuleId, // <- nesting
         })),
       });
     } finally {

@@ -140,6 +140,10 @@ function CourseDetails() {
                 await courseApi.toggleModuleCompletion(moduleId);
                 fetchCourse();
               }}
+              onAdd={async (payload) => {
+                await courseApi.createModule(id, payload);
+                fetchCourse();
+              }}
             />
           </section>
 

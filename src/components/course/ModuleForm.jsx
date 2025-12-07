@@ -1,6 +1,23 @@
 import styles from "./ModuleForm.module.css";
 
 function ModuleForm({ modules, setModules }) {
+  const getDepthLabel = (module) => {
+    let depth = 0;
+    let current = module;
+    const visited = new Set();
+
+    while (current?.parentModuleId) {
+      if (visited.has(current.parentModuleId)) break;
+      visited.add(current.parentModuleId);
+      depth += 1;
+      current = modules.find((m) => m.id === current.parentModuleId);
+    }
+
+    const prefix = depth > 0 ? "↳ ".repeat(depth) : "";
+    return `${prefix}${
+      module.title || `Module ${modules.indexOf(module) + 1}`
+    }`;
+  };
   const handleModuleChange = (index, field, value) => {
     setModules((prev) =>
       prev.map((m, i) => (i === index ? { ...m, [field]: value } : m))
@@ -42,17 +59,16 @@ function ModuleForm({ modules, setModules }) {
                   handleModuleChange(
                     index,
                     "parentModuleId",
-                    e.target.value ? parseInt(e.target.value) : null
+                    e.target.value ? Number(e.target.value) : null
                   )
                 }
               >
                 <option value="">Main Module</option>
                 {modules
-                  .filter((m, i) => i !== index && !m.parentModuleId)
+                  .filter((m, i) => i !== index)
                   .map((parent) => (
                     <option key={parent.id} value={parent.id}>
-                      ↳{" "}
-                      {parent.title || `Module ${modules.indexOf(parent) + 1}`}
+                      {getDepthLabel(parent)}
                     </option>
                   ))}
               </select>

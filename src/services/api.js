@@ -210,6 +210,12 @@ class ApiService {
     });
   }
 
+  async toggleModuleCompletion(moduleId) {
+    return this.request(`/api/courses/modules/${moduleId}/toggle-completion`, {
+      method: 'PATCH',
+    });
+  }
+
   // Session Management
   async startStudySession(courseId, moduleId = null) {
     const params = moduleId ? `?moduleId=${moduleId}` : '';
@@ -227,6 +233,43 @@ class ApiService {
 
   async getCourseSessions(courseId) {
     return this.request(`/api/courses/${courseId}/sessions`);
+  }
+
+  // Module Management
+  async updateModule(moduleId, updates) {
+    return this.request(`/api/courses/modules/${moduleId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  }
+
+  // External Links Management
+  async addExternalLink(courseId, link) {
+    return this.request(`/api/courses/${courseId}/external-links`, {
+      method: 'POST',
+      body: JSON.stringify(link),
+    });
+  }
+
+  async updateExternalLink(linkId, updates) {
+    return this.request(`/api/courses/external-links/${linkId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+    });
+  }
+
+  async deleteExternalLink(linkId) {
+    return this.request(`/api/courses/external-links/${linkId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  // Active Time Tracking
+  async updateCourseActiveTime(courseId, hours) {
+    return this.request(`/api/courses/${courseId}/active-time`, {
+      method: 'POST',
+      body: JSON.stringify({ hours }),
+    });
   }
 }
 

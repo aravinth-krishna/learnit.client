@@ -1,7 +1,15 @@
 import styles from "./Course.module.css";
-import { FaFilter, FaSearch, FaSort } from "react-icons/fa";
+import {
+  FaFilter,
+  FaSearch,
+  FaSort,
+  FaPlay,
+  FaEdit,
+  FaTrash,
+} from "react-icons/fa";
 import { useEffect, useState } from "react";
 import { IoIosAdd } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
 const filterGroups = {
@@ -19,6 +27,7 @@ const sortOptions = [
 ];
 
 function Course() {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -42,7 +51,9 @@ function Course() {
   const [editingCourse, setEditingCourse] = useState(null);
   const [createMode, setCreateMode] = useState("manual");
   const [modules, setModules] = useState([{ title: "", duration: "" }]);
-  const [externalLinks, setExternalLinks] = useState([{ platform: "", title: "", url: "" }]);
+  const [externalLinks, setExternalLinks] = useState([
+    { platform: "", title: "", url: "" },
+  ]);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -72,21 +83,26 @@ function Course() {
 
       const params = {
         search: search || undefined,
-        priority: selectedFilters.priority.length > 0 
-          ? selectedFilters.priority.join(",") 
-          : undefined,
-        difficulty: selectedFilters.difficulty.length > 0
-          ? selectedFilters.difficulty.join(",")
-          : undefined,
-        duration: selectedFilters.duration.length > 0
-          ? selectedFilters.duration[0] // API expects single duration value
-          : undefined,
+        priority:
+          selectedFilters.priority.length > 0
+            ? selectedFilters.priority.join(",")
+            : undefined,
+        difficulty:
+          selectedFilters.difficulty.length > 0
+            ? selectedFilters.difficulty.join(",")
+            : undefined,
+        duration:
+          selectedFilters.duration.length > 0
+            ? selectedFilters.duration[0] // API expects single duration value
+            : undefined,
         sortBy,
         sortOrder,
       };
 
       // Remove undefined values
-      Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
+      Object.keys(params).forEach(
+        (key) => params[key] === undefined && delete params[key]
+      );
 
       const data = await api.getCourses(params);
       setCourses(data);
@@ -168,7 +184,10 @@ function Course() {
 
       // Validate external links
       const validLinks = externalLinks.filter(
-        (l) => l.platform.trim() !== "" && l.title.trim() !== "" && l.url.trim() !== ""
+        (l) =>
+          l.platform.trim() !== "" &&
+          l.title.trim() !== "" &&
+          l.url.trim() !== ""
       );
 
       const courseData = {
@@ -253,7 +272,7 @@ function Course() {
       };
 
       await api.createCourse(courseData);
-      
+
       // Reset form
       setFormData({
         title: "",
@@ -267,7 +286,7 @@ function Course() {
       });
       setModules([{ title: "", duration: "" }]);
       setShowCreate(false);
-      
+
       // Refresh courses
       await fetchCourses();
       await fetchStats();
@@ -292,22 +311,27 @@ function Course() {
         difficulty: course.difficulty,
         priority: course.priority,
         totalEstimatedHours: course.totalEstimatedHours.toString(),
-        targetCompletionDate: course.targetCompletionDate ? course.targetCompletionDate.split('T')[0] : "",
+        targetCompletionDate: course.targetCompletionDate
+          ? course.targetCompletionDate.split("T")[0]
+          : "",
         notes: course.notes || "",
       });
 
-      setModules(course.modules.map(m => ({
-        title: m.title,
-        duration: m.estimatedHours.toString()
-      })));
+      setModules(
+        course.modules.map((m) => ({
+          title: m.title,
+          duration: m.estimatedHours.toString(),
+        }))
+      );
 
-      setExternalLinks(course.externalLinks.length > 0
-        ? course.externalLinks.map(l => ({
-            platform: l.platform,
-            title: l.title,
-            url: l.url
-          }))
-        : [{ platform: "", title: "", url: "" }]
+      setExternalLinks(
+        course.externalLinks.length > 0
+          ? course.externalLinks.map((l) => ({
+              platform: l.platform,
+              title: l.title,
+              url: l.url,
+            }))
+          : [{ platform: "", title: "", url: "" }]
       );
 
       setShowEdit(true);
@@ -320,9 +344,9 @@ function Course() {
   const handleStartSession = async (courseId, moduleId = null) => {
     try {
       const session = await api.startStudySession(courseId, moduleId);
-      setActiveSessions(prev => ({
+      setActiveSessions((prev) => ({
         ...prev,
-        [courseId]: session
+        [courseId]: session,
       }));
       setSessionStartTime(new Date());
     } catch (err) {
@@ -338,7 +362,7 @@ function Course() {
 
       await api.stopStudySession(session.id, sessionNotes);
 
-      setActiveSessions(prev => {
+      setActiveSessions((prev) => {
         const newSessions = { ...prev };
         delete newSessions[courseId];
         return newSessions;
@@ -404,7 +428,15 @@ function Course() {
       </header>
 
       {error && !loading && (
-        <div className={styles.errorMessage} style={{ color: 'red', padding: '12px', border: '1px solid red', background: '#ffe6e6' }}>
+        <div
+          className={styles.errorMessage}
+          style={{
+            color: "red",
+            padding: "12px",
+            border: "1px solid red",
+            background: "#ffe6e6",
+          }}
+        >
           {error}
         </div>
       )}
@@ -457,7 +489,9 @@ function Course() {
           </select>
         </div>
         <span className={styles.resultSummary}>
-          {loading ? "Loading..." : `${courses.length} course${courses.length === 1 ? "" : "s"}`}
+          {loading
+            ? "Loading..."
+            : `${courses.length} course${courses.length === 1 ? "" : "s"}`}
         </span>
       </div>
 
@@ -517,11 +551,7 @@ function Course() {
                   duration={getDurationCategory(course.totalEstimatedHours)}
                   onDelete={handleDeleteCourse}
                   onEdit={handleEditCourse}
-                  activeSession={activeSessions[course.id]}
-                  onStartSession={handleStartSession}
-                  onStopSession={handleStopSession}
-                  sessionNotes={sessionNotes}
-                  onSessionNotesChange={setSessionNotes}
+                  notes={course.notes}
                 />
               ))}
             </div>
@@ -719,7 +749,9 @@ function Course() {
                 </div>
 
                 {error && (
-                  <div style={{ color: 'red', fontSize: '0.9rem' }}>{error}</div>
+                  <div style={{ color: "red", fontSize: "0.9rem" }}>
+                    {error}
+                  </div>
                 )}
 
                 <div className={styles.formActions}>
@@ -889,7 +921,12 @@ function Course() {
                   <span>External links</span>
                   <button
                     type="button"
-                    onClick={() => setExternalLinks(prev => [...prev, { platform: "", title: "", url: "" }])}
+                    onClick={() =>
+                      setExternalLinks((prev) => [
+                        ...prev,
+                        { platform: "", title: "", url: "" },
+                      ])
+                    }
                   >
                     + Add link
                   </button>
@@ -940,7 +977,11 @@ function Course() {
                       <button
                         type="button"
                         className={styles.removeBtn}
-                        onClick={() => setExternalLinks(prev => prev.filter((_, i) => i !== index))}
+                        onClick={() =>
+                          setExternalLinks((prev) =>
+                            prev.filter((_, i) => i !== index)
+                          )
+                        }
                       >
                         Remove
                       </button>
@@ -998,7 +1039,7 @@ function Course() {
               </div>
 
               {error && (
-                <div style={{ color: 'red', fontSize: '0.9rem' }}>{error}</div>
+                <div style={{ color: "red", fontSize: "0.9rem" }}>{error}</div>
               )}
 
               <div className={styles.formActions}>
@@ -1038,93 +1079,107 @@ function CourseCard({
   totalEstimatedHours,
   priority,
   difficulty,
-  duration,
   onDelete,
   onEdit,
-  activeSession,
-  onStartSession,
-  onStopSession,
-  sessionNotes,
-  onSessionNotesChange,
 }) {
+  const navigate = useNavigate();
+  const progress =
+    totalEstimatedHours > 0
+      ? ((totalEstimatedHours - hoursRemaining) / totalEstimatedHours) * 100
+      : 0;
+
+  const handlePlayClick = (e) => {
+    e.stopPropagation();
+    navigate(`/app/course/${id}`);
+  };
+
   return (
-    <article className={styles.courseCard} onClick={() => onEdit(id)}>
-      <div className={styles.cardImage}>
-        <div className={styles.imagePlaceholder}>
-          {title.charAt(0).toUpperCase()}
+    <article className={styles.courseCard}>
+      {/* Card Header */}
+      <div className={styles.cardHeader}>
+        <div className={styles.cardImage}>
+          <div className={styles.imagePlaceholder}>
+            <span className={styles.courseInitial}>{title.charAt(0).toUpperCase()}</span>
+          </div>
+          <button
+            className={styles.playButton}
+            onClick={handlePlayClick}
+            title="Open Course"
+          >
+            <FaPlay />
+          </button>
+        </div>
+
+        {/* Badges */}
+        <div className={styles.cardBadges}>
+          {priority && (
+            <span className={`${styles.badge} ${styles[priority.toLowerCase()]}`}>
+              {priority}
+            </span>
+          )}
+          {difficulty && (
+            <span className={`${styles.badge} ${styles[difficulty.toLowerCase()]}`}>
+              {difficulty}
+            </span>
+          )}
         </div>
       </div>
-      <div className={styles.cardBody}>
-        <div className={styles.cardHeader}>
-          <div className={styles.cardMeta}>
-            {priority && <span>{priority}</span>}
-            {difficulty && <span>{difficulty}</span>}
+
+      {/* Card Content */}
+      <div className={styles.cardContent}>
+        <h3 className={styles.cardTitle}>{title}</h3>
+
+        <p className={styles.cardDescription}>
+          {description || "No description"}
+        </p>
+
+        {/* Progress */}
+        <div className={styles.progressSection}>
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{ width: `${progress}%` }}
+            />
           </div>
-          <div className={styles.cardActions}>
+          <div className={styles.progressText}>
+            <span className={styles.progressPercent}>{Math.round(progress)}%</span>
+            <span className={styles.hoursLeft}>{hoursRemaining}h left</span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className={styles.cardActions}>
+          <button
+            className={styles.actionBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePlayClick(e);
+            }}
+          >
+            <FaPlay /> Continue
+          </button>
+          <div className={styles.actionIcons}>
             <button
-              className={styles.editBtn}
+              className={styles.iconBtn}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(id);
               }}
-              title="Edit course"
+              title="Edit"
             >
-              ✏️
+              <FaEdit />
             </button>
             <button
-              className={styles.deleteBtn}
+              className={styles.iconBtn}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(id);
               }}
-              title="Delete course"
+              title="Delete"
             >
-              ×
+              <FaTrash />
             </button>
           </div>
-        </div>
-        <h3>{title}</h3>
-        <p>{description || "No description provided"}</p>
-        <span className={styles.hours}>
-          {hoursRemaining || totalEstimatedHours} hrs remaining
-        </span>
-
-        {/* Session Controls */}
-        <div className={styles.sessionControls}>
-          {activeSession ? (
-            <div className={styles.activeSession}>
-              <div className={styles.sessionTimer}>
-                <span className={styles.timerIcon}>⏱️</span>
-                <span>Session active</span>
-              </div>
-              <textarea
-                className={styles.sessionNotesInput}
-                value={sessionNotes}
-                onChange={(e) => onSessionNotesChange(e.target.value)}
-                placeholder="Session notes..."
-                rows="2"
-              />
-              <button
-                className={styles.stopSessionBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onStopSession(id);
-                }}
-              >
-                Stop Session
-              </button>
-            </div>
-          ) : (
-            <button
-              className={styles.startSessionBtn}
-              onClick={(e) => {
-                e.stopPropagation();
-                onStartSession(id);
-              }}
-            >
-              ▶️ Start Session
-            </button>
-          )}
         </div>
       </div>
     </article>

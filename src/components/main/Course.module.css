@@ -251,82 +251,263 @@
 .courseCard {
   border: 1px solid var(--border);
   background: var(--surface);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
-.cardImage {
+.courseCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent);
+}
+
+.cardHeader {
+  position: relative;
   height: 140px;
-  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--border);
+  overflow: hidden;
+}
+
+.cardBadges {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.badge.low {
+  background: rgba(40, 167, 69, 0.15);
+  border-color: rgba(40, 167, 69, 0.4);
+}
+
+.badge.medium {
+  background: rgba(255, 193, 7, 0.15);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.badge.high {
+  background: rgba(220, 53, 69, 0.15);
+  border-color: rgba(220, 53, 69, 0.4);
+}
+
+.badge.beginner {
+  background: rgba(40, 167, 69, 0.15);
+  border-color: rgba(40, 167, 69, 0.4);
+}
+
+.badge.intermediate {
+  background: rgba(255, 193, 7, 0.15);
+  border-color: rgba(255, 193, 7, 0.4);
+}
+
+.badge.advanced {
+  background: rgba(220, 53, 69, 0.15);
+  border-color: rgba(220, 53, 69, 0.4);
+}
+
+.cardImage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .imagePlaceholder {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: var(--accent);
-  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+}
+
+.courseInitial {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.playButton {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+.playButton:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
 }
 
 .courseCard img {
-  height: 140px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-bottom: 1px solid var(--border);
 }
 
-.cardBody {
-  padding: 16px;
+.cardContent {
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  flex: 1;
 }
 
-.cardHeader {
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-strong);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.cardDescription {
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
+  font-size: 0.85rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.progressSection {
+  margin: 16px 0 12px 0;
+}
+
+.progressBar {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.progressText {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
-.deleteBtn {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
+.progressPercent {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.hoursLeft {
   color: var(--muted);
-  padding: 0;
-  width: 24px;
-  height: 24px;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.actionBtn {
+  flex: 1;
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.deleteBtn:hover {
-  color: #ff4444;
+.actionBtn:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
-.cardMeta {
+.actionIcons {
   display: flex;
   gap: 8px;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--muted);
 }
 
-.hours {
-  font-weight: 600;
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.iconBtn:hover {
+  border-color: var(--accent);
   color: var(--accent);
+  background: rgba(0, 123, 255, 0.05);
 }
 
 .emptyState {
@@ -522,78 +703,189 @@
 
 /* Session Controls */
 .sessionControls {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sessionActions {
+  display: flex;
+  gap: 8px;
 }
 
 .startSessionBtn {
-  background: var(--accent);
+  flex: 1;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 16px;
+  border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
-  width: 100%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
 .startSessionBtn:hover {
-  background: var(--accent-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 123, 255, 0.4);
+}
+
+.quickPlayBtn {
+  background: rgba(0, 123, 255, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 123, 255, 0.2);
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.quickPlayBtn:hover {
+  background: rgba(0, 123, 255, 0.15);
+  border-color: rgba(0, 123, 255, 0.3);
 }
 
 .activeSession {
+  background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
+  border: 1px solid rgba(40, 167, 69, 0.2);
+  border-radius: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  box-shadow: 0 2px 12px rgba(40, 167, 69, 0.15);
 }
 
-.sessionTimer {
+.sessionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sessionStatus {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.liveIndicator {
+  width: 8px;
+  height: 8px;
+  background: #28a745;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.sessionLabel {
   font-size: 0.9rem;
-  color: var(--accent);
-  font-weight: 500;
+  font-weight: 600;
+  color: #155724;
+}
+
+.liveTimer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(40, 167, 69, 0.3);
 }
 
 .timerIcon {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
+}
+
+.timerText {
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #155724;
 }
 
 .sessionNotesInput {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--bg);
+  padding: 12px;
+  border: 1px solid rgba(40, 167, 69, 0.3);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
   color: var(--text-strong);
   font-size: 0.9rem;
   resize: vertical;
-  min-height: 60px;
+  min-height: 70px;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
 }
 
 .sessionNotesInput:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+}
+
+.sessionNotesInput::placeholder {
+  color: var(--muted);
+  font-style: italic;
 }
 
 .stopSessionBtn {
-  background: #dc3545;
+  background: linear-gradient(135deg, #dc3545, #c82333);
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 20px;
+  border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
 }
 
 .stopSessionBtn:hover {
-  background: #c82333;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(220, 53, 69, 0.4);
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.iconBtn:hover {
+  opacity: 1;
+  color: var(--accent);
+  background: rgba(0, 123, 255, 0.1);
 }
 
 @media (max-width: 640px) {

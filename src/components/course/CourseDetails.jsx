@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -25,33 +25,14 @@ function CourseDetails() {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [activeTime, setActiveTime] = useState(0);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingNotes, setEditingNotes] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
   const [savingNotes, setSavingNotes] = useState(false);
-  const intervalRef = useRef(null);
 
   useEffect(() => {
     fetchCourse();
   }, [id]);
-
-  useEffect(() => {
-    if (!course) return;
-
-    intervalRef.current = setInterval(() => {
-      setActiveTime((prev) => prev + 1);
-    }, 1000);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        if (activeTime > 0) {
-          courseApi.updateCourseActiveTime(id, activeTime / 3600);
-        }
-      }
-    };
-  }, [course, id]);
 
   const fetchCourse = async () => {
     try {
@@ -59,7 +40,6 @@ function CourseDetails() {
       const data = await courseApi.getCourse(id);
       setCourse(data);
       setNoteDraft(data.notes || "");
-      setActiveTime(0);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -91,11 +71,11 @@ function CourseDetails() {
     }
   };
 
-  const formatTime = (seconds) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`;
+  const moduleTotals = () => {
+    const total = course?.modules?.length || 0;
+    const completed = course?.modules?.filter((m) => m.isCompleted).length || 0;
+    const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { total, completed, percent };
   };
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
@@ -133,7 +113,8 @@ function CourseDetails() {
 
         <div className={styles.actions}>
           <div className={styles.timer}>
-            <FaClock /> {formatTime(activeTime)}
+            <FaClock /> {moduleTotals().completed}/{moduleTotals().total}{" "}
+            modules · {moduleTotals().percent}%
           </div>
           <button
             onClick={() => setShowEditModal(true)}

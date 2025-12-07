@@ -3,24 +3,27 @@
   flex-direction: column;
   gap: 16px;
   margin: 20px 0;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 16px;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-weight: 700;
+  font-size: 1rem;
 }
 
 .addBtn {
-  padding: 8px 16px;
+  padding: 8px 14px;
   background: var(--accent);
   color: white;
   border: none;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.85rem;
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
 .addBtn:hover {
@@ -33,34 +36,87 @@
   gap: 12px;
 }
 
-.row {
-  display: grid;
-  grid-template-columns: 1fr 120px auto;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.inputs {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.inputs select,
-.inputs input,
-.row input {
-  padding: 10px 12px;
+.card {
   border: 1px solid var(--border);
   background: var(--background);
+  padding: 14px;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.fieldLabel input,
+.fieldLabel select {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
   font-family: inherit;
   font-size: 0.95rem;
 }
 
-.inputs select:focus,
-.inputs input:focus,
-.row input:focus {
+.fieldLabel input:focus,
+.fieldLabel select:focus {
   outline: none;
   border-color: var(--accent);
+}
+
+.inlineFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.actionsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.actionsRight {
+  display: flex;
+  gap: 10px;
+}
+
+.textBtn,
+.textBtnDanger {
+  background: transparent;
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.textBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.textBtnDanger {
+  color: #c0392b;
+  border-color: #e0b4b1;
+}
+
+.textBtnDanger:hover {
+  border-color: #c0392b;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 .removeBtn {
@@ -81,5 +137,10 @@
 @media (max-width: 640px) {
   .row {
     grid-template-columns: 1fr;
+    align-items: flex-start;
+  }
+
+  .rowBadge {
+    display: none;
   }
 }

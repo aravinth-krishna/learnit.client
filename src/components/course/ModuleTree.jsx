@@ -307,14 +307,18 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion, onAdd }) {
                 <button
                   onClick={() => handleEdit(module)}
                   className={styles.inlineBtn}
+                  aria-label="Edit module"
+                  title="Edit module"
                 >
-                  <FaEdit /> Edit
+                  <FaEdit />
                 </button>
                 <button
                   onClick={() => startAdd(module.id)}
                   className={styles.inlineBtn}
+                  aria-label="Add submodule"
+                  title="Add submodule"
                 >
-                  <FaPlus /> Add submodule
+                  <FaPlus />
                 </button>
               </div>
             </div>

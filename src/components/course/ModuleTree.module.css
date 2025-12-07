@@ -222,23 +222,34 @@
 
 .rowActions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
 
 .inlineBtn {
+  width: 32px;
+  height: 32px;
   border: 1px solid var(--border);
-  background: transparent;
-  color: var(--text);
-  padding: 6px 10px;
+  background: var(--surface);
+  color: var(--muted);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  border-radius: 6px;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
 }
 
 .inlineBtn:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: rgba(0, 123, 255, 0.06);
+}
+
+.module:hover .rowActions {
+  opacity: 1;
 }
 
 .editForm {

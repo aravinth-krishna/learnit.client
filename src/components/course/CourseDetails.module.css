@@ -175,6 +175,90 @@
   margin-bottom: 20px;
 }
 
+.noteActions {
+  display: flex;
+  gap: 10px;
+}
+
+.noteBtnPrimary,
+.noteBtnGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.noteBtnPrimary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.noteBtnPrimary:hover {
+  background: var(--accent-dark);
+}
+
+.noteBtnGhost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.notesEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notesEditor textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  font-family: inherit;
+  font-size: 0.95rem;
+  min-height: 160px;
+  resize: vertical;
+}
+
+.noteHint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.notePreview {
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 16px;
+  line-height: 1.6;
+}
+
+.notePreview p {
+  margin-top: 0;
+}
+
+.notePreview :global(code) {
+  background: rgba(0, 0, 0, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.notePreview :global(pre) {
+  background: rgba(0, 0, 0, 0.04);
+  padding: 12px;
+  overflow-x: auto;
+}
+
+.notesEmpty {
+  margin: 0;
+  color: var(--muted);
+}
+
 .sectionHeader h2 {
   margin: 0;
 }

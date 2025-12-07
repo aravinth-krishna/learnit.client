@@ -18,6 +18,7 @@ function ModuleForm({ modules, setModules }) {
       module.title || `Module ${modules.indexOf(module) + 1}`
     }`;
   };
+
   const handleModuleChange = (index, field, value) => {
     setModules((prev) =>
       prev.map((m, i) => (i === index ? { ...m, [field]: value } : m))
@@ -36,6 +37,21 @@ function ModuleForm({ modules, setModules }) {
     ]);
   };
 
+  const addChild = (index, parentId) => {
+    const newModule = {
+      id: Date.now() + Math.random(),
+      title: "",
+      duration: "",
+      parentModuleId: parentId,
+    };
+
+    setModules((prev) => {
+      const next = [...prev];
+      next.splice(index + 1, 0, newModule);
+      return next;
+    });
+  };
+
   const removeModule = (index) => {
     setModules((prev) => prev.filter((_, i) => i !== index));
   };
@@ -51,57 +67,83 @@ function ModuleForm({ modules, setModules }) {
 
       <div className={styles.list}>
         {modules.map((module, index) => (
-          <div key={module.id || index} className={styles.row}>
-            <div className={styles.inputs}>
-              <select
-                value={module.parentModuleId || ""}
-                onChange={(e) =>
-                  handleModuleChange(
-                    index,
-                    "parentModuleId",
-                    e.target.value ? Number(e.target.value) : null
-                  )
-                }
-              >
-                <option value="">Main Module</option>
-                {modules
-                  .filter((m, i) => i !== index)
-                  .map((parent) => (
-                    <option key={parent.id} value={parent.id}>
-                      {getDepthLabel(parent)}
-                    </option>
-                  ))}
-              </select>
+          <div key={module.id || index} className={styles.card}>
+            <label className={styles.fieldLabel}>
+              Title
               <input
                 type="text"
-                placeholder="Module name"
+                placeholder="Module title"
                 value={module.title}
                 onChange={(e) =>
                   handleModuleChange(index, "title", e.target.value)
                 }
                 required
               />
+            </label>
+
+            <div className={styles.inlineFields}>
+              <label className={styles.fieldLabel}>
+                Hours
+                <input
+                  type="number"
+                  placeholder="e.g. 2"
+                  value={module.duration}
+                  onChange={(e) =>
+                    handleModuleChange(index, "duration", e.target.value)
+                  }
+                  min="0.5"
+                  step="0.5"
+                  required
+                />
+              </label>
+
+              <label className={styles.fieldLabel}>
+                Parent
+                <select
+                  value={module.parentModuleId || ""}
+                  onChange={(e) =>
+                    handleModuleChange(
+                      index,
+                      "parentModuleId",
+                      e.target.value ? Number(e.target.value) : null
+                    )
+                  }
+                >
+                  <option value="">Top level</option>
+                  {modules
+                    .filter((m, i) => i !== index)
+                    .map((parent) => (
+                      <option key={parent.id} value={parent.id}>
+                        {getDepthLabel(parent)}
+                      </option>
+                    ))}
+                </select>
+              </label>
             </div>
-            <input
-              type="number"
-              placeholder="Hours"
-              value={module.duration}
-              onChange={(e) =>
-                handleModuleChange(index, "duration", e.target.value)
-              }
-              min="0.5"
-              step="0.5"
-              required
-            />
-            {modules.length > 1 && (
-              <button
-                type="button"
-                onClick={() => removeModule(index)}
-                className={styles.removeBtn}
-              >
-                Remove
-              </button>
-            )}
+
+            <div className={styles.actionsRow}>
+              <span className={styles.hint}>
+                Tip: Use Add child to nest quickly.
+              </span>
+              <div className={styles.actionsRight}>
+                <button
+                  type="button"
+                  className={styles.textBtn}
+                  onClick={() => addChild(index, module.id)}
+                >
+                  + Add child
+                </button>
+                {modules.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeModule(index)}
+                    className={styles.textBtnDanger}
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         ))}
       </div>

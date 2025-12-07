@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import ReactMarkdown from "react-markdown";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -7,6 +8,9 @@ import {
   FaStickyNote,
   FaLink,
   FaCog,
+  FaEdit,
+  FaSave,
+  FaTimes,
 } from "react-icons/fa";
 import { courseApi } from "../../services";
 import ModuleTree from "./ModuleTree";
@@ -23,6 +27,9 @@ function CourseDetails() {
   const [error, setError] = useState("");
   const [activeTime, setActiveTime] = useState(0);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [noteDraft, setNoteDraft] = useState("");
+  const [savingNotes, setSavingNotes] = useState(false);
   const intervalRef = useRef(null);
 
   useEffect(() => {
@@ -51,6 +58,7 @@ function CourseDetails() {
       setLoading(true);
       const data = await courseApi.getCourse(id);
       setCourse(data);
+      setNoteDraft(data.notes || "");
       setActiveTime(0);
     } catch (err) {
       setError(err.message);
@@ -66,6 +74,20 @@ function CourseDetails() {
       setShowEditModal(false);
     } catch (err) {
       setError(err.message);
+    }
+  };
+
+  const handleSaveNotes = async () => {
+    setSavingNotes(true);
+    setError("");
+    try {
+      await courseApi.updateCourse(id, { notes: noteDraft });
+      setCourse((prev) => (prev ? { ...prev, notes: noteDraft } : prev));
+      setEditingNotes(false);
+    } catch (err) {
+      setError(err.message || "Failed to save notes");
+    } finally {
+      setSavingNotes(false);
     }
   };
 
@@ -148,10 +170,64 @@ function CourseDetails() {
           </section>
 
           <section className={styles.section}>
-            <h2>
-              <FaStickyNote /> Notes
-            </h2>
-            <p className={styles.notes}>{course.notes || "No notes"}</p>
+            <div className={styles.sectionHeader}>
+              <h2>
+                <FaStickyNote /> Notes
+              </h2>
+              <div className={styles.noteActions}>
+                {editingNotes ? (
+                  <>
+                    <button
+                      className={styles.noteBtnPrimary}
+                      onClick={handleSaveNotes}
+                      disabled={savingNotes}
+                    >
+                      <FaSave /> {savingNotes ? "Saving..." : "Save"}
+                    </button>
+                    <button
+                      className={styles.noteBtnGhost}
+                      onClick={() => {
+                        setEditingNotes(false);
+                        setNoteDraft(course?.notes || "");
+                      }}
+                    >
+                      <FaTimes /> Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    className={styles.noteBtnGhost}
+                    onClick={() => setEditingNotes(true)}
+                  >
+                    <FaEdit /> Edit
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {editingNotes ? (
+              <div className={styles.notesEditor}>
+                <textarea
+                  value={noteDraft}
+                  onChange={(e) => setNoteDraft(e.target.value)}
+                  rows={8}
+                  placeholder="Write notes in Markdown..."
+                />
+                <p className={styles.noteHint}>
+                  Markdown supported (bold, lists, links).
+                </p>
+              </div>
+            ) : (
+              <div className={styles.notePreview}>
+                {noteDraft?.trim() ? (
+                  <ReactMarkdown>{noteDraft}</ReactMarkdown>
+                ) : (
+                  <p className={styles.notesEmpty}>
+                    No notes yet. Click Edit to add some.
+                  </p>
+                )}
+              </div>
+            )}
           </section>
         </main>
 

@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import ModuleForm from "./ModuleForm";
-import styles from "./EditCourseModal.module.css";
+import styles from "./CreateCourseModal.module.css";
 
-function EditCourseModal({ course, onSave, onCancel, loading }) {
+function CreateCourseModal({ onSave, onCancel, loading }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -15,35 +15,11 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
     targetCompletionDate: "",
     notes: "",
   });
-  const [modules, setModules] = useState([]);
-  const [externalLinks, setExternalLinks] = useState([]);
+  const [modules, setModules] = useState([
+    { id: Date.now(), title: "", duration: "", parentModuleId: null },
+  ]);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (course) {
-      setFormData({
-        title: course.title,
-        description: course.description,
-        subjectArea: course.subjectArea,
-        learningObjectives: course.learningObjectives,
-        difficulty: course.difficulty,
-        priority: course.priority,
-        totalEstimatedHours: course.totalEstimatedHours.toString(),
-        targetCompletionDate: course.targetCompletionDate?.split("T")[0] || "",
-        notes: course.notes || "",
-      });
-      setModules(
-        course.modules.map((m) => ({
-          id: m.id,
-          title: m.title,
-          duration: m.estimatedHours.toString(),
-          parentModuleId: m.parentModuleId,
-        }))
-      );
-      setExternalLinks(course.externalLinks || []);
-    }
-  }, [course]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,7 +46,6 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
           estimatedHours: parseInt(m.duration) || 0,
           parentModuleId: m.parentModuleId,
         })),
-        externalLinks,
       });
     } finally {
       setSubmitting(false);
@@ -82,8 +57,8 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
       <div className={styles.modal}>
         <header className={styles.header}>
           <div>
-            <p className={styles.kicker}>Edit course</p>
-            <h2>Update course details</h2>
+            <p className={styles.kicker}>Create course</p>
+            <h2>Add a new course</h2>
           </div>
           <button onClick={onCancel} className={styles.closeBtn}>
             ×
@@ -93,10 +68,11 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
         <form onSubmit={handleSubmit}>
           <div className={styles.grid}>
             <label>
-              Title *
+              Course title *
               <input
                 type="text"
                 name="title"
+                placeholder="e.g. Machine Learning Foundations"
                 value={formData.title}
                 onChange={handleChange}
                 required
@@ -104,12 +80,22 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
             </label>
             <label>
               Subject area
-              <input
-                type="text"
+              <select
                 name="subjectArea"
                 value={formData.subjectArea}
                 onChange={handleChange}
-              />
+              >
+                <option value="">Select category</option>
+                <option>Programming</option>
+                <option>Data Science</option>
+                <option>Web Development</option>
+                <option>Design</option>
+                <option>Business</option>
+                <option>Science</option>
+                <option>Mathematics</option>
+                <option>Language</option>
+                <option>Other</option>
+              </select>
             </label>
           </div>
 
@@ -117,9 +103,10 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
             Description
             <textarea
               name="description"
+              placeholder="Brief description"
+              rows={2}
               value={formData.description}
               onChange={handleChange}
-              rows={2}
             />
           </label>
 
@@ -127,25 +114,25 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
             Learning objectives
             <textarea
               name="learningObjectives"
+              placeholder="What will you achieve?"
+              rows={2}
               value={formData.learningObjectives}
               onChange={handleChange}
-              rows={2}
             />
           </label>
 
           <div className={styles.grid}>
             <label>
-              Difficulty
+              Difficulty level
               <select
                 name="difficulty"
                 value={formData.difficulty}
                 onChange={handleChange}
-                required
               >
                 <option value="">Select difficulty</option>
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Advanced">Advanced</option>
+                <option>Beginner</option>
+                <option>Intermediate</option>
+                <option>Advanced</option>
               </select>
             </label>
             <label>
@@ -154,12 +141,11 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
                 name="priority"
                 value={formData.priority}
                 onChange={handleChange}
-                required
               >
                 <option value="">Select priority</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
               </select>
             </label>
           </div>
@@ -170,9 +156,10 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
               <input
                 type="number"
                 name="totalEstimatedHours"
+                min="1"
+                placeholder="24"
                 value={formData.totalEstimatedHours}
                 onChange={handleChange}
-                min="1"
                 required
               />
             </label>
@@ -186,16 +173,6 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
               />
             </label>
           </div>
-
-          <label>
-            Notes
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              rows={3}
-            />
-          </label>
 
           <ModuleForm modules={modules} setModules={setModules} />
 
@@ -215,7 +192,7 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
               disabled={submitting}
               className={styles.submitBtn}
             >
-              {submitting ? "Updating..." : "Update course"}
+              {submitting ? "Saving..." : "Save course"}
             </button>
           </div>
         </form>
@@ -224,4 +201,4 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
   );
 }
 
-export default EditCourseModal;
+export default CreateCourseModal;

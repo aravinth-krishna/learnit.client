@@ -1,0 +1,85 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.addBtn {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.addBtn:hover {
+  background: var(--accent-dark);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 120px auto;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inputs select,
+.inputs input,
+.row input {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.inputs select:focus,
+.inputs input:focus,
+.row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.removeBtn {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.removeBtn:hover {
+  border-color: #dc3545;
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.05);
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: 1fr;
+  }
+}

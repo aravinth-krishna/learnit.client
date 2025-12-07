@@ -559,7 +559,6 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion }) {
   const [expanded, setExpanded] = useState(new Set([modules.find(m => !m.parentModuleId)?.id].filter(Boolean)));
   const [editing, setEditing] = useState(null);
   const [editValues, setEditValues] = useState({});
-  const [draggedModule, setDraggedModule] = useState(null);
 
   // Build tree structure
   const buildTree = (modules) => {
@@ -588,7 +587,7 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion }) {
 
     // Sort by order
     const sortModules = (mods) => {
-      mods.sort((a, b) => a.order - b.order);
+      mods.sort((a, b) => (a.order || 0) - (b.order || 0));
       mods.forEach((mod) => {
         if (mod.children.length > 0) {
           sortModules(mod.children);
@@ -646,17 +645,6 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion }) {
         key={module.id}
         className={`${styles.moduleItem} ${isCompleted ? styles.moduleCompleted : ''}`}
         style={getIndentationStyle(depth)}
-        draggable
-        onDragStart={(e) => setDraggedModule(module.id)}
-        onDragEnd={() => setDraggedModule(null)}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          if (draggedModule && draggedModule !== module.id) {
-            // Handle reordering logic here if needed
-            console.log(`Move module ${draggedModule} to position of ${module.id}`);
-          }
-        }}
       >
         {/* Connector line */}
         {depth > 0 && (
@@ -735,7 +723,7 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion }) {
             <div className={styles.moduleContent}>
               <div className={styles.moduleTitleContainer}>
                 <div className={`${styles.moduleTitle} ${isCompleted ? styles.completedTitle : ''}`}>
-                  {module.title}
+                  {depth > 0 && "↳ "}{module.title}
                 </div>
                 <div className={styles.moduleBadges}>
                   <span className={styles.hoursBadge}>
@@ -942,7 +930,7 @@ function ExternalLinksList({ links, onUpdate, onDelete }) {
   );
 }
 
-function EditCourseModal({ course, formData, setFormData, onSave, onCancel, saving }) {
+function EditCourseModal({ formData, setFormData, onSave, onCancel, saving }) {
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };

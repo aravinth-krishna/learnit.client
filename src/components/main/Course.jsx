@@ -27,7 +27,6 @@ const sortOptions = [
 ];
 
 function Course() {
-  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -50,7 +49,7 @@ function Course() {
   const [showEdit, setShowEdit] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [createMode, setCreateMode] = useState("manual");
-  const [modules, setModules] = useState([{ title: "", duration: "" }]);
+  const [modules, setModules] = useState([{ id: Date.now(), title: "", duration: "", parentModuleId: null }]);
   const [externalLinks, setExternalLinks] = useState([
     { platform: "", title: "", url: "" },
   ]);
@@ -65,9 +64,6 @@ function Course() {
     targetCompletionDate: "",
     notes: "",
   });
-  const [activeSessions, setActiveSessions] = useState({});
-  const [sessionNotes, setSessionNotes] = useState("");
-  const [sessionStartTime, setSessionStartTime] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Fetch courses
@@ -152,8 +148,8 @@ function Course() {
     );
   };
 
-  const addModule = () =>
-    setModules((prev) => [...prev, { title: "", duration: "" }]);
+  const addModule = (parentModuleId = null) =>
+    setModules((prev) => [...prev, { id: Date.now() + Math.random(), title: "", duration: "", parentModuleId }]);
 
   const removeModule = (index) =>
     setModules((prev) => prev.filter((_, i) => i !== index));
@@ -203,6 +199,7 @@ function Course() {
         modules: validModules.map((m) => ({
           title: m.title,
           estimatedHours: parseInt(m.duration) || 0,
+          parentModuleId: m.parentModuleId,
         })),
         externalLinks: validLinks.map((l) => ({
           platform: l.platform,
@@ -230,7 +227,7 @@ function Course() {
         targetCompletionDate: "",
         notes: "",
       });
-      setModules([{ title: "", duration: "" }]);
+      setModules([{ id: Date.now(), title: "", duration: "", parentModuleId: null }]);
       setExternalLinks([{ platform: "", title: "", url: "" }]);
     } catch (err) {
       setError(err.message || "Failed to update course");
@@ -268,6 +265,7 @@ function Course() {
         modules: validModules.map((m) => ({
           title: m.title,
           estimatedHours: parseInt(m.duration) || 0,
+          parentModuleId: m.parentModuleId,
         })),
       };
 
@@ -319,8 +317,10 @@ function Course() {
 
       setModules(
         course.modules.map((m) => ({
+          id: m.id,
           title: m.title,
           duration: m.estimatedHours.toString(),
+          parentModuleId: m.parentModuleId,
         }))
       );
 
@@ -341,43 +341,6 @@ function Course() {
     }
   };
 
-  const handleStartSession = async (courseId, moduleId = null) => {
-    try {
-      const session = await api.startStudySession(courseId, moduleId);
-      setActiveSessions((prev) => ({
-        ...prev,
-        [courseId]: session,
-      }));
-      setSessionStartTime(new Date());
-    } catch (err) {
-      setError("Failed to start session");
-      console.error(err);
-    }
-  };
-
-  const handleStopSession = async (courseId) => {
-    try {
-      const session = activeSessions[courseId];
-      if (!session) return;
-
-      await api.stopStudySession(session.id, sessionNotes);
-
-      setActiveSessions((prev) => {
-        const newSessions = { ...prev };
-        delete newSessions[courseId];
-        return newSessions;
-      });
-
-      setSessionNotes("");
-      setSessionStartTime(null);
-
-      // Refresh courses to update progress
-      await fetchCourses();
-    } catch (err) {
-      setError("Failed to stop session");
-      console.error(err);
-    }
-  };
 
   const handleDeleteCourse = async (id) => {
     if (!confirm("Are you sure you want to delete this course?")) return;
@@ -716,16 +679,34 @@ function Course() {
 
                 <div className={styles.modulesList}>
                   {modules.map((module, index) => (
-                    <div key={index} className={styles.moduleRow}>
-                      <input
-                        type="text"
-                        placeholder="Module name"
-                        value={module.title}
-                        onChange={(e) =>
-                          handleModuleChange(index, "title", e.target.value)
-                        }
-                        required
-                      />
+                    <div key={module.id || index} className={styles.moduleRow}>
+                      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <select
+                          value={module.parentModuleId || ""}
+                          onChange={(e) =>
+                            handleModuleChange(index, "parentModuleId", e.target.value ? parseInt(e.target.value) : null)
+                          }
+                          style={{ marginBottom: '4px' }}
+                        >
+                          <option value="">Main Module</option>
+                          {modules
+                            .filter((m, i) => i !== index && !m.parentModuleId)
+                            .map((parentModule) => (
+                              <option key={parentModule.id} value={parentModule.id}>
+                                ↳ {parentModule.title || `Module ${modules.indexOf(parentModule) + 1}`}
+                              </option>
+                            ))}
+                        </select>
+                        <input
+                          type="text"
+                          placeholder="Module name"
+                          value={module.title}
+                          onChange={(e) =>
+                            handleModuleChange(index, "title", e.target.value)
+                          }
+                          required
+                        />
+                      </div>
                       <input
                         type="number"
                         min="1"
@@ -1000,18 +981,38 @@ function Course() {
                 </div>
 
                 {modules.map((module, index) => (
-                  <div key={index} className={styles.moduleRow}>
-                    <input
-                      type="text"
-                      value={module.title}
-                      onChange={(e) => {
-                        const newModules = [...modules];
-                        newModules[index].title = e.target.value;
-                        setModules(newModules);
-                      }}
-                      placeholder="Module title"
-                      required
-                    />
+                  <div key={module.id || index} className={styles.moduleRow}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <select
+                        value={module.parentModuleId || ""}
+                        onChange={(e) => {
+                          const newModules = [...modules];
+                          newModules[index].parentModuleId = e.target.value ? parseInt(e.target.value) : null;
+                          setModules(newModules);
+                        }}
+                        style={{ marginBottom: '4px' }}
+                      >
+                        <option value="">Main Module</option>
+                        {modules
+                          .filter((m, i) => i !== index && !m.parentModuleId)
+                          .map((parentModule) => (
+                            <option key={parentModule.id} value={parentModule.id}>
+                              ↳ {parentModule.title || `Module ${modules.indexOf(parentModule) + 1}`}
+                            </option>
+                          ))}
+                      </select>
+                      <input
+                        type="text"
+                        value={module.title}
+                        onChange={(e) => {
+                          const newModules = [...modules];
+                          newModules[index].title = e.target.value;
+                          setModules(newModules);
+                        }}
+                        placeholder="Module title"
+                        required
+                      />
+                    </div>
                     <input
                       type="number"
                       value={module.duration}

@@ -3,8 +3,8 @@ import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { scheduleApi } from "../../services";
 import styles from "./Schedule.module.css";
-import api from "../../services/api";
 
 export default function Schedule() {
   const calendarRef = useRef(null);
@@ -35,7 +35,7 @@ export default function Schedule() {
     try {
       setLoading(true);
       setError("");
-      const data = await api.getScheduleEvents();
+      const data = await scheduleApi.getScheduleEvents();
       // Map backend DTOs to FullCalendar events
       setEvents(
         data.map((e) => ({
@@ -46,8 +46,8 @@ export default function Schedule() {
           allDay: e.allDay,
           courseModuleId: e.courseModuleId,
           courseModule: e.courseModule,
-          backgroundColor: e.courseModuleId ? '#4CAF50' : undefined, // Green for course modules
-          borderColor: e.courseModuleId ? '#4CAF50' : undefined,
+          backgroundColor: e.courseModuleId ? "#4CAF50" : undefined, // Green for course modules
+          borderColor: e.courseModuleId ? "#4CAF50" : undefined,
         }))
       );
     } catch (err) {
@@ -60,7 +60,7 @@ export default function Schedule() {
 
   const loadAvailableModules = async () => {
     try {
-      const data = await api.getAvailableModules();
+      const data = await scheduleApi.getAvailableModules();
       setAvailableModules(data);
     } catch (err) {
       console.error("Failed to load available modules", err);
@@ -75,7 +75,7 @@ export default function Schedule() {
       allDay: !!allDay,
     };
 
-    const created = await api.createScheduleEvent(payload);
+    const created = await scheduleApi.createScheduleEvent(payload);
     return {
       id: String(created.id),
       title: created.title,
@@ -84,8 +84,8 @@ export default function Schedule() {
       allDay: created.allDay,
       courseModuleId: created.courseModuleId,
       courseModule: created.courseModule,
-      backgroundColor: created.courseModuleId ? '#4CAF50' : undefined,
-      borderColor: created.courseModuleId ? '#4CAF50' : undefined,
+      backgroundColor: created.courseModuleId ? "#4CAF50" : undefined,
+      borderColor: created.courseModuleId ? "#4CAF50" : undefined,
     };
   };
 
@@ -96,7 +96,7 @@ export default function Schedule() {
       endUtc: end ? new Date(end).toISOString() : null,
       allDay: !!allDay,
     };
-    await api.updateScheduleEvent(id, payload);
+    await scheduleApi.updateScheduleEvent(id, payload);
   };
 
   const handleAutoSchedule = async () => {
@@ -112,13 +112,17 @@ export default function Schedule() {
       nextMonday.setDate(nextMonday.getDate() + diff);
       nextMonday.setHours(9, 0, 0, 0);
 
-      const result = await api.autoScheduleModules(nextMonday.toISOString());
+      const result = await scheduleApi.autoScheduleModules(
+        nextMonday.toISOString()
+      );
 
       if (result.scheduledEvents > 0) {
         // Reload events to show the newly scheduled ones
         await loadEvents();
         await loadAvailableModules();
-        alert(`Successfully scheduled ${result.scheduledEvents} course modules!`);
+        alert(
+          `Successfully scheduled ${result.scheduledEvents} course modules!`
+        );
       } else {
         alert("No course modules available to schedule.");
       }
@@ -134,7 +138,7 @@ export default function Schedule() {
 
   const handleLinkToModule = async (eventId, moduleId) => {
     try {
-      await api.linkEventToModule(eventId, moduleId);
+      await scheduleApi.linkEventToModule(eventId, moduleId);
       await loadEvents();
       await loadAvailableModules();
       alert("Event linked to course module!");
@@ -146,7 +150,7 @@ export default function Schedule() {
 
   const handleUnlinkFromModule = async (eventId) => {
     try {
-      await api.unlinkEventFromModule(eventId);
+      await scheduleApi.unlinkEventFromModule(eventId);
       await loadEvents();
       await loadAvailableModules();
       alert("Event unlinked from course module!");
@@ -157,7 +161,7 @@ export default function Schedule() {
   };
 
   const deleteEventOnServer = async (id) => {
-    await api.deleteScheduleEvent(id);
+    await scheduleApi.deleteScheduleEvent(id);
   };
 
   // Create event by selecting range
@@ -226,7 +230,9 @@ export default function Schedule() {
       );
     } catch (err) {
       console.error("Failed to move event", err);
-      setNotification(`Failed to update event: ${err.message || "Unknown error"}`);
+      setNotification(
+        `Failed to update event: ${err.message || "Unknown error"}`
+      );
       setTimeout(() => setNotification(""), 5000);
       info.revert();
     }
@@ -259,7 +265,9 @@ export default function Schedule() {
       );
     } catch (err) {
       console.error("Failed to resize event", err);
-      setNotification(`Failed to update event: ${err.message || "Unknown error"}`);
+      setNotification(
+        `Failed to update event: ${err.message || "Unknown error"}`
+      );
       setTimeout(() => setNotification(""), 5000);
       info.revert();
     }
@@ -268,15 +276,15 @@ export default function Schedule() {
   // Hover effects for better UX
   function handleEventMouseEnter(info) {
     const el = info.el;
-    el.style.cursor = 'pointer';
-    el.style.transform = 'scale(1.02)';
-    el.style.transition = 'transform 0.1s ease';
+    el.style.cursor = "pointer";
+    el.style.transform = "scale(1.02)";
+    el.style.transition = "transform 0.1s ease";
   }
 
   function handleEventMouseLeave(info) {
     const el = info.el;
-    el.style.cursor = 'default';
-    el.style.transform = 'scale(1)';
+    el.style.cursor = "default";
+    el.style.transform = "scale(1)";
   }
 
   // Add drag indicator to events
@@ -289,7 +297,7 @@ export default function Schedule() {
   // Open edit modal for event
   function handleEventClick(info) {
     const event = info.event;
-    const currentEvent = events.find(e => e.id === event.id);
+    const currentEvent = events.find((e) => e.id === event.id);
 
     setEditingEvent({
       id: event.id,
@@ -351,8 +359,14 @@ export default function Schedule() {
       }
 
       // Check if any event properties changed
-      const startChanged = editForm.start !== new Date(editingEvent.start).toISOString().slice(0, 16);
-      const endChanged = editForm.end !== (editingEvent.end ? new Date(editingEvent.end).toISOString().slice(0, 16) : "");
+      const startChanged =
+        editForm.start !==
+        new Date(editingEvent.start).toISOString().slice(0, 16);
+      const endChanged =
+        editForm.end !==
+        (editingEvent.end
+          ? new Date(editingEvent.end).toISOString().slice(0, 16)
+          : "");
       const allDayChanged = editForm.allDay !== (editingEvent.allDay || false);
       const titleChanged = editForm.title !== editingEvent.title;
 
@@ -414,15 +428,21 @@ export default function Schedule() {
     const insights = [];
 
     if (availableModules.length > 0) {
-      insights.push(`📚 You have ${availableModules.length} unscheduled course modules ready to schedule.`);
+      insights.push(
+        `📚 You have ${availableModules.length} unscheduled course modules ready to schedule.`
+      );
       if (availableModules.length > 3) {
-        insights.push("🎯 Consider using auto-schedule to efficiently plan multiple modules.");
+        insights.push(
+          "🎯 Consider using auto-schedule to efficiently plan multiple modules."
+        );
       }
     }
 
-    const courseEvents = events.filter(e => e.courseModuleId);
+    const courseEvents = events.filter((e) => e.courseModuleId);
     if (courseEvents.length > 0) {
-      insights.push(`✅ ${courseEvents.length} scheduled sessions are linked to course modules.`);
+      insights.push(
+        `✅ ${courseEvents.length} scheduled sessions are linked to course modules.`
+      );
     }
 
     // Default insights
@@ -439,9 +459,7 @@ export default function Schedule() {
   return (
     <section className={styles.page}>
       {notification && (
-        <div className={styles.notification}>
-          {notification}
-        </div>
+        <div className={styles.notification}>{notification}</div>
       )}
 
       <div className={styles.pageHeader}>
@@ -593,32 +611,45 @@ export default function Schedule() {
           </div>
           <div className={styles.deepWorkList}>
             {events
-              .filter(e => new Date(e.start) > new Date())
+              .filter((e) => new Date(e.start) > new Date())
               .sort((a, b) => new Date(a.start) - new Date(b.start))
               .slice(0, 3)
               .map((event) => {
                 const startDate = new Date(event.start);
                 const endDate = new Date(event.end);
-                const duration = Math.round((endDate - startDate) / (1000 * 60 * 60) * 10) / 10; // hours
+                const duration =
+                  Math.round(((endDate - startDate) / (1000 * 60 * 60)) * 10) /
+                  10; // hours
 
                 return (
                   <div key={event.id} className={styles.sessionItem}>
                     <div className={styles.sessionMeta}>
-                      <span>{startDate.toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        hour: 'numeric',
-                        minute: '2-digit'
-                      })}</span>
-                      <small>{event.courseModuleId ? 'Course module' : 'Study session'}</small>
+                      <span>
+                        {startDate.toLocaleDateString("en-US", {
+                          weekday: "short",
+                          hour: "numeric",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                      <small>
+                        {event.courseModuleId
+                          ? "Course module"
+                          : "Study session"}
+                      </small>
                     </div>
-                    <strong>{event.title} · {duration}h</strong>
+                    <strong>
+                      {event.title} · {duration}h
+                    </strong>
                     <span className={styles.sessionType}>
-                      {event.courseModuleId ? 'Linked module' : 'Manual session'}
+                      {event.courseModuleId
+                        ? "Linked module"
+                        : "Manual session"}
                     </span>
                   </div>
                 );
               })}
-            {events.filter(e => new Date(e.start) > new Date()).length === 0 && (
+            {events.filter((e) => new Date(e.start) > new Date()).length ===
+              0 && (
               <div className={styles.sessionItem}>
                 <div className={styles.sessionMeta}>
                   <span>No upcoming sessions</span>
@@ -672,7 +703,9 @@ export default function Schedule() {
                 <input
                   type="text"
                   value={editForm.title}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, title: e.target.value }))
+                  }
                   placeholder="Enter event title"
                   required
                 />
@@ -684,7 +717,12 @@ export default function Schedule() {
                   <input
                     type="datetime-local"
                     value={editForm.start}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, start: e.target.value }))}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        start: e.target.value,
+                      }))
+                    }
                     required
                   />
                 </label>
@@ -693,7 +731,9 @@ export default function Schedule() {
                   <input
                     type="datetime-local"
                     value={editForm.end}
-                    onChange={(e) => setEditForm(prev => ({ ...prev, end: e.target.value }))}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, end: e.target.value }))
+                    }
                   />
                 </label>
               </div>
@@ -702,7 +742,12 @@ export default function Schedule() {
                 <input
                   type="checkbox"
                   checked={editForm.allDay}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, allDay: e.target.checked }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      allDay: e.target.checked,
+                    }))
+                  }
                 />
                 All-day event
               </label>
@@ -719,10 +764,12 @@ export default function Schedule() {
                     <input
                       type="checkbox"
                       checked={editForm.unlinkFromModule}
-                      onChange={(e) => setEditForm(prev => ({
-                        ...prev,
-                        unlinkFromModule: e.target.checked
-                      }))}
+                      onChange={(e) =>
+                        setEditForm((prev) => ({
+                          ...prev,
+                          unlinkFromModule: e.target.checked,
+                        }))
+                      }
                     />
                     Disconnect from course module
                   </label>
@@ -735,10 +782,12 @@ export default function Schedule() {
                   Link to Course Module
                   <select
                     value={editForm.linkToModule}
-                    onChange={(e) => setEditForm(prev => ({
-                      ...prev,
-                      linkToModule: e.target.value
-                    }))}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({
+                        ...prev,
+                        linkToModule: e.target.value,
+                      }))
+                    }
                   >
                     <option value="">Choose a module (optional)</option>
                     {availableModules.map((module) => (
@@ -750,12 +799,7 @@ export default function Schedule() {
                 </label>
               )}
 
-
-              {error && (
-                <div className={styles.errorMessage}>
-                  {error}
-                </div>
-              )}
+              {error && <div className={styles.errorMessage}>{error}</div>}
 
               <div className={styles.formActions}>
                 <button

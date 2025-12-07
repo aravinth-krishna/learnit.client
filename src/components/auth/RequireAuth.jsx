@@ -1,11 +1,30 @@
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext.js";
+import { AuthContext } from "../../context/AuthContext";
 
 function RequireAuth({ children }) {
-  const { token } = useContext(AuthContext);
+  const { isAuthenticated, loading } = useContext(AuthContext);
 
-  if (!token) return <Navigate to="/auth/login" replace />;
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100vh",
+          fontSize: "1.2rem",
+          color: "var(--muted)",
+        }}
+      >
+        Loading authentication...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth/login" replace />;
+  }
 
   return children;
 }

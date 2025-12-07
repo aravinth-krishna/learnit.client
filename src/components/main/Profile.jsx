@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import styles from "./Profile.module.css";
-import api from "../../services/api";
+import { profileApi } from "../../services";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import styles from "./Profile.module.css";
 
 function Profile() {
   const { isDarkMode, setDarkMode } = useTheme();
@@ -42,12 +42,20 @@ function Profile() {
   const loadProfile = async () => {
     try {
       setLoading(true);
-      const data = await api.getProfile();
-      setProfile(data.profile);
-      setPreferences(data.preferences);
+      setError("");
+      const data = await profileApi.getProfile();
+      setProfile(data.profile || data);
+      setPreferences(
+        data.preferences || {
+          studySpeed: "normal",
+          maxSessionMinutes: 60,
+          weeklyStudyLimitHours: 10,
+          darkMode: false,
+        }
+      );
     } catch (err) {
       setError("Failed to load profile");
-      console.error(err);
+      console.error("Profile loading error:", err);
     } finally {
       setLoading(false);
     }
@@ -60,10 +68,12 @@ function Profile() {
       setError("");
       setSuccess("");
 
-      await api.updateProfile(profile);
+      await profileApi.updateProfile(profile);
       setSuccess("Profile updated successfully!");
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.message || "Failed to update profile");
+      setTimeout(() => setError(""), 3000);
     } finally {
       setSaving(false);
     }
@@ -76,10 +86,12 @@ function Profile() {
       setError("");
       setSuccess("");
 
-      await api.updatePreferences(preferences);
+      await profileApi.updatePreferences(preferences);
       setSuccess("Preferences updated successfully!");
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.message || "Failed to update preferences");
+      setTimeout(() => setError(""), 3000);
     } finally {
       setSaving(false);
     }
@@ -87,7 +99,10 @@ function Profile() {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
+    // Validation
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setError("New passwords do not match");
       return;
@@ -98,20 +113,27 @@ function Profile() {
       return;
     }
 
+    if (!passwordData.currentPassword) {
+      setError("Current password is required");
+      return;
+    }
+
     try {
       setSaving(true);
-      setError("");
-      setSuccess("");
-
-      await api.changePassword(passwordData);
+      await profileApi.changePassword({
+        oldPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
       setSuccess("Password changed successfully!");
       setPasswordData({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
+      setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.message || "Failed to change password");
+      setTimeout(() => setError(""), 3000);
     } finally {
       setSaving(false);
     }
@@ -126,7 +148,13 @@ function Profile() {
             <h1>Your profile</h1>
           </div>
         </div>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px",
+            color: "var(--muted)",
+          }}
+        >
           Loading profile...
         </div>
       </section>
@@ -142,34 +170,38 @@ function Profile() {
         </div>
       </div>
 
-      {(error || success) && (
-        <div className={error ? styles.errorMessage : styles.successMessage}>
-          {error || success}
-        </div>
-      )}
+      {error && <div className={styles.errorMessage}>{error}</div>}
+
+      {success && <div className={styles.successMessage}>{success}</div>}
 
       <div className={styles.tabs}>
         <button
-          className={`${styles.tab} ${activeSection === 'profile' ? styles.active : ''}`}
-          onClick={() => setActiveSection('profile')}
+          className={`${styles.tab} ${
+            activeSection === "profile" ? styles.active : ""
+          }`}
+          onClick={() => setActiveSection("profile")}
         >
           Profile Info
         </button>
         <button
-          className={`${styles.tab} ${activeSection === 'preferences' ? styles.active : ''}`}
-          onClick={() => setActiveSection('preferences')}
+          className={`${styles.tab} ${
+            activeSection === "preferences" ? styles.active : ""
+          }`}
+          onClick={() => setActiveSection("preferences")}
         >
           Preferences
         </button>
         <button
-          className={`${styles.tab} ${activeSection === 'security' ? styles.active : ''}`}
-          onClick={() => setActiveSection('security')}
+          className={`${styles.tab} ${
+            activeSection === "security" ? styles.active : ""
+          }`}
+          onClick={() => setActiveSection("security")}
         >
           Security
         </button>
       </div>
 
-      {activeSection === 'profile' && (
+      {activeSection === "profile" && (
         <div className={styles.grid}>
           <section className={styles.card}>
             <div className={styles.cardHeader}>
@@ -184,7 +216,12 @@ function Profile() {
                   type="text"
                   value={profile.fullName}
                   placeholder="Your name"
-                  onChange={(e) => setProfile(prev => ({ ...prev, fullName: e.target.value }))}
+                  onChange={(e) =>
+                    setProfile((prev) => ({
+                      ...prev,
+                      fullName: e.target.value,
+                    }))
+                  }
                   required
                 />
               </label>
@@ -195,7 +232,9 @@ function Profile() {
                   type="email"
                   value={profile.email}
                   placeholder="Your email"
-                  onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) =>
+                    setProfile((prev) => ({ ...prev, email: e.target.value }))
+                  }
                   required
                 />
               </label>
@@ -214,7 +253,7 @@ function Profile() {
         </div>
       )}
 
-      {activeSection === 'preferences' && (
+      {activeSection === "preferences" && (
         <div className={styles.grid}>
           <section className={styles.card}>
             <div className={styles.cardHeader}>
@@ -227,7 +266,12 @@ function Profile() {
                 Preferred Study Speed
                 <select
                   value={preferences.studySpeed}
-                  onChange={(e) => setPreferences(prev => ({ ...prev, studySpeed: e.target.value }))}
+                  onChange={(e) =>
+                    setPreferences((prev) => ({
+                      ...prev,
+                      studySpeed: e.target.value,
+                    }))
+                  }
                 >
                   <option value="slow">Slow & Deep</option>
                   <option value="normal">Balanced</option>
@@ -239,7 +283,12 @@ function Profile() {
                 Max Session Time (minutes)
                 <input
                   value={preferences.maxSessionMinutes}
-                  onChange={(e) => setPreferences(prev => ({ ...prev, maxSessionMinutes: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setPreferences((prev) => ({
+                      ...prev,
+                      maxSessionMinutes: Number(e.target.value),
+                    }))
+                  }
                   type="number"
                   min="15"
                   max="240"
@@ -248,13 +297,19 @@ function Profile() {
               </label>
 
               <label className={styles.rangeLabel}>
-                Weekly Study Limit: <strong>{preferences.weeklyStudyLimitHours} hrs</strong>
+                Weekly Study Limit:{" "}
+                <strong>{preferences.weeklyStudyLimitHours} hrs</strong>
                 <input
                   type="range"
                   min="1"
                   max="40"
                   value={preferences.weeklyStudyLimitHours}
-                  onChange={(e) => setPreferences(prev => ({ ...prev, weeklyStudyLimitHours: Number(e.target.value) }))}
+                  onChange={(e) =>
+                    setPreferences((prev) => ({
+                      ...prev,
+                      weeklyStudyLimitHours: Number(e.target.value),
+                    }))
+                  }
                 />
               </label>
 
@@ -288,15 +343,21 @@ function Profile() {
                   onChange={async (e) => {
                     const enabled = e.target.checked;
                     setDarkMode(enabled); // Immediate UI update
-                    setPreferences(prev => ({ ...prev, darkMode: enabled }));
+                    setPreferences((prev) => ({ ...prev, darkMode: enabled }));
 
                     // Update backend
                     try {
-                      await api.updatePreferences({ ...preferences, darkMode: enabled });
+                      await profileApi.updatePreferences({
+                        ...preferences,
+                        darkMode: enabled,
+                      });
                     } catch (err) {
                       // Revert on error
                       setDarkMode(!enabled);
-                      setPreferences(prev => ({ ...prev, darkMode: !enabled }));
+                      setPreferences((prev) => ({
+                        ...prev,
+                        darkMode: !enabled,
+                      }));
                       setError("Failed to update theme preference");
                       setTimeout(() => setError(""), 3000);
                     }
@@ -314,7 +375,7 @@ function Profile() {
         </div>
       )}
 
-      {activeSection === 'security' && (
+      {activeSection === "security" && (
         <div className={styles.grid}>
           <section className={styles.card}>
             <div className={styles.cardHeader}>
@@ -329,7 +390,12 @@ function Profile() {
                   type="password"
                   value={passwordData.currentPassword}
                   placeholder="••••••••"
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      currentPassword: e.target.value,
+                    }))
+                  }
                   required
                 />
               </label>
@@ -340,7 +406,12 @@ function Profile() {
                   type="password"
                   value={passwordData.newPassword}
                   placeholder="••••••••"
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      newPassword: e.target.value,
+                    }))
+                  }
                   required
                   minLength="6"
                 />
@@ -352,7 +423,12 @@ function Profile() {
                   type="password"
                   value={passwordData.confirmPassword}
                   placeholder="••••••••"
-                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                  onChange={(e) =>
+                    setPasswordData((prev) => ({
+                      ...prev,
+                      confirmPassword: e.target.value,
+                    }))
+                  }
                   required
                   minLength="6"
                 />

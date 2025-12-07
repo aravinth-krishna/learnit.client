@@ -1,72 +1,126 @@
 import { useState, useContext } from "react";
-import { AuthContext } from "../../context/AuthContext.js";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { authApi } from "../../services";
+import { AuthContext } from "../../context/AuthContext";
 import styles from "./Signin.module.css";
-import api from "../../services/api";
 
 function Signin() {
-  const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
-
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const { login } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     try {
-      const data = await api.login(form.email, form.password);
-      login(data.token);
-      navigate("/app/course");
+      // Validate inputs
+      if (!email.trim() || !password.trim()) {
+        setError("Email and password are required");
+        setLoading(false);
+        return;
+      }
+
+      console.log("[Signin] Attempting login with:", { email });
+
+      const response = await authApi.login(email, password);
+
+      console.log("[Signin] Login response:", response);
+
+      // API only returns { token }
+      const token = response.token;
+
+      if (!token) {
+        setError("No token received from server");
+        setLoading(false);
+        return;
+      }
+
+      // Store token
+      localStorage.setItem("token", token);
+      console.log("[Signin] Token stored:", token.substring(0, 20) + "...");
+
+      // Decode JWT to get user info (email, sub)
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        const user = {
+          id: payload.sub,
+          email: payload.email,
+        };
+
+        // Call login to update context
+        login(user);
+        console.log("[Signin] User logged in:", user);
+      } catch (decodeErr) {
+        console.warn(
+          "[Signin] Could not decode token, logging in with token only"
+        );
+        login({ token });
+      }
+
+      // Navigate to dashboard
+      setTimeout(() => {
+        navigate("/app/course", { replace: true });
+      }, 100);
     } catch (err) {
-      setError(err.message || "Invalid credentials");
+      console.error("[Signin] Login error:", err);
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className={styles.signin}>
-      <h1>Log In</h1>
-      <p>Enter your credentials to access your account.</p>
-
-      {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <label>Email</label>
-        <input
-          name="email"
-          type="email"
-          placeholder="john.doe@example.com"
-          required
-          value={form.email}
-          onChange={handleChange}
-        />
-
-        <label>Password</label>
-        <input
-          name="password"
-          type="password"
-          placeholder="********"
-          required
-          value={form.password}
-          onChange={handleChange}
-        />
-
-        <button type="submit">Login</button>
-
-        <div className={styles.extra}>
-          <Link to="/auth/forgot-password">Forgot Password?</Link>
-          <span>
-            Don't have an account? <Link to="/auth/register">Sign Up</Link>
-          </span>
+    <div className={styles.container}>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={styles.header}>
+          <h2>Welcome back</h2>
+          <p>Sign in to your LearnIt account</p>
         </div>
+
+        {error && (
+          <div className={styles.error}>
+            <strong>Error:</strong> {error}
+          </div>
+        )}
+
+        <label className={styles.label}>
+          <span>Email Address</span>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            required
+            disabled={loading}
+            autoComplete="email"
+          />
+        </label>
+
+        <label className={styles.label}>
+          <span>Password</span>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+            disabled={loading}
+            autoComplete="current-password"
+          />
+        </label>
+
+        <button type="submit" className={styles.submitBtn} disabled={loading}>
+          {loading ? "Signing in..." : "Sign In"}
+        </button>
+
+        <p className={styles.footer}>
+          Don't have an account? <a href="/auth/register">Sign up here</a>
+        </p>
       </form>
     </div>
   );

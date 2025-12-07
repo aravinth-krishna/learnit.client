@@ -1,4 +1,4 @@
-import styles from "./Progress.module.css";
+import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -10,8 +10,8 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-import { useState, useEffect } from "react";
-import api from "../../services/api";
+import { progressApi } from "../../services";
+import styles from "./Progress.module.css";
 
 function Progress() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -25,11 +25,12 @@ function Progress() {
   const loadProgressData = async () => {
     try {
       setLoading(true);
-      const data = await api.getProgressDashboard();
+      setError("");
+      const data = await progressApi.getProgressDashboard();
       setDashboardData(data);
     } catch (err) {
       setError("Failed to load progress data");
-      console.error(err);
+      console.error("Progress data error:", err);
     } finally {
       setLoading(false);
     }
@@ -44,7 +45,7 @@ function Progress() {
             <h1>Progress overview</h1>
           </div>
         </div>
-        <div style={{ textAlign: 'center', padding: '40px' }}>
+        <div style={{ textAlign: "center", padding: "40px" }}>
           Loading progress data...
         </div>
       </section>
@@ -60,7 +61,7 @@ function Progress() {
             <h1>Progress overview</h1>
           </div>
         </div>
-        <div style={{ textAlign: 'center', padding: '40px', color: 'red' }}>
+        <div style={{ textAlign: "center", padding: "40px", color: "#c33" }}>
           {error || "Failed to load progress data"}
         </div>
       </section>
@@ -69,10 +70,14 @@ function Progress() {
 
   const { stats, weeklyData, courseProgress, activityHeatmap } = dashboardData;
 
-  const aiRecommendations = [
-    "Shift ML sessions earlier in the week when focus is higher.",
-    "React Basics pace is slowing — schedule a 45 min recap.",
-    "Add a 20 min reflection after each deep work block.",
+  // ✅ FIX: Convert object to array of entries
+  const metricsData = [
+    { label: "🔥 Current Streak", value: `${stats.currentStreak} days` },
+    { label: "🏆 Longest Streak", value: `${stats.longestStreak} days` },
+    { label: "📅 Scheduled Hours", value: `${stats.totalScheduledHours} hrs` },
+    { label: "⏳ Completed Hours", value: `${stats.totalCompletedHours} hrs` },
+    { label: "📊 Completion Rate", value: `${stats.completionRate}%` },
+    { label: "⚡ Efficiency", value: `${stats.efficiency}%` },
   ];
 
   return (
@@ -89,17 +94,10 @@ function Progress() {
 
       {/* METRICS */}
       <div className={styles.metricsRow}>
-        {[
-          ["🔥 Current Streak", `${stats.currentStreak} days`],
-          ["🏆 Longest Streak", `${stats.longestStreak} days`],
-          ["📅 Scheduled Hours", `${stats.totalScheduledHours} hrs`],
-          ["⏳ Completed Hours", `${stats.totalCompletedHours} hrs`],
-          ["📊 Completion Rate", `${stats.completionRate}%`],
-          ["⚡ Efficiency", `${stats.efficiency}%`],
-        ].map(([title, value], i) => (
-          <div className={styles.metric} key={i}>
-            <span>{title}</span>
-            <strong>{value}</strong>
+        {metricsData.map((metric, index) => (
+          <div className={styles.metric} key={index}>
+            <span>{metric.label}</span>
+            <strong>{metric.value}</strong>
           </div>
         ))}
       </div>
@@ -108,9 +106,14 @@ function Progress() {
       <div className={styles.section}>
         <h2>Overall Progress</h2>
         <div className={styles.progressBarOuter}>
-          <div className={styles.progressBarInner} style={{ width: `${stats.overallProgress}%` }} />
+          <div
+            className={styles.progressBarInner}
+            style={{ width: `${stats.overallProgress}%` }}
+          />
         </div>
-        <p className={styles.progressLabel}>{stats.overallProgress}% Completed</p>
+        <p className={styles.progressLabel}>
+          {stats.overallProgress}% Completed
+        </p>
       </div>
 
       {/* CHARTS */}
@@ -137,7 +140,12 @@ function Progress() {
               <XAxis dataKey="day" />
               <YAxis />
               <Tooltip />
-              <Line dataKey="completed" stroke="#00b894" strokeWidth={2} />
+              <Line
+                dataKey="completed"
+                stroke="#00b894"
+                strokeWidth={2}
+                dot={{ fill: "#00b894", r: 4 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -161,31 +169,35 @@ function Progress() {
                     ? "#64c0f0"
                     : "#008dd0",
               }}
+              title={`Activity level: ${val}`}
             />
           ))}
         </div>
       </div>
 
       {/* COURSE PROGRESS */}
-      <div className={styles.grid}>
-        <div className={styles.section}>
-          <h2>Course Progress</h2>
-          <div className={styles.courseGrid}>
-            {courseProgress.map((c, i) => (
-              <div className={styles.courseCard} key={c.id}>
-                <span className={styles.courseName}>{c.title}</span>
+      <div className={styles.section}>
+        <h2>Course Progress</h2>
+        <div className={styles.courseGrid}>
+          {courseProgress && courseProgress.length > 0 ? (
+            courseProgress.map((course) => (
+              <div className={styles.courseCard} key={course.id}>
+                <span className={styles.courseName}>{course.title}</span>
                 <div className={styles.courseProgressBarOuter}>
                   <div
                     className={styles.courseProgressBarInner}
-                    style={{ width: `${c.progressPercentage}%` }}
+                    style={{ width: `${course.progressPercentage}%` }}
                   />
                 </div>
-                <span className={styles.coursePercent}>{c.progressPercentage}%</span>
+                <span className={styles.coursePercent}>
+                  {course.progressPercentage}%
+                </span>
               </div>
-            ))}
-          </div>
+            ))
+          ) : (
+            <p className={styles.noData}>No courses in progress</p>
+          )}
         </div>
-
       </div>
     </section>
   );

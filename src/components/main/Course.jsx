@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoIosAdd } from "react-icons/io";
-import api from "../../services/api";
+import { courseApi } from "../../services";
 import CourseList from "../course/CourseList";
 import CreateCourseModal from "../course/CreateCourseModal";
 import EditCourseModal from "../course/EditCourseModal";
@@ -31,7 +31,7 @@ function Course() {
     try {
       setLoading(true);
       setError("");
-      const data = await api.getCourses();
+      const data = await courseApi.getCourses();
       setCourses(data);
     } catch (err) {
       setError(err.message || "Failed to load courses");
@@ -42,7 +42,7 @@ function Course() {
 
   const fetchStats = async () => {
     try {
-      const data = await api.getCourseStats();
+      const data = await courseApi.getCourseStats();
       setStats({
         activeCourses: data.activeCourses,
         weeklyFocus: data.weeklyFocus,
@@ -54,7 +54,7 @@ function Course() {
   };
 
   const handleCreateCourse = async (formData) => {
-    await api.createCourse(formData);
+    await courseApi.createCourse(formData);
     setShowCreate(false);
     await fetchCourses();
     await fetchStats();
@@ -62,16 +62,16 @@ function Course() {
 
   const handleEditCourse = async (courseId) => {
     try {
-      const course = await api.getCourse(courseId);
+      const course = await courseApi.getCourse(courseId);
       setEditingCourse(course);
       setShowEdit(true);
-    } catch {
+    } catch (err) {
       setError("Failed to load course for editing");
     }
   };
 
   const handleUpdateCourse = async (formData) => {
-    await api.updateCourse(editingCourse.id, formData);
+    await courseApi.updateCourse(editingCourse.id, formData);
     setShowEdit(false);
     setEditingCourse(null);
     await fetchCourses();
@@ -82,7 +82,7 @@ function Course() {
     if (!confirm("Are you sure you want to delete this course?")) return;
 
     try {
-      await api.deleteCourse(id);
+      await courseApi.deleteCourse(id);
       await fetchCourses();
       await fetchStats();
     } catch (err) {

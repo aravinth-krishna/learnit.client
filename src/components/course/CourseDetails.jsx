@@ -8,7 +8,7 @@ import {
   FaLink,
   FaCog,
 } from "react-icons/fa";
-import api from "../../services/api";
+import { courseApi } from "../../services";
 import ModuleTree from "./ModuleTree";
 import ExternalLinks from "./ExternalLinks";
 import ProgressCard from "./ProgressCard";
@@ -40,7 +40,7 @@ function CourseDetails() {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         if (activeTime > 0) {
-          api.updateCourseActiveTime(id, activeTime / 3600);
+          courseApi.updateCourseActiveTime(id, activeTime / 3600);
         }
       }
     };
@@ -49,7 +49,7 @@ function CourseDetails() {
   const fetchCourse = async () => {
     try {
       setLoading(true);
-      const data = await api.getCourse(id);
+      const data = await courseApi.getCourse(id);
       setCourse(data);
       setActiveTime(0);
     } catch (err) {
@@ -61,7 +61,7 @@ function CourseDetails() {
 
   const handleUpdateCourse = async (updates) => {
     try {
-      await api.updateCourse(id, updates);
+      await courseApi.updateCourse(id, updates);
       setCourse((prev) => ({ ...prev, ...updates }));
       setShowEditModal(false);
     } catch (err) {
@@ -132,12 +132,12 @@ function CourseDetails() {
             </h2>
             <ModuleTree
               modules={course.modules || []}
-              onUpdate={async (id, updates) => {
-                await api.updateModule(id, updates);
+              onUpdate={async (moduleId, updates) => {
+                await courseApi.updateModule(moduleId, updates);
                 fetchCourse();
               }}
-              onToggleCompletion={async (id) => {
-                await api.toggleModuleCompletion(id);
+              onToggleCompletion={async (moduleId) => {
+                await courseApi.toggleModuleCompletion(moduleId);
                 fetchCourse();
               }}
             />
@@ -169,7 +169,7 @@ function CourseDetails() {
               </h2>
               <button
                 onClick={async () => {
-                  await api.addExternalLink(id, {
+                  await courseApi.addExternalLink(id, {
                     platform: "Website",
                     title: "",
                     url: "",
@@ -184,11 +184,11 @@ function CourseDetails() {
             <ExternalLinks
               links={course.externalLinks || []}
               onUpdate={async (linkId, updates) => {
-                await api.updateExternalLink(linkId, updates);
+                await courseApi.updateExternalLink(linkId, updates);
                 fetchCourse();
               }}
               onDelete={async (linkId) => {
-                await api.deleteExternalLink(linkId);
+                await courseApi.deleteExternalLink(linkId);
                 fetchCourse();
               }}
             />

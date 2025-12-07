@@ -1,7 +1,7 @@
-import { useContext, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext.js';
-import api from '../services/api';
+import { useContext, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
+import { authApi } from "../services";
 
 /**
  * Custom hook for handling logout functionality
@@ -23,22 +23,22 @@ export function useLogout() {
 
     try {
       // Attempt to call logout API endpoint
-      // This is optional since JWT is stateless
-      await api.logout();
+      await authApi.logout();
     } catch (err) {
-      // If logout API fails (e.g., token expired, network error),
-      // we still proceed with local logout since JWT is stateless
-      console.warn('Logout API call failed, proceeding with local logout:', err.message);
+      // If logout API fails, proceed with local logout
+      console.warn(
+        "Logout API call failed, proceeding with local logout:",
+        err.message
+      );
     } finally {
       // Always clear local authentication state
       clearAuth();
       // Reset the flag
       isLoggingOut.current = false;
       // Redirect to login page
-      navigate('/auth/login', { replace: true });
+      navigate("/auth/login", { replace: true });
     }
   };
 
   return { logout };
 }
-

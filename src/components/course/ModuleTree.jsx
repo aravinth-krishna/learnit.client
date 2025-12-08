@@ -169,7 +169,15 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
     </div>
   );
 
-  const renderNode = (node, depth = 0) => {
+  const renderNode = (node, depth = 0, visited = new Set()) => {
+    if (!node || visited.has(node.id) || depth > 10) {
+      // Prevent cycles or runaway depth from malformed parent links
+      return null;
+    }
+
+    const nextVisited = new Set(visited);
+    nextVisited.add(node.id);
+
     const children = childrenMap[node.id] || [];
     const isEditing = editingId === node.id;
     const isAddingHere = addTarget === node.id;
@@ -287,7 +295,7 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
 
         {children.length > 0 && (
           <ul className={styles.children}>
-            {children.map((child) => renderNode(child, depth + 1))}
+            {children.map((child) => renderNode(child, depth + 1, nextVisited))}
           </ul>
         )}
       </li>

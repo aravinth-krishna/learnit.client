@@ -261,6 +261,49 @@ input:checked + .slider:before {
   font-size: 0.9rem;
 }
 
+.inlineForm {
+  display: grid;
+  grid-template-columns: 2fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.listHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.friendList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.friendItem {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  background: var(--bg);
+}
+
+.muted {
+  color: var(--text-soft);
+}
+
+.linkBtn {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-weight: 650;
+}
+
 /* Card Actions */
 .cardActions {
   margin-top: 16px;

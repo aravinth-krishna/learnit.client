@@ -16,8 +16,8 @@ export const aiApi = {
   progressInsights(prompt = "") {
     return http.post("/api/ai/progress-insights", { prompt });
   },
-  compareFriends(friends) {
-    return http.post("/api/ai/compare", friends);
+  compareFriends(friendIds) {
+    return http.post("/api/ai/compare", { friendIds });
   },
   listFriends() {
     return http.get("/api/friends");

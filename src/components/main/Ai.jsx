@@ -49,16 +49,18 @@ function Ai() {
   const [loading, setLoading] = useState(false);
   const [insights, setInsights] = useState([]);
   const [friends, setFriends] = useState([]);
-  const [friendName, setFriendName] = useState("");
-  const [friendEmail, setFriendEmail] = useState("");
-  const [friendStats, setFriendStats] = useState({
-    completionRate: 0,
-    weeklyHours: 0,
-  });
+  const [selectedFriendIds, setSelectedFriendIds] = useState([]);
+  const [activeTab, setActiveTab] = useState("chat");
 
   useEffect(() => {
     loadFriends();
   }, []);
+
+  useEffect(() => {
+    setSelectedFriendIds((prev) =>
+      prev.filter((id) => friends.some((f) => f.id === id))
+    );
+  }, [friends]);
 
   const userHistory = useMemo(
     () =>
@@ -139,26 +141,11 @@ function Ai() {
     }
   };
 
-  const addFriend = async () => {
-    if (!friendName.trim()) return;
-    const payload = {
-      displayName: friendName,
-      email: friendEmail,
-      completionRate: Number(friendStats.completionRate) || 0,
-      weeklyHours: Number(friendStats.weeklyHours) || 0,
-    };
-    const saved = await aiApi.addFriend(payload);
-    setFriends((prev) => [...prev, saved]);
-    setFriendName("");
-    setFriendEmail("");
-    setFriendStats({ completionRate: 0, weeklyHours: 0 });
-  };
-
   const compareFriends = async () => {
-    if (!friends.length) return;
+    if (!selectedFriendIds.length) return;
     setLoading(true);
     try {
-      const data = await aiApi.compareFriends(friends);
+      const data = await aiApi.compareFriends(selectedFriendIds);
       setInsights(data.insights || []);
     } catch (err) {
       setInsights([
@@ -202,40 +189,104 @@ function Ai() {
         </div>
       </header>
 
-      <div className={styles.layout}>
-        <div className={styles.chatCard}>
-          <div className={styles.messages}>
-            {messages.map((m, idx) => (
-              <div
-                key={idx}
-                className={`${styles.message} ${
-                  m.role === "assistant" ? styles.assistant : styles.user
-                }`}
-                dangerouslySetInnerHTML={{ __html: markdownToHtml(m.content) }}
-              ></div>
-            ))}
-            {loading && <div className={styles.message}>Thinking...</div>}
-          </div>
-          <div className={styles.inputRow}>
-            <input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about your study plan..."
-            />
-            <button
-              onClick={() => sendMessage(input)}
-              disabled={loading || !input.trim()}
-            >
-              Send
-            </button>
+      <div className={styles.tabs}>
+        <button
+          className={`${styles.tab} ${
+            activeTab === "chat" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("chat")}
+        >
+          Chat
+        </button>
+        <button
+          className={`${styles.tab} ${
+            activeTab === "compare" ? styles.active : ""
+          }`}
+          onClick={() => setActiveTab("compare")}
+        >
+          Insights & Friends
+        </button>
+      </div>
+
+      {activeTab === "chat" && (
+        <div className={styles.layout}>
+          <div className={styles.chatCard}>
+            <div className={styles.messages}>
+              {messages.map((m, idx) => (
+                <div
+                  key={idx}
+                  className={`${styles.message} ${
+                    m.role === "assistant" ? styles.assistant : styles.user
+                  }`}
+                  dangerouslySetInnerHTML={{
+                    __html: markdownToHtml(m.content),
+                  }}
+                ></div>
+              ))}
+              {loading && <div className={styles.message}>Thinking...</div>}
+            </div>
+            <div className={styles.inputRow}>
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask anything about your study plan..."
+              />
+              <button
+                onClick={() => sendMessage(input)}
+                disabled={loading || !input.trim()}
+              >
+                Send
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
-        <div className={styles.sideColumn}>
+      {activeTab === "compare" && (
+        <div className={styles.compareGrid}>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <h3>Select a friend</h3>
+              <small>We’ll compare them with your progress</small>
+            </div>
+            <ul className={styles.friendList}>
+              {friends.map((f) => (
+                <li key={f.id}>
+                  <label className={styles.friendRow}>
+                    <input
+                      type="radio"
+                      name="friendCompare"
+                      checked={selectedFriendIds.includes(f.id)}
+                      onChange={() => setSelectedFriendIds([f.id])}
+                    />
+                    <div>
+                      <strong>{f.displayName}</strong>
+                      <p className={styles.muted}>
+                        {f.completionRate}% · {f.weeklyHours}h/wk · {f.email}
+                      </p>
+                    </div>
+                  </label>
+                </li>
+              ))}
+              {!friends.length && (
+                <li className={styles.muted}>
+                  No friends yet. Add them from Profile → Friends.
+                </li>
+              )}
+            </ul>
+            <button
+              className={styles.primaryBtn}
+              onClick={compareFriends}
+              disabled={!selectedFriendIds.length}
+            >
+              Compare with AI
+            </button>
+          </div>
+
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h3>Insights</h3>
-              <small>Latest AI suggestions</small>
+              <small>User vs selected friend</small>
             </div>
             <ul className={styles.insightList}>
               {insights.map((ins, i) => (
@@ -249,85 +300,8 @@ function Ai() {
               )}
             </ul>
           </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h3>Friends</h3>
-              <small>Compare progress</small>
-            </div>
-            <div className={styles.fieldRow}>
-              <input
-                placeholder="Name"
-                value={friendName}
-                onChange={(e) => setFriendName(e.target.value)}
-              />
-              <input
-                placeholder="Email (optional)"
-                value={friendEmail}
-                onChange={(e) => setFriendEmail(e.target.value)}
-              />
-              <div className={styles.inlineFields}>
-                <input
-                  type="number"
-                  placeholder="Completion %"
-                  value={friendStats.completionRate}
-                  onChange={(e) =>
-                    setFriendStats((p) => ({
-                      ...p,
-                      completionRate: e.target.value,
-                    }))
-                  }
-                />
-                <input
-                  type="number"
-                  placeholder="Weekly hrs"
-                  value={friendStats.weeklyHours}
-                  onChange={(e) =>
-                    setFriendStats((p) => ({
-                      ...p,
-                      weeklyHours: e.target.value,
-                    }))
-                  }
-                />
-              </div>
-              <button className={styles.pill} onClick={addFriend}>
-                + Add friend
-              </button>
-            </div>
-            <ul className={styles.friendList}>
-              {friends.map((f) => (
-                <li key={f.id}>
-                  <div>
-                    <strong>{f.displayName}</strong>
-                    <p className={styles.muted}>
-                      {f.completionRate}% · {f.weeklyHours}h/wk
-                    </p>
-                  </div>
-                  <button
-                    className={styles.linkBtn}
-                    onClick={async () => {
-                      await aiApi.deleteFriend(f.id);
-                      setFriends((prev) => prev.filter((x) => x.id !== f.id));
-                    }}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-              {!friends.length && (
-                <li className={styles.muted}>No friends yet.</li>
-              )}
-            </ul>
-            <button
-              className={styles.primaryBtn}
-              onClick={compareFriends}
-              disabled={!friends.length}
-            >
-              Compare with AI
-            </button>
-          </div>
         </div>
-      </div>
+      )}
     </section>
   );
 }

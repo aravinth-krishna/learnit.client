@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { profileApi } from "../../services";
+import { profileApi, aiApi } from "../../services";
 import { useTheme } from "../../context/ThemeContext.jsx";
 import styles from "./Profile.module.css";
 
@@ -24,6 +24,10 @@ function Profile() {
     confirmPassword: "",
   });
 
+  const [friendEmail, setFriendEmail] = useState("");
+  const [friends, setFriends] = useState([]);
+  const [friendsLoading, setFriendsLoading] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -33,6 +37,12 @@ function Profile() {
   useEffect(() => {
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    if (activeSection === "friends") {
+      loadFriends();
+    }
+  }, [activeSection]);
 
   // Sync theme context when preferences are loaded
   useEffect(() => {
@@ -139,6 +149,47 @@ function Profile() {
     }
   };
 
+  const loadFriends = async () => {
+    try {
+      setFriendsLoading(true);
+      const data = await aiApi.listFriends();
+      setFriends(data);
+    } catch (err) {
+      setError("Failed to load friends");
+      setTimeout(() => setError(""), 2500);
+    } finally {
+      setFriendsLoading(false);
+    }
+  };
+
+  const handleAddFriend = async (e) => {
+    e.preventDefault();
+    if (!friendEmail.trim()) return;
+    try {
+      setSaving(true);
+      const added = await aiApi.addFriend({ email: friendEmail.trim() });
+      setFriends((prev) => [...prev, added]);
+      setFriendEmail("");
+      setSuccess("Friend added");
+      setTimeout(() => setSuccess(""), 2000);
+    } catch (err) {
+      setError(err.message || "Failed to add friend");
+      setTimeout(() => setError(""), 2500);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveFriend = async (id) => {
+    try {
+      await aiApi.deleteFriend(id);
+      setFriends((prev) => prev.filter((f) => f.id !== id));
+    } catch (err) {
+      setError("Failed to remove friend");
+      setTimeout(() => setError(""), 2500);
+    }
+  };
+
   if (loading) {
     return (
       <section className={styles.profile}>
@@ -198,6 +249,14 @@ function Profile() {
           onClick={() => setActiveSection("security")}
         >
           Security
+        </button>
+        <button
+          className={`${styles.tab} ${
+            activeSection === "friends" ? styles.active : ""
+          }`}
+          onClick={() => setActiveSection("friends")}
+        >
+          Friends
         </button>
       </div>
 
@@ -444,6 +503,63 @@ function Profile() {
                 </button>
               </div>
             </form>
+          </section>
+        </div>
+      )}
+
+      {activeSection === "friends" && (
+        <div className={styles.grid}>
+          <section className={styles.card}>
+            <div className={styles.cardHeader}>
+              <p className={styles.kicker}>Friends</p>
+              <h2>Connect with Learnit users</h2>
+              <small>Add by email, no confirmation required.</small>
+            </div>
+
+            <form className={styles.inlineForm} onSubmit={handleAddFriend}>
+              <input
+                type="email"
+                placeholder="friend@email.com"
+                value={friendEmail}
+                onChange={(e) => setFriendEmail(e.target.value)}
+                required
+              />
+              <button
+                type="submit"
+                className={styles.primaryBtn}
+                disabled={saving}
+              >
+                {saving ? "Adding..." : "Add Friend"}
+              </button>
+            </form>
+
+            <div className={styles.listHeader}>
+              <p>Friends ({friends.length})</p>
+              {friendsLoading && <small>Refreshing…</small>}
+            </div>
+            <ul className={styles.friendList}>
+              {friends.map((f) => (
+                <li key={f.id} className={styles.friendItem}>
+                  <div>
+                    <strong>{f.displayName}</strong>
+                    <p className={styles.muted}>{f.email}</p>
+                    <p className={styles.muted}>
+                      {f.completionRate}% complete · {f.weeklyHours}h/wk
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.linkBtn}
+                    onClick={() => handleRemoveFriend(f.id)}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+              {!friends.length && !friendsLoading && (
+                <li className={styles.muted}>No friends yet.</li>
+              )}
+            </ul>
           </section>
         </div>
       )}

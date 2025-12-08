@@ -57,6 +57,35 @@
   gap: 14px;
 }
 
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--border);
+  margin: 4px 0 12px;
+}
+
+.tab {
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--text-soft);
+  border-radius: 4px 4px 0 0;
+}
+
+.tab:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.tab.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+}
+
 .chatCard {
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -143,6 +172,12 @@
 .sideColumn {
   display: flex;
   flex-direction: column;
+  gap: 12px;
+}
+
+.compareGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 12px;
 }
 
@@ -236,6 +271,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.friendRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
 }
 
 @media (max-width: 960px) {

@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 8px 4px 18px;
+  padding: 12px;
 }
 
 .header {
@@ -10,11 +10,15 @@
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 14px 16px;
+  padding: 16px 18px;
   border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface);
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+  border-radius: 10px;
+  background: linear-gradient(
+    135deg,
+    rgba(99, 102, 241, 0.08),
+    rgba(14, 165, 233, 0.08)
+  );
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.14);
 }
 
 .kicker {
@@ -23,6 +27,11 @@
   letter-spacing: 0.14em;
   font-size: 0.76rem;
   color: var(--text-soft);
+}
+
+.icon {
+  vertical-align: middle;
+  margin-right: 6px;
 }
 
 .subtle {
@@ -40,10 +49,14 @@
 .pill {
   border: 1px solid var(--border);
   background: var(--surface);
-  padding: 8px 12px;
-  border-radius: 4px;
+  padding: 10px 14px;
+  border-radius: 999px;
   cursor: pointer;
   font-weight: 650;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
 .pill:hover {
@@ -88,11 +101,12 @@
 
 .chatCard {
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 10px;
   background: var(--surface);
   display: flex;
   flex-direction: column;
-  height: 70vh;
+  min-height: 520px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
 }
 
 .messages {
@@ -102,14 +116,17 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background: var(--bg);
+  border-radius: 10px 10px 0 0;
 }
 
 .message {
-  padding: 10px 12px;
-  border-radius: 4px;
+  padding: 12px 14px;
+  border-radius: 10px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--surface);
   line-height: 1.4;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
 }
 
 .message p {
@@ -137,11 +154,12 @@
 
 .assistant {
   border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.08);
 }
 
 .user {
   align-self: flex-end;
-  background: var(--surface);
+  background: var(--bg);
 }
 
 .inputRow {
@@ -149,6 +167,8 @@
   gap: 8px;
   padding: 10px;
   border-top: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 0 0 10px 10px;
 }
 
 .inputRow input {
@@ -167,6 +187,9 @@
   background: var(--accent);
   color: #fff;
   font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .sideColumn {
@@ -183,7 +206,7 @@
 
 .card {
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 10px;
   background: var(--surface);
   padding: 12px;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
@@ -210,18 +233,42 @@
   gap: 8px;
 }
 
-.insightList li,
 .friendList li {
   padding: 10px;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--bg);
 }
 
-.insightList p,
-.friendList p {
-  margin: 4px 0 0;
-  color: var(--text-soft);
+.insightBox {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--bg);
+}
+
+.insightBlock {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.insightBlock:last-child {
+  border-bottom: none;
+}
+
+.markdown p {
+  margin: 6px 0;
+}
+
+.markdown ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.markdown code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 2px 4px;
+  border-radius: 4px;
 }
 
 .muted {
@@ -265,6 +312,9 @@
   cursor: pointer;
   font-weight: 700;
   text-align: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .friendList li {

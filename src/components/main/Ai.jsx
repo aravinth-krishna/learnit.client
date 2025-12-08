@@ -1,42 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { aiApi } from "../../services";
+import ReactMarkdown from "react-markdown";
+import {
+  FiSend,
+  FiZap,
+  FiBarChart2,
+  FiUsers,
+  FiMessageCircle,
+} from "react-icons/fi";
 import styles from "./Ai.module.css";
-
-const escapeHtml = (str) =>
-  str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-const applyInlineMarkdown = (text) =>
-  text
-    .replace(/`([^`]+)`/g, "<code>$1</code>")
-    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
-
-const markdownToHtml = (text) => {
-  const escaped = escapeHtml(text || "");
-  const lines = escaped.split(/\r?\n/);
-  const html = [];
-  let inList = false;
-
-  for (const line of lines) {
-    if (/^\s*[-*]\s+/.test(line)) {
-      if (!inList) {
-        html.push("<ul>");
-        inList = true;
-      }
-      const item = line.replace(/^\s*[-*]\s+/, "");
-      html.push(`<li>${applyInlineMarkdown(item)}</li>`);
-    } else if (line.trim().length) {
-      if (inList) {
-        html.push("</ul>");
-        inList = false;
-      }
-      html.push(`<p>${applyInlineMarkdown(line)}</p>`);
-    }
-  }
-
-  if (inList) html.push("</ul>");
-  return html.join("") || "<p></p>";
-};
 
 function Ai() {
   const [messages, setMessages] = useState([
@@ -161,7 +133,9 @@ function Ai() {
       <header className={styles.header}>
         <div>
           <p className={styles.kicker}>AI Workspace</p>
-          <h1>Assistant</h1>
+          <h1>
+            <FiMessageCircle className={styles.icon} /> Assistant
+          </h1>
           <p className={styles.subtle}>
             Chat, generate courses, get scheduling and progress insights.
           </p>
@@ -171,20 +145,20 @@ function Ai() {
             className={styles.pill}
             onClick={() => quickInsights("schedule")}
           >
-            ⚡ Schedule insights
+            <FiZap /> Schedule insights
           </button>
           <button
             className={styles.pill}
             onClick={() => quickInsights("progress")}
           >
-            📊 Progress tips
+            <FiBarChart2 /> Progress tips
           </button>
           <button
             className={styles.pill}
             onClick={generateCourse}
             disabled={!input}
           >
-            🛠️ Generate course
+            <FiSend /> Generate course
           </button>
         </div>
       </header>
@@ -218,10 +192,11 @@ function Ai() {
                   className={`${styles.message} ${
                     m.role === "assistant" ? styles.assistant : styles.user
                   }`}
-                  dangerouslySetInnerHTML={{
-                    __html: markdownToHtml(m.content),
-                  }}
-                ></div>
+                >
+                  <ReactMarkdown className={styles.markdown}>
+                    {m.content}
+                  </ReactMarkdown>
+                </div>
               ))}
               {loading && <div className={styles.message}>Thinking...</div>}
             </div>
@@ -235,7 +210,7 @@ function Ai() {
                 onClick={() => sendMessage(input)}
                 disabled={loading || !input.trim()}
               >
-                Send
+                <FiSend /> Send
               </button>
             </div>
           </div>
@@ -279,7 +254,7 @@ function Ai() {
               onClick={compareFriends}
               disabled={!selectedFriendIds.length}
             >
-              Compare with AI
+              <FiUsers /> Compare with AI
             </button>
           </div>
 
@@ -288,17 +263,19 @@ function Ai() {
               <h3>Insights</h3>
               <small>User vs selected friend</small>
             </div>
-            <ul className={styles.insightList}>
-              {insights.map((ins, i) => (
-                <li key={i}>
-                  <strong>{ins.title}</strong>
-                  <p>{ins.detail}</p>
-                </li>
-              ))}
-              {!insights.length && (
-                <li className={styles.muted}>No insights yet.</li>
+            <div className={styles.insightBox}>
+              {insights.length ? (
+                insights.map((ins, i) => (
+                  <div key={i} className={styles.insightBlock}>
+                    <ReactMarkdown className={styles.markdown}>
+                      {ins.detail}
+                    </ReactMarkdown>
+                  </div>
+                ))
+              ) : (
+                <p className={styles.muted}>No insights yet.</p>
               )}
-            </ul>
+            </div>
           </div>
         </div>
       )}

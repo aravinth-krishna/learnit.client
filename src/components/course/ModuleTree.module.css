@@ -10,7 +10,7 @@
   justify-content: space-between;
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 12px 14px;
+  padding: 10px 12px;
 }
 
 .title {
@@ -27,8 +27,8 @@
 .primaryBtn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 6px;
+  padding: 8px 12px;
   background: var(--accent);
   border: none;
   color: #fff;
@@ -47,56 +47,65 @@
   padding: 10px 12px;
 }
 
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.moduleCard {
+.tree {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   border: 1px solid var(--border);
   background: var(--background);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
-.displayRow,
-.editCard,
-.addCard {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  padding: 12px;
+.node {
+  border-bottom: 1px solid var(--border);
+}
+
+.node:last-child {
+  border-bottom: none;
+}
+
+.row {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
   gap: 10px;
+  padding: 10px 12px;
+  padding-left: calc(12px + (var(--depth, 0) * 16px));
 }
 
-.childRow {
-  border-style: dashed;
-}
-
-.checkboxLabel {
+.rowLeft {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+}
+
+.icon {
+  color: var(--muted);
+  width: 18px;
+  display: inline-flex;
+}
+
+.labelBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
   font-weight: 600;
   color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.checkboxLabel input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-
-.meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .badge {
@@ -107,138 +116,123 @@
   border-radius: 6px;
 }
 
-.iconBtn {
-  width: 32px;
-  height: 32px;
-  display: inline-flex;
+.actions {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 6px;
+}
+
+.actions button {
   border: 1px solid var(--border);
   background: var(--background);
   color: var(--muted);
   cursor: pointer;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 
-.iconBtn:hover {
+.actions button:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-.details {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  color: var(--muted);
-}
-
-.details p {
+.children {
+  list-style: none;
   margin: 0;
+  padding: 0 0 0 0;
 }
 
-.note {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--accent);
-}
-
-.subList {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.subHeader {
-  font-weight: 600;
-  color: var(--muted);
-}
-
-.subEmpty {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.subItem {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.addCard {
-  border-style: dashed;
-}
-
-.addHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-weight: 600;
-}
-
-.addHint {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-.rowInputs {
+.inlineForm {
   display: grid;
-  grid-template-columns: 2fr 120px;
-  gap: 10px;
+  grid-template-columns: 1.2fr 120px;
+  gap: 8px;
 }
 
-.displayRow input,
-.addCard input,
-.addCard textarea,
-.editCard input,
-.editCard textarea {
+.inlineForm input {
   padding: 8px 10px;
   border: 1px solid var(--border);
   background: var(--surface);
   font-family: inherit;
 }
 
-.displayRow textarea,
-.addCard textarea,
-.editCard textarea {
+.editNotes {
+  display: grid;
+  gap: 8px;
+  padding: 0 12px 12px;
+  padding-left: calc(12px + (var(--depth, 0) * 16px));
+}
+
+.editNotes textarea,
+.addRow textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
   resize: vertical;
 }
 
-.actions {
+.addRow {
+  padding: 10px 12px 12px;
+  padding-left: calc(12px + (var(--depth, 0) * 16px));
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.rowInputs {
+  display: grid;
+  grid-template-columns: 1.6fr 100px 90px;
   gap: 8px;
 }
 
-.actions button {
-  padding: 8px 12px;
+.rowInputs input {
+  padding: 8px 10px;
   border: 1px solid var(--border);
-  background: var(--background);
-  cursor: pointer;
+  background: var(--surface);
+  font-family: inherit;
+}
+
+.addActions {
   display: inline-flex;
-  align-items: center;
   gap: 6px;
 }
 
-.actions button:first-child {
-  background: var(--accent);
-  color: #fff;
+.addActions button {
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px;
+}
+
+.addActions button:hover {
   border-color: var(--accent);
+  color: var(--accent);
 }
 
 .empty {
-  padding: 32px;
+  padding: 28px;
   text-align: center;
   color: var(--muted);
   border: 1px dashed var(--border);
 }
 
 @media (max-width: 640px) {
-  .header {
+  .row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
   }
 
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .inlineForm,
   .rowInputs {
     grid-template-columns: 1fr;
   }

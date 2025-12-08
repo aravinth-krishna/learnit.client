@@ -1,5 +1,13 @@
 import { useMemo, useState } from "react";
-import { FaEdit, FaPlus, FaSave, FaStickyNote, FaTimes } from "react-icons/fa";
+import {
+  FaEdit,
+  FaPlus,
+  FaSave,
+  FaStickyNote,
+  FaTimes,
+  FaFolder,
+  FaRegFile,
+} from "react-icons/fa";
 import styles from "./ModuleTree.module.css";
 
 const emptyModule = {
@@ -120,21 +128,15 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
     setError("");
   };
 
-  const renderAddCard = (parentId) => (
-    <div className={styles.addCard}>
-      <div className={styles.addHeader}>
-        <span>{parentId ? "Add sub-module" : "Add module"}</span>
-        <span className={styles.addHint}>
-          {parentId ? "One level deep" : "Top level"}
-        </span>
-      </div>
+  const renderAddRow = (parentId, depth = 0) => (
+    <div className={styles.addRow} style={{ "--depth": depth }}>
       <div className={styles.rowInputs}>
         <input
           value={addValues.title}
           onChange={(e) =>
             setAddValues({ ...addValues, title: e.target.value })
           }
-          placeholder="Title"
+          placeholder={parentId ? "New sub-module" : "New module"}
           autoFocus
         />
         <input
@@ -147,6 +149,14 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
           min="0"
           step="0.5"
         />
+        <div className={styles.addActions}>
+          <button type="button" onClick={handleAdd} disabled={pending}>
+            <FaSave />
+          </button>
+          <button type="button" onClick={cancelAdd}>
+            <FaTimes />
+          </button>
+        </div>
       </div>
       <textarea
         value={addValues.description}
@@ -156,140 +166,131 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
         placeholder="Description (optional)"
         rows={2}
       />
-      <textarea
-        value={addValues.notes}
-        onChange={(e) => setAddValues({ ...addValues, notes: e.target.value })}
-        placeholder="Notes (optional)"
-        rows={2}
-      />
-      <div className={styles.actions}>
-        <button type="button" onClick={handleAdd} disabled={pending}>
-          <FaSave /> {pending ? "Saving..." : "Save"}
-        </button>
-        <button type="button" onClick={cancelAdd}>
-          <FaTimes /> Cancel
-        </button>
-      </div>
     </div>
   );
 
-  const renderDisplayRow = (module, isChild = false) => (
-    <div className={`${styles.displayRow} ${isChild ? styles.childRow : ""}`}>
-      <label className={styles.checkboxLabel}>
-        <input
-          type="checkbox"
-          checked={!!module.isCompleted}
-          onChange={() => onToggleCompletion(module.id)}
-        />
-        <span className={styles.title}>{module.title}</span>
-      </label>
-      <div className={styles.meta}>
-        <span className={styles.badge}>{module.estimatedHours ?? 0}h</span>
-        <button
-          type="button"
-          className={styles.iconBtn}
-          onClick={() => startEdit(module)}
-          aria-label="Edit module"
-        >
-          <FaEdit />
-        </button>
-        {!isChild && (
-          <button
-            type="button"
-            className={styles.iconBtn}
-            onClick={() => startAdd(module.id)}
-            aria-label="Add sub-module"
-          >
-            <FaPlus />
-          </button>
-        )}
-      </div>
-      {(module.description || module.notes) && (
-        <div className={styles.details}>
-          {module.description && <p>{module.description}</p>}
-          {module.notes && (
-            <span className={styles.note}>
-              <FaStickyNote /> {module.notes}
-            </span>
-          )}
-        </div>
-      )}
-    </div>
-  );
-
-  const renderEditRow = (isChild = false) => (
-    <div className={`${styles.editCard} ${isChild ? styles.childRow : ""}`}>
-      <div className={styles.rowInputs}>
-        <input
-          value={formValues.title}
-          onChange={(e) =>
-            setFormValues({ ...formValues, title: e.target.value })
-          }
-          placeholder="Title"
-          autoFocus
-        />
-        <input
-          type="number"
-          value={formValues.estimatedHours}
-          onChange={(e) =>
-            setFormValues({ ...formValues, estimatedHours: e.target.value })
-          }
-          placeholder="Hours"
-          min="0"
-          step="0.5"
-        />
-      </div>
-      <textarea
-        value={formValues.description}
-        onChange={(e) =>
-          setFormValues({ ...formValues, description: e.target.value })
-        }
-        placeholder="Description"
-        rows={2}
-      />
-      <textarea
-        value={formValues.notes}
-        onChange={(e) =>
-          setFormValues({ ...formValues, notes: e.target.value })
-        }
-        placeholder="Notes"
-        rows={2}
-      />
-      <div className={styles.actions}>
-        <button type="button" onClick={handleSave} disabled={pending}>
-          <FaSave /> {pending ? "Saving..." : "Save"}
-        </button>
-        <button type="button" onClick={cancelEditing}>
-          <FaTimes /> Cancel
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderRoot = (root) => {
-    const children = childrenMap[root.id] || [];
-    const isEditing = editingId === root.id;
+  const renderNode = (node, depth = 0) => {
+    const children = childrenMap[node.id] || [];
+    const isEditing = editingId === node.id;
+    const isAddingHere = addTarget === node.id;
 
     return (
-      <div key={root.id} className={styles.moduleCard}>
-        {isEditing ? renderEditRow(false) : renderDisplayRow(root, false)}
-
-        {addTarget === root.id && renderAddCard(root.id)}
-
-        <div className={styles.subList}>
-          <div className={styles.subHeader}>Sub-modules</div>
-          {children.length === 0 && (
-            <div className={styles.subEmpty}>None yet</div>
-          )}
-          {children.map((child) => (
-            <div key={child.id} className={styles.subItem}>
-              {editingId === child.id
-                ? renderEditRow(true)
-                : renderDisplayRow(child, true)}
-            </div>
-          ))}
+      <li className={styles.node} key={node.id}>
+        <div className={styles.row} style={{ "--depth": depth }}>
+          <div className={styles.rowLeft}>
+            <input
+              type="checkbox"
+              checked={!!node.isCompleted}
+              onChange={() => onToggleCompletion(node.id)}
+            />
+            <span className={styles.icon}>
+              {depth === 0 ? <FaFolder /> : <FaRegFile />}
+            </span>
+            {isEditing ? (
+              <div className={styles.inlineForm}>
+                <input
+                  value={formValues.title}
+                  onChange={(e) =>
+                    setFormValues({ ...formValues, title: e.target.value })
+                  }
+                  placeholder="Title"
+                  autoFocus
+                />
+                <input
+                  type="number"
+                  value={formValues.estimatedHours}
+                  onChange={(e) =>
+                    setFormValues({
+                      ...formValues,
+                      estimatedHours: e.target.value,
+                    })
+                  }
+                  placeholder="Hours"
+                  min="0"
+                  step="0.5"
+                />
+              </div>
+            ) : (
+              <div className={styles.labelBlock}>
+                <span className={styles.title}>{node.title}</span>
+                {(node.description || node.notes) && (
+                  <span className={styles.muted}>
+                    {node.description || node.notes}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+          <div className={styles.actions}>
+            <span className={styles.badge}>{node.estimatedHours ?? 0}h</span>
+            {isEditing ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={pending}
+                  title="Save"
+                >
+                  <FaSave />
+                </button>
+                <button type="button" onClick={cancelEditing} title="Cancel">
+                  <FaTimes />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => startEdit(node)}
+                  className={styles.iconBtn}
+                  title="Edit"
+                >
+                  <FaEdit />
+                </button>
+                {depth === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => startAdd(node.id)}
+                    className={styles.iconBtn}
+                    title="Add"
+                  >
+                    <FaPlus />
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
+
+        {isEditing && (
+          <div className={styles.editNotes} style={{ "--depth": depth }}>
+            <textarea
+              value={formValues.description}
+              onChange={(e) =>
+                setFormValues({ ...formValues, description: e.target.value })
+              }
+              placeholder="Description"
+              rows={2}
+            />
+            <textarea
+              value={formValues.notes}
+              onChange={(e) =>
+                setFormValues({ ...formValues, notes: e.target.value })
+              }
+              placeholder="Notes"
+              rows={2}
+            />
+          </div>
+        )}
+
+        {isAddingHere && renderAddRow(node.id, depth + 1)}
+
+        {children.length > 0 && (
+          <ul className={styles.children}>
+            {children.map((child) => renderNode(child, depth + 1))}
+          </ul>
+        )}
+      </li>
     );
   };
 
@@ -307,20 +308,18 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
           className={styles.primaryBtn}
           onClick={() => startAdd(null)}
         >
-          <FaPlus /> Add module
+          <FaPlus />
         </button>
       </div>
 
       {error && <div className={styles.error}>{error}</div>}
 
-      {addTarget === null && renderAddCard(null)}
+      {addTarget === null && renderAddRow(null, 0)}
 
       {roots.length === 0 ? (
         <div className={styles.empty}>No modules yet.</div>
       ) : (
-        <div className={styles.list}>
-          {roots.map((root) => renderRoot(root))}
-        </div>
+        <ul className={styles.tree}>{roots.map((root) => renderNode(root))}</ul>
       )}
     </div>
   );

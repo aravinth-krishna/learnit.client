@@ -85,7 +85,7 @@ function ModuleForm({ modules, setModules }) {
             </Field>
 
             <div className={styles.inlineFieldsSingleLine}>
-              <Field label="Hours">
+              <Field label="Hours (whole)">
                 <input
                   type="number"
                   placeholder="e.g. 2"
@@ -93,8 +93,8 @@ function ModuleForm({ modules, setModules }) {
                   onChange={(e) =>
                     updateRoot(module.id, "duration", e.target.value)
                   }
-                  min="0.5"
-                  step="0.5"
+                  min="0"
+                  step="1"
                   required
                 />
               </Field>
@@ -128,7 +128,7 @@ function ModuleForm({ modules, setModules }) {
                     required
                   />
                 </Field>
-                <Field label="Hours">
+                <Field label="Hours (whole)">
                   <input
                     type="number"
                     value={sub.duration}
@@ -136,8 +136,8 @@ function ModuleForm({ modules, setModules }) {
                       updateSub(module.id, sub.id, "duration", e.target.value)
                     }
                     placeholder="e.g. 1"
-                    min="0.5"
-                    step="0.5"
+                    min="0"
+                    step="1"
                     required
                   />
                 </Field>

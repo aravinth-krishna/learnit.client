@@ -39,16 +39,21 @@ function CreateCourseModal({ onSave, onCancel }) {
       return;
     }
 
+    const toHours = (value) => {
+      const num = parseFloat(value);
+      return Number.isFinite(num) ? Math.max(0, Math.round(num)) : 0;
+    };
+
     const modulesPayload = validModules.map((m, idx) => ({
       tempId: idx + 1,
       title: m.title,
-      estimatedHours: parseFloat(m.duration) || 0,
+      estimatedHours: toHours(m.duration),
       notes: "",
       subModules: (m.subModules || [])
         .filter((s) => s.title.trim() && s.duration)
         .map((s, subIdx) => ({
           title: s.title,
-          estimatedHours: parseFloat(s.duration) || 0,
+          estimatedHours: toHours(s.duration),
           description: "",
           notes: "",
           order: subIdx,

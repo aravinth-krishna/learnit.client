@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styles from "./Sidebar.module.css";
 import { useLogout } from "../../hooks/useLogout";
+import { useTheme } from "../../context/ThemeContext";
 
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { IoIosLogOut } from "react-icons/io";
@@ -9,11 +10,13 @@ import { MdOutlineMenuBook } from "react-icons/md";
 import { AiOutlineSchedule } from "react-icons/ai";
 import { BsGraphUp } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
+import { BsSun, BsMoon } from "react-icons/bs";
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { logout } = useLogout();
+  const { isDarkMode, toggleDarkMode } = useTheme();
 
   const menuItems = useMemo(
     () => [
@@ -98,8 +101,19 @@ const Sidebar = () => {
       </div>
 
       <div className={styles.footerSection}>
-        <button 
-          className={styles.logoutBtn} 
+        <button
+          className={styles.ghostBtn}
+          type="button"
+          onClick={toggleDarkMode}
+          aria-label="Toggle theme"
+        >
+          <span className={styles.icon}>
+            {isDarkMode ? <BsSun size={18} /> : <BsMoon size={18} />}
+          </span>
+          {!collapsed && (isDarkMode ? "Light mode" : "Dark mode")}
+        </button>
+        <button
+          className={styles.logoutBtn}
           type="button"
           onClick={logout}
           aria-label="Logout"

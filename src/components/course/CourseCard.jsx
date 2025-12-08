@@ -36,40 +36,42 @@ function CourseCard({ course, onNavigate, onEdit, onDelete }) {
 
   return (
     <article className={styles.card}>
-      <div className={styles.header}>
-        <div className={styles.image}>
-          <div className={styles.placeholder}>
-            <span>{title.charAt(0).toUpperCase()}</span>
-          </div>
-          <button
-            className={styles.playBtn}
-            onClick={handlePlay}
-            title="Open Course"
-          >
-            <FaPlay />
-          </button>
-        </div>
-
-        <div className={styles.badges}>
+      <div className={styles.hero}>
+        <div className={styles.initial}>{title.charAt(0).toUpperCase()}</div>
+        <div className={styles.heroMeta}>
           {priority && (
             <span
-              className={`${styles.badge} ${styles[priority.toLowerCase()]}`}
+              className={`${styles.pill} ${
+                styles[`pill_${priority.toLowerCase()}`]
+              }`}
             >
               {priority}
             </span>
           )}
           {difficulty && (
             <span
-              className={`${styles.badge} ${styles[difficulty.toLowerCase()]}`}
+              className={`${styles.pill} ${
+                styles[`pill_${difficulty.toLowerCase()}`]
+              }`}
             >
               {difficulty}
             </span>
           )}
         </div>
+        <button
+          className={styles.playFab}
+          onClick={handlePlay}
+          title="Open Course"
+        >
+          <FaPlay />
+        </button>
       </div>
 
       <div className={styles.content}>
-        <h3 className={styles.title}>{title}</h3>
+        <div className={styles.headerRow}>
+          <h3 className={styles.title}>{title}</h3>
+          <span className={styles.hours}>{totalEstimatedHours}h</span>
+        </div>
         <p className={styles.description}>{description || "No description"}</p>
 
         <div className={styles.progress}>
@@ -83,10 +85,10 @@ function CourseCard({ course, onNavigate, onEdit, onDelete }) {
         </div>
 
         <div className={styles.actions}>
-          <button className={styles.continueBtn} onClick={handlePlay}>
+          <button className={styles.primary} onClick={handlePlay}>
             <FaPlay /> Continue
           </button>
-          <div className={styles.icons}>
+          <div className={styles.iconActions}>
             <button
               className={styles.iconBtn}
               onClick={handleEdit}

@@ -118,56 +118,62 @@ function CourseList({ courses, loading, onEdit, onDelete, onNavigate }) {
         </span>
       </div>
 
-      <div className={styles.filtersBar}>
-        <span>
-          <FaFilter /> Filters
-        </span>
-        <div className={styles.filterGroups}>
-          {Object.entries(filterGroups).map(([group, options]) => (
-            <div key={group} className={styles.filterGroup}>
-              <p>{group}</p>
-              <div className={styles.chips}>
-                {options.map((option) => {
-                  const active = selectedFilters[group].includes(option);
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      className={`${styles.chip} ${
-                        active ? styles.chipActive : ""
-                      }`}
-                      onClick={() => toggleFilter(group, option)}
-                    >
-                      {option}
-                    </button>
-                  );
-                })}
-              </div>
+      <div className={styles.body}>
+        <aside className={styles.filtersPanel}>
+          <div className={styles.filtersBar}>
+            <span>
+              <FaFilter /> Filters
+            </span>
+            <div className={styles.filterGroups}>
+              {Object.entries(filterGroups).map(([group, options]) => (
+                <div key={group} className={styles.filterGroup}>
+                  <p>{group}</p>
+                  <div className={styles.chips}>
+                    {options.map((option) => {
+                      const active = selectedFilters[group].includes(option);
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          className={`${styles.chip} ${
+                            active ? styles.chipActive : ""
+                          }`}
+                          onClick={() => toggleFilter(group, option)}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <button onClick={resetFilters} className={styles.resetBtn}>
-          Clear filters
-        </button>
-      </div>
+            <button onClick={resetFilters} className={styles.resetBtn}>
+              Clear filters
+            </button>
+          </div>
+        </aside>
 
-      {loading ? (
-        <div className={styles.emptyState}>Loading courses...</div>
-      ) : sortedCourses.length === 0 ? (
-        <div className={styles.emptyState}>No courses found</div>
-      ) : (
-        <div className={styles.grid}>
-          {sortedCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              course={course}
-              onNavigate={onNavigate}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          ))}
-        </div>
-      )}
+        <section className={styles.cardsSection}>
+          {loading ? (
+            <div className={styles.emptyState}>Loading courses...</div>
+          ) : sortedCourses.length === 0 ? (
+            <div className={styles.emptyState}>No courses found</div>
+          ) : (
+            <div className={styles.grid}>
+              {sortedCourses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  onNavigate={onNavigate}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

@@ -2,15 +2,14 @@
   width: 260px;
   min-width: 260px;
   height: 100vh;
-  background: var(--card-bg);
-  border-right: 1px solid var(--card-border);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
-  padding: 28px 20px;
-  gap: 20px;
+  padding: 28px 18px;
+  gap: 18px;
   position: relative;
   transition: width 0.25s ease;
-  border-radius: 0;
 }
 
 .collapsed {
@@ -25,8 +24,8 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1px solid var(--card-border);
-  background: var(--card-bg);
+  border: 1px solid var(--border);
+  background: var(--surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -36,7 +35,7 @@
 }
 
 .toggleBtn:hover {
-  background: var(--app-bg);
+  background: var(--bg);
 }
 
 .branding {
@@ -44,25 +43,32 @@
   align-items: center;
   gap: 12px;
   overflow: hidden;
+  padding: 6px 8px;
+  border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.08),
+    rgba(34, 211, 238, 0.08)
+  );
 }
 
 .logoMark {
   width: 42px;
   height: 42px;
-  border-radius: 0;
-  background: var(--primary);
+  border-radius: 10px;
+  background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 1.2rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 800;
   flex-shrink: 0;
 }
 
 .brandTitle {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 700;
 }
 
@@ -73,10 +79,11 @@
 
 .sectionLabel {
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   letter-spacing: 0.16em;
   color: var(--text-soft);
-  margin-top: 8px;
+  margin-top: 2px;
+  padding: 0 6px;
 }
 
 .menu {
@@ -90,10 +97,10 @@
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 0;
+  border-radius: 12px;
   color: var(--text-strong);
   text-decoration: none;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .menuItem:hover {
@@ -102,9 +109,13 @@
 }
 
 .active {
-  background: var(--primary);
+  background: linear-gradient(
+    135deg,
+    var(--accent) 0%,
+    var(--accent-dark) 100%
+  );
   color: white;
-  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.24);
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
 }
 
 .icon {
@@ -115,8 +126,12 @@
 
 .focusCard {
   padding: 14px;
-  border-radius: 0;
-  background: var(--bg);
+  border-radius: 14px;
+  background: linear-gradient(
+    145deg,
+    rgba(37, 99, 235, 0.08),
+    rgba(34, 211, 238, 0.08)
+  );
   border: 1px solid rgba(148, 163, 184, 0.3);
   display: flex;
   flex-direction: column;
@@ -126,14 +141,14 @@
 
 .focusCard h3 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.2rem;
 }
 
 .progressTrack {
   width: 100%;
   height: 6px;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(148, 163, 184, 0.25);
   overflow: hidden;
   margin: 4px 0;
 }
@@ -141,30 +156,55 @@
 .progressTrack span {
   display: block;
   height: 100%;
-  background: var(--primary);
+  background: var(--accent);
 }
 
 .footerSection {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ghostBtn {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-strong);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 600;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.ghostBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--bg);
 }
 
 .logoutBtn {
   width: 100%;
   padding: 10px 12px;
   border: none;
-  border-radius: 0;
-  background: #f43f5e;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
   color: white;
   display: flex;
   gap: 10px;
   align-items: center;
   cursor: pointer;
-  font-weight: 600;
-  transition: background 0.2s ease;
+  font-weight: 700;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .logoutBtn:hover {
-  background: #e11d48;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(244, 63, 94, 0.35);
 }
 
 .collapsed .branding div,

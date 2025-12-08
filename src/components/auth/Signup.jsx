@@ -1,13 +1,12 @@
-import { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useContext, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { authApi } from "../../services";
 import { AuthContext } from "../../context/AuthContext";
 import Button from "../ui/Button";
-import Field from "../ui/Field";
 import styles from "./Signup.module.css";
 
 function Signup() {
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     fullName: "",
     email: "",
     password: "",
@@ -18,90 +17,85 @@ function Signup() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const inputs = useMemo(
+    () => [
+      {
+        name: "fullName",
+        label: "Full name",
+        type: "text",
+        placeholder: "Jordan Lee",
+        autoComplete: "name",
+      },
+      {
+        name: "email",
+        label: "Email address",
+        type: "email",
+        placeholder: "you@example.com",
+        autoComplete: "email",
+      },
+      {
+        name: "password",
+        label: "Password",
+        type: "password",
+        placeholder: "••••••••",
+        autoComplete: "new-password",
+        minLength: 6,
+      },
+      {
+        name: "confirmPassword",
+        label: "Confirm password",
+        type: "password",
+        placeholder: "••••••••",
+        autoComplete: "new-password",
+        minLength: 6,
+      },
+    ],
+    []
+  );
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const applySession = (token) => {
+    localStorage.setItem("token", token);
+    const baseUser = (() => {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return {
+          id: payload.sub,
+          email: payload.email,
+          fullName: form.fullName,
+        };
+      } catch (err) {
+        return { fullName: form.fullName, email: form.email };
+      }
+    })();
+    login({ ...baseUser, token });
+    navigate("/app/course", { replace: true });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-
-    // Validation
-    if (!formData.fullName.trim()) {
-      setError("Full name is required");
-      return;
-    }
-
-    if (!formData.email.trim()) {
-      setError("Email is required");
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+    if (!form.fullName.trim()) return setError("Full name is required");
+    if (!form.email.trim()) return setError("Email is required");
+    if (form.password.length < 6)
+      return setError("Password must be at least 6 characters");
+    if (form.password !== form.confirmPassword)
+      return setError("Passwords do not match");
 
     setLoading(true);
-
+    setError("");
     try {
-      console.log("[Signup] Attempting registration with:", {
-        fullName: formData.fullName,
-        email: formData.email,
-      });
-
-      const response = await authApi.register(
-        formData.fullName,
-        formData.email,
-        formData.password
+      const { token } = await authApi.register(
+        form.fullName,
+        form.email,
+        form.password
       );
-
-      console.log("[Signup] Register response:", response);
-
-      // API only returns { token }
-      const token = response.token;
-
-      if (!token) {
-        setError("No token received from server");
-        setLoading(false);
-        return;
-      }
-
-      // Store token
-      localStorage.setItem("token", token);
-      console.log("[Signup] Token stored:", token.substring(0, 20) + "...");
-
-      // Decode JWT to get user info (email, sub)
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const user = {
-          id: payload.sub,
-          email: payload.email,
-          fullName: formData.fullName,
-        };
-
-        // Call login to update context
-        login(user);
-        console.log("[Signup] User registered and logged in:", user);
-      } catch (decodeErr) {
-        console.warn(
-          "[Signup] Could not decode token, logging in with token only"
-        );
-        login({ token, fullName: formData.fullName, email: formData.email });
-      }
-
-      // Navigate to dashboard
-      setTimeout(() => {
-        navigate("/app/course", { replace: true });
-      }, 100);
+      if (!token) throw new Error("No token received from server");
+      applySession(token);
     } catch (err) {
-      console.error("[Signup] Registration error:", err);
       setError(err.message || "Registration failed. Please try again.");
     } finally {
       setLoading(false);
@@ -109,86 +103,61 @@ function Signup() {
   };
 
   return (
-    <div className={styles.container}>
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={styles.header}>
-          <h2>Create your account</h2>
-          <p>Join LearnIt and start learning today</p>
-        </div>
-
-        {error && (
-          <div className={styles.error}>
-            <strong>Error:</strong> {error}
-          </div>
-        )}
-
-        <Field label="Full Name">
-          <input
-            type="text"
-            name="fullName"
-            value={formData.fullName}
-            onChange={handleChange}
-            placeholder="John Doe"
-            required
-            disabled={loading}
-            autoComplete="name"
-          />
-        </Field>
-
-        <Field label="Email Address">
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="you@example.com"
-            required
-            disabled={loading}
-            autoComplete="email"
-          />
-        </Field>
-
-        <Field label="Password">
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="••••••••"
-            required
-            disabled={loading}
-            minLength="6"
-            autoComplete="new-password"
-          />
-        </Field>
-
-        <Field label="Confirm Password">
-          <input
-            type="password"
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            placeholder="••••••••"
-            required
-            disabled={loading}
-            minLength="6"
-            autoComplete="new-password"
-          />
-        </Field>
-
-        <Button
-          type="submit"
-          variant="primary"
-          disabled={loading}
-          className={styles.fullWidth}
-        >
-          {loading ? "Creating account..." : "Sign Up"}
-        </Button>
-
-        <p className={styles.footer}>
-          Already have an account? <a href="/auth/login">Sign in here</a>
+    <div className={styles.layout}>
+      <div className={styles.brandPane}>
+        <p className={styles.kicker}>Learnit</p>
+        <h1>Create your account</h1>
+        <p className={styles.copy}>
+          Set up your workspace and start tracking courses in minutes.
         </p>
-      </form>
+      </div>
+
+      <div className={styles.cardPane}>
+        <div className={styles.card}>
+          <header className={styles.header}>
+            <div>
+              <p className={styles.eyebrow}>Get started</p>
+              <h2>Join the workspace</h2>
+              <p className={styles.subhead}>
+                Create your profile and begin organizing your learning.
+              </p>
+            </div>
+            <Link to="/auth/login" className={styles.inlineLink}>
+              Already a member?
+            </Link>
+          </header>
+
+          {error && (
+            <div className={styles.error} role="alert" aria-live="polite">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className={styles.form}>
+            {inputs.map((field) => (
+              <label key={field.name} className={styles.field}>
+                <span>{field.label}</span>
+                <input
+                  {...field}
+                  value={form[field.name]}
+                  onChange={handleChange}
+                  disabled={loading}
+                  required
+                  autoFocus={field.name === "fullName"}
+                />
+              </label>
+            ))}
+
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading ? "Creating account..." : "Create account"}
+            </Button>
+          </form>
+
+          <p className={styles.footerText}>
+            Have an account? <Link to="/auth/login">Sign in</Link>
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

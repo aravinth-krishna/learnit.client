@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -74,11 +74,25 @@ function CourseDetails() {
   };
 
   const moduleTotals = () => {
-    const total = course?.modules?.length || 0;
-    const completed = course?.modules?.filter((m) => m.isCompleted).length || 0;
+    const flat = flatModules;
+    const total = flat.length;
+    const completed = flat.filter((m) => m.isCompleted).length;
     const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
     return { total, completed, percent };
   };
+
+  const flatModules = useMemo(() => {
+    if (!course?.modules) return [];
+    const roots = course.modules || [];
+    const result = [];
+    roots.forEach((root) => {
+      result.push({ ...root, parentModuleId: null });
+      (root.subModules || []).forEach((sub) => {
+        result.push({ ...sub, parentModuleId: root.id });
+      });
+    });
+    return result;
+  }, [course]);
 
   if (loading) return <div className={styles.loading}>Loading...</div>;
   if (error && !course) return <div className={styles.error}>{error}</div>;
@@ -130,7 +144,7 @@ function CourseDetails() {
               <FaBook /> Course Modules
             </h2>
             <ModuleTree
-              modules={course.modules || []}
+              modules={flatModules}
               onUpdate={async (moduleId, updates) => {
                 await courseApi.updateModule(moduleId, updates);
                 fetchCourse();

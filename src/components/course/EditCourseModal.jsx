@@ -41,7 +41,11 @@ function EditCourseModal({ course, onSave, onCancel }) {
           id: m.id,
           title: m.title,
           duration: m.estimatedHours.toString(),
-          parentModuleId: m.parentModuleId,
+          subModules: (m.subModules || []).map((s) => ({
+            id: s.id,
+            title: s.title,
+            duration: (s.estimatedHours ?? "").toString(),
+          })),
         }))
       );
       setExternalLinks(course.externalLinks || []);
@@ -63,18 +67,28 @@ function EditCourseModal({ course, onSave, onCancel }) {
       return;
     }
 
+    const modulesPayload = validModules.map((m, idx) => ({
+      tempId: idx + 1,
+      title: m.title,
+      estimatedHours: parseFloat(m.duration) || 0,
+      notes: "",
+      subModules: (m.subModules || [])
+        .filter((s) => s.title.trim() && s.duration)
+        .map((s, subIdx) => ({
+          title: s.title,
+          estimatedHours: parseFloat(s.duration) || 0,
+          description: "",
+          notes: "",
+          order: subIdx,
+        })),
+    }));
+
     setSubmitting(true);
     try {
       await onSave({
         ...formData,
         totalEstimatedHours: parseInt(formData.totalEstimatedHours) || 0,
-        modules: modules
-          .filter((m) => m.title.trim() && m.duration)
-          .map((m) => ({
-            title: m.title,
-            estimatedHours: parseInt(m.duration) || 0,
-            parentModuleId: m.parentModuleId,
-          })),
+        modules: modulesPayload,
         externalLinks,
       });
     } finally {

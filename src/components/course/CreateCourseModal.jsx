@@ -19,7 +19,7 @@ function CreateCourseModal({ onSave, onCancel }) {
     notes: "",
   });
   const [modules, setModules] = useState([
-    { id: Date.now(), title: "", duration: "", parentModuleId: null },
+    { id: crypto.randomUUID(), title: "", duration: "", subModules: [] },
   ]);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -39,22 +39,21 @@ function CreateCourseModal({ onSave, onCancel }) {
       return;
     }
 
-    // Rebase client-only ids to sequential integers to avoid int overflow and keep parent mapping.
-    const idMap = new Map();
-    validModules.forEach((m, idx) => {
-      idMap.set(m.id, idx + 1);
-    });
-
-    const modulesPayload = validModules.map((m) => {
-      const parentId =
-        m.parentModuleId != null ? idMap.get(m.parentModuleId) ?? null : null;
-
-      return {
-        title: m.title,
-        estimatedHours: parseFloat(m.duration) || 0,
-        parentModuleId: parentId,
-      };
-    });
+    const modulesPayload = validModules.map((m, idx) => ({
+      tempId: idx + 1,
+      title: m.title,
+      estimatedHours: parseFloat(m.duration) || 0,
+      notes: "",
+      subModules: (m.subModules || [])
+        .filter((s) => s.title.trim() && s.duration)
+        .map((s, subIdx) => ({
+          title: s.title,
+          estimatedHours: parseFloat(s.duration) || 0,
+          description: "",
+          notes: "",
+          order: subIdx,
+        })),
+    }));
 
     setSubmitting(true);
     try {

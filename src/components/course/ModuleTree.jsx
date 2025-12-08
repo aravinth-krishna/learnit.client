@@ -1,104 +1,51 @@
-import { useState } from "react";
-import {
-  FaChevronDown,
-  FaChevronRight,
-  FaEdit,
-  FaSave,
-  FaTimes,
-  FaStickyNote,
-  FaPlus,
-  FaFolder,
-} from "react-icons/fa";
+import { useMemo, useState } from "react";
+import { FaEdit, FaPlus, FaSave, FaStickyNote, FaTimes } from "react-icons/fa";
 import styles from "./ModuleTree.module.css";
 
-function ModuleTree({ modules, onUpdate, onToggleCompletion, onAdd }) {
-  const [expanded, setExpanded] = useState(new Set());
-  const [editing, setEditing] = useState(null);
-  const [editValues, setEditValues] = useState({});
-  const [addTarget, setAddTarget] = useState();
-  const [addValues, setAddValues] = useState({
-    title: "",
-    estimatedHours: "",
-    description: "",
-    notes: "",
-  });
+const emptyModule = {
+  title: "",
+  estimatedHours: "",
+  description: "",
+  notes: "",
+};
+
+function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
+  const [editingId, setEditingId] = useState(null);
+  const [formValues, setFormValues] = useState(emptyModule);
+  const [addTarget, setAddTarget] = useState(undefined);
+  const [addValues, setAddValues] = useState(emptyModule);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
 
-  const buildTree = (list) => {
-    const map = new Map();
-    const roots = [];
+  const sortByOrder = (list) =>
+    [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-    list.forEach((m) => map.set(m.id, { ...m, children: [] }));
+  const roots = useMemo(
+    () => sortByOrder(modules.filter((m) => !m.parentModuleId)),
+    [modules]
+  );
 
-    list.forEach((m) => {
-      const node = map.get(m.id);
-      if (m.parentModuleId && map.has(m.parentModuleId)) {
-        map.get(m.parentModuleId).children.push(node);
-      } else {
-        roots.push(node);
-      }
+  const childrenMap = useMemo(() => {
+    const grouped = modules
+      .filter((m) => m.parentModuleId)
+      .reduce((acc, m) => {
+        acc[m.parentModuleId] = acc[m.parentModuleId] || [];
+        acc[m.parentModuleId].push(m);
+        return acc;
+      }, {});
+
+    Object.keys(grouped).forEach((key) => {
+      grouped[key] = sortByOrder(grouped[key]);
     });
 
-    const sort = (arr) => {
-      arr.sort((a, b) => (a.order || 0) - (b.order || 0));
-      arr.forEach((m) => m.children.length && sort(m.children));
-    };
-
-    sort(roots);
-    return roots;
-  };
-
-  const toggleExpand = (id) => {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
-
-  const handleEdit = (module) => {
-    setEditing(module.id);
-    setAddTarget(null);
-    setError("");
-    setEditValues({
-      title: module.title,
-      description: module.description || "",
-      estimatedHours: module.estimatedHours ?? "",
-      notes: module.notes || "",
-    });
-  };
-
-  const handleSave = async () => {
-    if (!editing) return;
-    setPending(true);
-    setError("");
-    try {
-      await onUpdate(editing, {
-        title: editValues.title,
-        description: editValues.description,
-        estimatedHours: editValues.estimatedHours
-          ? parseInt(editValues.estimatedHours, 10)
-          : 0,
-        notes: editValues.notes,
-      });
-      setEditing(null);
-      setEditValues({});
-    } catch (err) {
-      setError(err?.message || "Failed to update module");
-    } finally {
-      setPending(false);
-    }
-  };
+    return grouped;
+  }, [modules]);
 
   const startAdd = (parentId = null) => {
-    setAddTarget(parentId ?? null);
-    setEditing(null);
+    setAddTarget(parentId);
     setError("");
-    setAddValues({ title: "", estimatedHours: "", description: "", notes: "" });
-    if (parentId) {
-      setExpanded((prev) => new Set(prev).add(parentId));
-    }
+    setEditingId(null);
+    setAddValues(emptyModule);
   };
 
   const handleAdd = async () => {
@@ -117,15 +64,10 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion, onAdd }) {
           : 0,
         description: addValues.description?.trim() || "",
         notes: addValues.notes?.trim() || "",
-        parentModuleId: addTarget,
+        parentModuleId: addTarget ?? null,
       });
       setAddTarget(undefined);
-      setAddValues({
-        title: "",
-        estimatedHours: "",
-        description: "",
-        notes: "",
-      });
+      setAddValues(emptyModule);
     } catch (err) {
       setError(err?.message || "Failed to add module");
     } finally {
@@ -133,19 +75,66 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion, onAdd }) {
     }
   };
 
-  const renderAddForm = (parentId) => (
+  const startEdit = (module) => {
+    setEditingId(module.id);
+    setAddTarget(undefined);
+    setError("");
+    setFormValues({
+      title: module.title,
+      estimatedHours: module.estimatedHours ?? "",
+      description: module.description || "",
+      notes: module.notes || "",
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editingId) return;
+    setPending(true);
+    setError("");
+    try {
+      await onUpdate(editingId, {
+        title: formValues.title,
+        description: formValues.description,
+        estimatedHours: formValues.estimatedHours
+          ? parseInt(formValues.estimatedHours, 10)
+          : 0,
+        notes: formValues.notes,
+      });
+      setEditingId(null);
+      setFormValues(emptyModule);
+    } catch (err) {
+      setError(err?.message || "Failed to update module");
+    } finally {
+      setPending(false);
+    }
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setFormValues(emptyModule);
+  };
+
+  const cancelAdd = () => {
+    setAddTarget(undefined);
+    setAddValues(emptyModule);
+    setError("");
+  };
+
+  const renderAddCard = (parentId) => (
     <div className={styles.addCard}>
       <div className={styles.addHeader}>
-        <FaFolder />
-        <span>{parentId ? "Add submodule" : "Add module"}</span>
+        <span>{parentId ? "Add sub-module" : "Add module"}</span>
+        <span className={styles.addHint}>
+          {parentId ? "One level deep" : "Top level"}
+        </span>
       </div>
-      <div className={styles.addGrid}>
+      <div className={styles.rowInputs}>
         <input
           value={addValues.title}
           onChange={(e) =>
             setAddValues({ ...addValues, title: e.target.value })
           }
-          placeholder="Module title"
+          placeholder="Title"
           autoFocus
         />
         <input
@@ -177,175 +166,141 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion, onAdd }) {
         <button type="button" onClick={handleAdd} disabled={pending}>
           <FaSave /> {pending ? "Saving..." : "Save"}
         </button>
-        <button
-          type="button"
-          onClick={() => {
-            setAddTarget(undefined);
-            setError("");
-          }}
-        >
+        <button type="button" onClick={cancelAdd}>
           <FaTimes /> Cancel
         </button>
       </div>
     </div>
   );
 
-  const renderModule = (module, depth = 0) => {
-    const hasChildren = module.children?.length > 0;
-    const isExpanded = expanded.has(module.id);
-    const isEditing = editing === module.id;
-    const isCompleted = module.isCompleted;
-    const hours = module.estimatedHours ?? 0;
-
-    return (
-      <div
-        key={module.id}
-        className={`${styles.module} ${isCompleted ? styles.completed : ""}`}
-      >
-        <div
-          className={styles.header}
-          style={{ paddingLeft: `${depth * 20}px` }}
+  const renderDisplayRow = (module, isChild = false) => (
+    <div className={`${styles.displayRow} ${isChild ? styles.childRow : ""}`}>
+      <label className={styles.checkboxLabel}>
+        <input
+          type="checkbox"
+          checked={!!module.isCompleted}
+          onChange={() => onToggleCompletion(module.id)}
+        />
+        <span className={styles.title}>{module.title}</span>
+      </label>
+      <div className={styles.meta}>
+        <span className={styles.badge}>{module.estimatedHours ?? 0}h</span>
+        <button
+          type="button"
+          className={styles.iconBtn}
+          onClick={() => startEdit(module)}
+          aria-label="Edit module"
         >
-          <div className={styles.controls}>
-            {hasChildren ? (
-              <button
-                onClick={() => toggleExpand(module.id)}
-                className={styles.expandBtn}
-                aria-label={isExpanded ? "Collapse" : "Expand"}
-              >
-                {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
-              </button>
-            ) : (
-              <span className={styles.spacer} />
-            )}
-
-            <input
-              type="checkbox"
-              checked={isCompleted}
-              onChange={() => onToggleCompletion(module.id)}
-              className={styles.checkbox}
-            />
-          </div>
-
-          {isEditing ? (
-            <div className={styles.editForm}>
-              <div className={styles.editGrid}>
-                <input
-                  value={editValues.title}
-                  onChange={(e) =>
-                    setEditValues({ ...editValues, title: e.target.value })
-                  }
-                  placeholder="Module title"
-                  autoFocus
-                />
-                <input
-                  type="number"
-                  value={editValues.estimatedHours}
-                  onChange={(e) =>
-                    setEditValues({
-                      ...editValues,
-                      estimatedHours: e.target.value,
-                    })
-                  }
-                  placeholder="Hours"
-                  min="0"
-                  step="0.5"
-                />
-              </div>
-              <textarea
-                value={editValues.description}
-                onChange={(e) =>
-                  setEditValues({ ...editValues, description: e.target.value })
-                }
-                placeholder="Description"
-                rows={2}
-              />
-              <textarea
-                value={editValues.notes}
-                onChange={(e) =>
-                  setEditValues({ ...editValues, notes: e.target.value })
-                }
-                placeholder="Notes"
-                rows={2}
-              />
-              <div className={styles.actions}>
-                <button type="button" onClick={handleSave} disabled={pending}>
-                  <FaSave /> {pending ? "Saving..." : "Save"}
-                </button>
-                <button type="button" onClick={() => setEditing(null)}>
-                  <FaTimes /> Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className={styles.content}>
-              <div className={styles.titleRow}>
-                <div className={styles.titleGroup}>
-                  <span className={styles.bullet} />
-                  <span
-                    className={`${styles.title} ${
-                      isCompleted ? styles.strikethrough : ""
-                    }`}
-                  >
-                    {module.title}
-                  </span>
-                </div>
-                <div className={styles.badges}>
-                  <span className={styles.hours}>{hours}h</span>
-                  {isCompleted && <span className={styles.done}>✓</span>}
-                </div>
-              </div>
-              {module.description && (
-                <p className={styles.desc}>{module.description}</p>
-              )}
-              {module.notes && (
-                <div className={styles.notes}>
-                  <FaStickyNote /> {module.notes}
-                </div>
-              )}
-              <div className={styles.rowActions}>
-                <button
-                  onClick={() => handleEdit(module)}
-                  className={styles.inlineBtn}
-                  aria-label="Edit module"
-                  title="Edit module"
-                >
-                  <FaEdit />
-                </button>
-                <button
-                  onClick={() => startAdd(module.id)}
-                  className={styles.inlineBtn}
-                  aria-label="Add submodule"
-                  title="Add submodule"
-                >
-                  <FaPlus />
-                </button>
-              </div>
-            </div>
+          <FaEdit />
+        </button>
+        {!isChild && (
+          <button
+            type="button"
+            className={styles.iconBtn}
+            onClick={() => startAdd(module.id)}
+            aria-label="Add sub-module"
+          >
+            <FaPlus />
+          </button>
+        )}
+      </div>
+      {(module.description || module.notes) && (
+        <div className={styles.details}>
+          {module.description && <p>{module.description}</p>}
+          {module.notes && (
+            <span className={styles.note}>
+              <FaStickyNote /> {module.notes}
+            </span>
           )}
         </div>
+      )}
+    </div>
+  );
 
-        {addTarget === module.id && (
-          <div className={styles.children}>{renderAddForm(module.id)}</div>
-        )}
+  const renderEditRow = (isChild = false) => (
+    <div className={`${styles.editCard} ${isChild ? styles.childRow : ""}`}>
+      <div className={styles.rowInputs}>
+        <input
+          value={formValues.title}
+          onChange={(e) =>
+            setFormValues({ ...formValues, title: e.target.value })
+          }
+          placeholder="Title"
+          autoFocus
+        />
+        <input
+          type="number"
+          value={formValues.estimatedHours}
+          onChange={(e) =>
+            setFormValues({ ...formValues, estimatedHours: e.target.value })
+          }
+          placeholder="Hours"
+          min="0"
+          step="0.5"
+        />
+      </div>
+      <textarea
+        value={formValues.description}
+        onChange={(e) =>
+          setFormValues({ ...formValues, description: e.target.value })
+        }
+        placeholder="Description"
+        rows={2}
+      />
+      <textarea
+        value={formValues.notes}
+        onChange={(e) =>
+          setFormValues({ ...formValues, notes: e.target.value })
+        }
+        placeholder="Notes"
+        rows={2}
+      />
+      <div className={styles.actions}>
+        <button type="button" onClick={handleSave} disabled={pending}>
+          <FaSave /> {pending ? "Saving..." : "Save"}
+        </button>
+        <button type="button" onClick={cancelEditing}>
+          <FaTimes /> Cancel
+        </button>
+      </div>
+    </div>
+  );
 
-        {hasChildren && isExpanded && (
-          <div className={styles.children}>
-            {module.children.map((child) => renderModule(child, depth + 1))}
-          </div>
-        )}
+  const renderRoot = (root) => {
+    const children = childrenMap[root.id] || [];
+    const isEditing = editingId === root.id;
+
+    return (
+      <div key={root.id} className={styles.moduleCard}>
+        {isEditing ? renderEditRow(false) : renderDisplayRow(root, false)}
+
+        {addTarget === root.id && renderAddCard(root.id)}
+
+        <div className={styles.subList}>
+          <div className={styles.subHeader}>Sub-modules</div>
+          {children.length === 0 && (
+            <div className={styles.subEmpty}>None yet</div>
+          )}
+          {children.map((child) => (
+            <div key={child.id} className={styles.subItem}>
+              {editingId === child.id
+                ? renderEditRow(true)
+                : renderDisplayRow(child, true)}
+            </div>
+          ))}
+        </div>
       </div>
     );
   };
 
-  const tree = buildTree(modules);
-
   return (
-    <div className={styles.tree}>
-      <div className={styles.toolbar}>
-        <div className={styles.toolbarLeft}>
-          <FaFolder />
-          <span>Module hierarchy</span>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div>
+          <p className={styles.title}>Modules</p>
+          <p className={styles.subtitle}>
+            Root modules with a single sub-module level.
+          </p>
         </div>
         <button
           type="button"
@@ -358,15 +313,14 @@ function ModuleTree({ modules, onUpdate, onToggleCompletion, onAdd }) {
 
       {error && <div className={styles.error}>{error}</div>}
 
-      {addTarget === null && renderAddForm(null)}
+      {addTarget === null && renderAddCard(null)}
 
-      {tree.length === 0 ? (
-        <div className={styles.empty}>
-          <span>📚</span>
-          <p>No modules yet</p>
-        </div>
+      {roots.length === 0 ? (
+        <div className={styles.empty}>No modules yet.</div>
       ) : (
-        tree.map((m) => renderModule(m))
+        <div className={styles.list}>
+          {roots.map((root) => renderRoot(root))}
+        </div>
       )}
     </div>
   );

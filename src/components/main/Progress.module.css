@@ -3,7 +3,7 @@
   padding: 8px 4px 18px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 22px;
 }
 
 .pageHeader {
@@ -12,7 +12,7 @@
   align-items: flex-start;
   gap: 16px;
   flex-wrap: wrap;
-  padding: 20px;
+  padding: 16px;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--surface);
@@ -40,32 +40,43 @@
 /* ------------------ METRICS ------------------ */
 .metricsRow {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
 }
 
 .metric {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 16px 18px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 4px;
-  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
-.metric span {
-  font-size: 0.82rem;
+.metricIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.metricText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metricLabel {
+  font-size: 0.78rem;
   color: var(--text-soft);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
-.metric strong {
-  font-size: 1.35rem;
+.metricValue {
+  font-size: 1.15rem;
   font-weight: 750;
-  letter-spacing: -0.3px;
+  letter-spacing: -0.25px;
   color: var(--text-strong);
 }
 
@@ -73,7 +84,7 @@
 .section {
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 20px;
+  padding: 18px;
   border-radius: 4px;
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
 }
@@ -119,7 +130,7 @@
 .chartBox {
   background: var(--surface);
   border: 1px solid var(--border);
-  padding: 18px;
+  padding: 16px;
   border-radius: 4px;
   box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
 }
@@ -154,7 +165,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 14px;
+  padding: 12px;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--surface);

@@ -70,14 +70,29 @@ function Progress() {
 
   const { stats, weeklyData, courseProgress, activityHeatmap } = dashboardData;
 
-  // ✅ FIX: Convert object to array of entries
   const metricsData = [
-    { label: "🔥 Current Streak", value: `${stats.currentStreak} days` },
-    { label: "🏆 Longest Streak", value: `${stats.longestStreak} days` },
-    { label: "📅 Scheduled Hours", value: `${stats.totalScheduledHours} hrs` },
-    { label: "⏳ Completed Hours", value: `${stats.totalCompletedHours} hrs` },
-    { label: "📊 Completion Rate", value: `${stats.completionRate}%` },
-    { label: "⚡ Efficiency", value: `${stats.efficiency}%` },
+    {
+      icon: "🔥",
+      label: "Current Streak",
+      value: `${stats.currentStreak} days`,
+    },
+    {
+      icon: "🏆",
+      label: "Longest Streak",
+      value: `${stats.longestStreak} days`,
+    },
+    {
+      icon: "📅",
+      label: "Scheduled Hours",
+      value: `${stats.totalScheduledHours} hrs`,
+    },
+    {
+      icon: "⏳",
+      label: "Completed Hours",
+      value: `${stats.totalCompletedHours} hrs`,
+    },
+    { icon: "📊", label: "Completion Rate", value: `${stats.completionRate}%` },
+    { icon: "⚡", label: "Efficiency", value: `${stats.efficiency}%` },
   ];
 
   return (
@@ -94,10 +109,13 @@ function Progress() {
 
       {/* METRICS */}
       <div className={styles.metricsRow}>
-        {metricsData.map((metric, index) => (
-          <div className={styles.metric} key={index}>
-            <span>{metric.label}</span>
-            <strong>{metric.value}</strong>
+        {metricsData.map((metric) => (
+          <div className={styles.metric} key={metric.label}>
+            <span className={styles.metricIcon}>{metric.icon}</span>
+            <div className={styles.metricText}>
+              <span className={styles.metricLabel}>{metric.label}</span>
+              <strong className={styles.metricValue}>{metric.value}</strong>
+            </div>
           </div>
         ))}
       </div>

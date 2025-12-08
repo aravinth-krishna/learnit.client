@@ -2,6 +2,8 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../../services";
 import { AuthContext } from "../../context/AuthContext";
+import Button from "../ui/Button";
+import Field from "../ui/Field";
 import styles from "./Signup.module.css";
 
 function Signup() {
@@ -120,8 +122,7 @@ function Signup() {
           </div>
         )}
 
-        <label className={styles.label}>
-          <span>Full Name</span>
+        <Field label="Full Name">
           <input
             type="text"
             name="fullName"
@@ -132,10 +133,9 @@ function Signup() {
             disabled={loading}
             autoComplete="name"
           />
-        </label>
+        </Field>
 
-        <label className={styles.label}>
-          <span>Email Address</span>
+        <Field label="Email Address">
           <input
             type="email"
             name="email"
@@ -146,10 +146,9 @@ function Signup() {
             disabled={loading}
             autoComplete="email"
           />
-        </label>
+        </Field>
 
-        <label className={styles.label}>
-          <span>Password</span>
+        <Field label="Password">
           <input
             type="password"
             name="password"
@@ -161,10 +160,9 @@ function Signup() {
             minLength="6"
             autoComplete="new-password"
           />
-        </label>
+        </Field>
 
-        <label className={styles.label}>
-          <span>Confirm Password</span>
+        <Field label="Confirm Password">
           <input
             type="password"
             name="confirmPassword"
@@ -176,11 +174,16 @@ function Signup() {
             minLength="6"
             autoComplete="new-password"
           />
-        </label>
+        </Field>
 
-        <button type="submit" className={styles.submitBtn} disabled={loading}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={loading}
+          className={styles.fullWidth}
+        >
           {loading ? "Creating account..." : "Sign Up"}
-        </button>
+        </Button>
 
         <p className={styles.footer}>
           Already have an account? <a href="/auth/login">Sign in here</a>

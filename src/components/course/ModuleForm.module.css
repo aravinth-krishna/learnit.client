@@ -16,20 +16,6 @@
   font-size: 1rem;
 }
 
-.addBtn {
-  padding: 8px 14px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.addBtn:hover {
-  background: var(--accent-dark);
-}
-
 .list {
   display: flex;
   flex-direction: column;
@@ -45,6 +31,34 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.dropTarget {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.dragRow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.dragHandle {
+  width: 28px;
+  height: 28px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  cursor: grab;
+  flex-shrink: 0;
+}
+
+.dragHandle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .fieldLabel {
@@ -71,10 +85,11 @@
   border-color: var(--accent);
 }
 
-.inlineFields {
+.inlineFieldsSingleLine {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 12px;
+  flex: 1;
 }
 
 .actionsRow {
@@ -90,57 +105,11 @@
   gap: 10px;
 }
 
-.textBtn,
-.textBtnDanger {
-  background: transparent;
-  border: 1px solid var(--border);
-  padding: 8px 12px;
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.textBtn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.textBtnDanger {
+.dangerText {
   color: #c0392b;
-  border-color: #e0b4b1;
-}
-
-.textBtnDanger:hover {
-  border-color: #c0392b;
 }
 
 .hint {
   color: var(--muted);
   font-size: 0.9rem;
-}
-
-.removeBtn {
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.removeBtn:hover {
-  border-color: #dc3545;
-  color: #dc3545;
-  background: rgba(220, 53, 69, 0.05);
-}
-
-@media (max-width: 640px) {
-  .row {
-    grid-template-columns: 1fr;
-    align-items: flex-start;
-  }
-
-  .rowBadge {
-    display: none;
-  }
 }

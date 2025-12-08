@@ -2,6 +2,8 @@ import { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { authApi } from "../../services";
 import { AuthContext } from "../../context/AuthContext";
+import Button from "../ui/Button";
+import Field from "../ui/Field";
 import styles from "./Signin.module.css";
 
 function Signin() {
@@ -88,8 +90,7 @@ function Signin() {
           </div>
         )}
 
-        <label className={styles.label}>
-          <span>Email Address</span>
+        <Field label="Email Address">
           <input
             type="email"
             value={email}
@@ -99,10 +100,9 @@ function Signin() {
             disabled={loading}
             autoComplete="email"
           />
-        </label>
+        </Field>
 
-        <label className={styles.label}>
-          <span>Password</span>
+        <Field label="Password">
           <input
             type="password"
             value={password}
@@ -112,11 +112,16 @@ function Signin() {
             disabled={loading}
             autoComplete="current-password"
           />
-        </label>
+        </Field>
 
-        <button type="submit" className={styles.submitBtn} disabled={loading}>
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={loading}
+          className={styles.fullWidth}
+        >
           {loading ? "Signing in..." : "Sign In"}
-        </button>
+        </Button>
 
         <p className={styles.footer}>
           Don't have an account? <a href="/auth/register">Sign up here</a>

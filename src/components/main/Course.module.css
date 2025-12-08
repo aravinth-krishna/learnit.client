@@ -39,33 +39,6 @@
   font-size: 0.95rem;
 }
 
-.primaryBtn {
-  padding: 12px 24px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  background: var(--accent);
-  color: #fff;
-  border: 1px solid var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.primaryBtn:hover {
-  background: var(--accent-dark);
-  border-color: var(--accent-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-}
-
-.primaryBtn:active {
-  transform: translateY(0);
-}
-
 .errorMessage {
   color: #721c24;
   padding: 14px 16px;
@@ -79,37 +52,6 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
-}
-
-.statCard {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: all 0.2s ease;
-}
-
-.statCard:hover {
-  border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-.statCard span {
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-weight: 600;
-  margin: 0;
-}
-
-.statCard strong {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-strong);
-  margin: 0;
 }
 
 @media (max-width: 768px) {

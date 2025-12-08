@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
+import Button from "../ui/Button";
+import Field from "../ui/Field";
+import Modal from "../ui/Modal";
+import ui from "../ui/ui.module.css";
 import ModuleForm from "./ModuleForm";
 import styles from "./EditCourseModal.module.css";
 
-function EditCourseModal({ course, onSave, onCancel, loading }) {
+function EditCourseModal({ course, onSave, onCancel }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -80,149 +83,128 @@ function EditCourseModal({ course, onSave, onCancel, loading }) {
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <header className={styles.header}>
-          <div>
-            <p className={styles.kicker}>Edit course</p>
-            <h2>Update course details</h2>
-          </div>
-          <button onClick={onCancel} className={styles.closeBtn}>
-            ×
-          </button>
-        </header>
-
-        <form onSubmit={handleSubmit}>
-          <div className={styles.grid}>
-            <label>
-              Title *
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label>
-              Subject area
-              <input
-                type="text"
-                name="subjectArea"
-                value={formData.subjectArea}
-                onChange={handleChange}
-              />
-            </label>
-          </div>
-
-          <label>
-            Description
-            <textarea
-              name="description"
-              value={formData.description}
+    <Modal
+      kicker="Edit course"
+      title="Update course details"
+      onClose={onCancel}
+    >
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={ui.formGrid}>
+          <Field label="Title *">
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
               onChange={handleChange}
-              rows={2}
+              required
             />
-          </label>
-
-          <label>
-            Learning objectives
-            <textarea
-              name="learningObjectives"
-              value={formData.learningObjectives}
+          </Field>
+          <Field label="Subject area">
+            <input
+              type="text"
+              name="subjectArea"
+              value={formData.subjectArea}
               onChange={handleChange}
-              rows={2}
             />
-          </label>
+          </Field>
+        </div>
 
-          <div className={styles.grid}>
-            <label>
-              Difficulty
-              <select
-                name="difficulty"
-                value={formData.difficulty}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select difficulty</option>
-                <option value="Beginner">Beginner</option>
-                <option value="Intermediate">Intermediate</option>
-                <option value="Advanced">Advanced</option>
-              </select>
-            </label>
-            <label>
-              Priority
-              <select
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select priority</option>
-                <option value="Low">Low</option>
-                <option value="Medium">Medium</option>
-                <option value="High">High</option>
-              </select>
-            </label>
-          </div>
+        <Field label="Description">
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            rows={2}
+          />
+        </Field>
 
-          <div className={styles.grid}>
-            <label>
-              Total hours *
-              <input
-                type="number"
-                name="totalEstimatedHours"
-                value={formData.totalEstimatedHours}
-                onChange={handleChange}
-                min="1"
-                required
-              />
-            </label>
-            <label>
-              Target completion
-              <input
-                type="date"
-                name="targetCompletionDate"
-                value={formData.targetCompletionDate}
-                onChange={handleChange}
-              />
-            </label>
-          </div>
+        <Field label="Learning objectives">
+          <textarea
+            name="learningObjectives"
+            value={formData.learningObjectives}
+            onChange={handleChange}
+            rows={2}
+          />
+        </Field>
 
-          <label>
-            Notes
-            <textarea
-              name="notes"
-              value={formData.notes}
+        <div className={ui.formGrid}>
+          <Field label="Difficulty">
+            <select
+              name="difficulty"
+              value={formData.difficulty}
               onChange={handleChange}
-              rows={3}
-            />
-          </label>
-
-          <ModuleForm modules={modules} setModules={setModules} />
-
-          {error && <div className={styles.error}>{error}</div>}
-
-          <div className={styles.actions}>
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={submitting}
-              className={styles.cancelBtn}
+              required
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className={styles.submitBtn}
+              <option value="">Select difficulty</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </Field>
+          <Field label="Priority">
+            <select
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+              required
             >
-              {submitting ? "Updating..." : "Update course"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <option value="">Select priority</option>
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </Field>
+        </div>
+
+        <div className={ui.formGrid}>
+          <Field label="Total hours *">
+            <input
+              type="number"
+              name="totalEstimatedHours"
+              value={formData.totalEstimatedHours}
+              onChange={handleChange}
+              min="1"
+              required
+            />
+          </Field>
+          <Field label="Target completion">
+            <input
+              type="date"
+              name="targetCompletionDate"
+              value={formData.targetCompletionDate}
+              onChange={handleChange}
+            />
+          </Field>
+        </div>
+
+        <Field label="Notes">
+          <textarea
+            name="notes"
+            value={formData.notes}
+            onChange={handleChange}
+            rows={3}
+          />
+        </Field>
+
+        <ModuleForm modules={modules} setModules={setModules} />
+
+        {error && <div className={ui.errorBanner}>{error}</div>}
+
+        <div className={ui.modalActions}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            disabled={submitting}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" disabled={submitting}>
+            {submitting ? "Updating..." : "Update course"}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 

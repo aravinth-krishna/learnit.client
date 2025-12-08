@@ -13,6 +13,8 @@ import {
   FaTimes,
 } from "react-icons/fa";
 import { courseApi } from "../../services";
+import Button from "../ui/Button";
+import ui from "../ui/ui.module.css";
 import ModuleTree from "./ModuleTree";
 import ExternalLinks from "./ExternalLinks";
 import ProgressCard from "./ProgressCard";
@@ -84,12 +86,9 @@ function CourseDetails() {
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <button
-          onClick={() => navigate("/app/course")}
-          className={styles.backBtn}
-        >
+        <Button variant="ghost" onClick={() => navigate("/app/course")}>
           <FaArrowLeft /> Back
-        </button>
+        </Button>
 
         <div className={styles.title}>
           <h1>{course.title}</h1>
@@ -116,16 +115,13 @@ function CourseDetails() {
             <FaClock /> {moduleTotals().completed}/{moduleTotals().total}{" "}
             modules · {moduleTotals().percent}%
           </div>
-          <button
-            onClick={() => setShowEditModal(true)}
-            className={styles.editBtn}
-          >
+          <Button variant="primary" onClick={() => setShowEditModal(true)}>
             <FaCog /> Edit
-          </button>
+          </Button>
         </div>
       </header>
 
-      {error && <div className={styles.errorBanner}>{error}</div>}
+      {error && <div className={ui.errorBanner}>{error}</div>}
 
       <div className={styles.content}>
         <main className={styles.main}>
@@ -158,30 +154,27 @@ function CourseDetails() {
               <div className={styles.noteActions}>
                 {editingNotes ? (
                   <>
-                    <button
-                      className={styles.noteBtnPrimary}
+                    <Button
+                      variant="primary"
                       onClick={handleSaveNotes}
                       disabled={savingNotes}
                     >
                       <FaSave /> {savingNotes ? "Saving..." : "Save"}
-                    </button>
-                    <button
-                      className={styles.noteBtnGhost}
+                    </Button>
+                    <Button
+                      variant="ghost"
                       onClick={() => {
                         setEditingNotes(false);
                         setNoteDraft(course?.notes || "");
                       }}
                     >
                       <FaTimes /> Cancel
-                    </button>
+                    </Button>
                   </>
                 ) : (
-                  <button
-                    className={styles.noteBtnGhost}
-                    onClick={() => setEditingNotes(true)}
-                  >
+                  <Button variant="ghost" onClick={() => setEditingNotes(true)}>
                     <FaEdit /> Edit
-                  </button>
+                  </Button>
                 )}
               </div>
             </div>
@@ -228,7 +221,8 @@ function CourseDetails() {
               <h2>
                 <FaLink /> Resources
               </h2>
-              <button
+              <Button
+                variant="primary"
                 onClick={async () => {
                   await courseApi.addExternalLink(id, {
                     platform: "Website",
@@ -237,10 +231,9 @@ function CourseDetails() {
                   });
                   fetchCourse();
                 }}
-                className={styles.addBtn}
               >
-                +
-              </button>
+                + Add
+              </Button>
             </div>
             <ExternalLinks
               links={course.externalLinks || []}

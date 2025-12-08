@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { FaTimes } from "react-icons/fa";
+import Button from "../ui/Button";
+import Field from "../ui/Field";
+import Modal from "../ui/Modal";
+import ui from "../ui/ui.module.css";
 import ModuleForm from "./ModuleForm";
 import styles from "./CreateCourseModal.module.css";
 
-function CreateCourseModal({ onSave, onCancel, loading }) {
+function CreateCourseModal({ onSave, onCancel }) {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -36,16 +39,30 @@ function CreateCourseModal({ onSave, onCancel, loading }) {
       return;
     }
 
+    // Rebase client-only ids to sequential integers to avoid int overflow and keep parent mapping.
+    const idMap = new Map();
+    validModules.forEach((m, idx) => {
+      idMap.set(m.id, idx + 1);
+    });
+
+    const modulesPayload = validModules.map((m) => {
+      const parentId =
+        m.parentModuleId != null ? idMap.get(m.parentModuleId) ?? null : null;
+
+      return {
+        title: m.title,
+        estimatedHours: parseFloat(m.duration) || 0,
+        parentModuleId: parentId,
+      };
+    });
+
     setSubmitting(true);
     try {
       await onSave({
         ...formData,
         totalEstimatedHours: parseInt(formData.totalEstimatedHours) || 0,
-        modules: validModules.map((m) => ({
-          title: m.title,
-          estimatedHours: parseInt(m.duration) || 0,
-          parentModuleId: m.parentModuleId, // <- nesting
-        })),
+        modules: modulesPayload,
+        externalLinks: [],
       });
     } finally {
       setSubmitting(false);
@@ -53,151 +70,127 @@ function CreateCourseModal({ onSave, onCancel, loading }) {
   };
 
   return (
-    <div className={styles.overlay}>
-      <div className={styles.modal}>
-        <header className={styles.header}>
-          <div>
-            <p className={styles.kicker}>Create course</p>
-            <h2>Add a new course</h2>
-          </div>
-          <button onClick={onCancel} className={styles.closeBtn}>
-            ×
-          </button>
-        </header>
+    <Modal kicker="Create course" title="Add a new course" onClose={onCancel}>
+      <form onSubmit={handleSubmit} className={styles.form}>
+        <div className={ui.formGrid}>
+          <Field label="Course title *">
+            <input
+              type="text"
+              name="title"
+              placeholder="e.g. Machine Learning Foundations"
+              value={formData.title}
+              onChange={handleChange}
+              required
+            />
+          </Field>
+          <Field label="Subject area">
+            <select
+              name="subjectArea"
+              value={formData.subjectArea}
+              onChange={handleChange}
+            >
+              <option value="">Select category</option>
+              <option>Programming</option>
+              <option>Data Science</option>
+              <option>Web Development</option>
+              <option>Design</option>
+              <option>Business</option>
+              <option>Science</option>
+              <option>Mathematics</option>
+              <option>Language</option>
+              <option>Other</option>
+            </select>
+          </Field>
+        </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.grid}>
-            <label>
-              Course title *
-              <input
-                type="text"
-                name="title"
-                placeholder="e.g. Machine Learning Foundations"
-                value={formData.title}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label>
-              Subject area
-              <select
-                name="subjectArea"
-                value={formData.subjectArea}
-                onChange={handleChange}
-              >
-                <option value="">Select category</option>
-                <option>Programming</option>
-                <option>Data Science</option>
-                <option>Web Development</option>
-                <option>Design</option>
-                <option>Business</option>
-                <option>Science</option>
-                <option>Mathematics</option>
-                <option>Language</option>
-                <option>Other</option>
-              </select>
-            </label>
-          </div>
+        <Field label="Description">
+          <textarea
+            name="description"
+            placeholder="Brief description"
+            rows={2}
+            value={formData.description}
+            onChange={handleChange}
+          />
+        </Field>
 
-          <label>
-            Description
-            <textarea
-              name="description"
-              placeholder="Brief description"
-              rows={2}
-              value={formData.description}
+        <Field label="Learning objectives">
+          <textarea
+            name="learningObjectives"
+            placeholder="What will you achieve?"
+            rows={2}
+            value={formData.learningObjectives}
+            onChange={handleChange}
+          />
+        </Field>
+
+        <div className={ui.formGrid}>
+          <Field label="Difficulty level">
+            <select
+              name="difficulty"
+              value={formData.difficulty}
+              onChange={handleChange}
+            >
+              <option value="">Select difficulty</option>
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+          </Field>
+          <Field label="Priority">
+            <select
+              name="priority"
+              value={formData.priority}
+              onChange={handleChange}
+            >
+              <option value="">Select priority</option>
+              <option>High</option>
+              <option>Medium</option>
+              <option>Low</option>
+            </select>
+          </Field>
+        </div>
+
+        <div className={ui.formGrid}>
+          <Field label="Total hours *">
+            <input
+              type="number"
+              name="totalEstimatedHours"
+              min="1"
+              placeholder="24"
+              value={formData.totalEstimatedHours}
+              onChange={handleChange}
+              required
+            />
+          </Field>
+          <Field label="Target completion">
+            <input
+              type="date"
+              name="targetCompletionDate"
+              value={formData.targetCompletionDate}
               onChange={handleChange}
             />
-          </label>
+          </Field>
+        </div>
 
-          <label>
-            Learning objectives
-            <textarea
-              name="learningObjectives"
-              placeholder="What will you achieve?"
-              rows={2}
-              value={formData.learningObjectives}
-              onChange={handleChange}
-            />
-          </label>
+        <ModuleForm modules={modules} setModules={setModules} />
 
-          <div className={styles.grid}>
-            <label>
-              Difficulty level
-              <select
-                name="difficulty"
-                value={formData.difficulty}
-                onChange={handleChange}
-              >
-                <option value="">Select difficulty</option>
-                <option>Beginner</option>
-                <option>Intermediate</option>
-                <option>Advanced</option>
-              </select>
-            </label>
-            <label>
-              Priority
-              <select
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-              >
-                <option value="">Select priority</option>
-                <option>High</option>
-                <option>Medium</option>
-                <option>Low</option>
-              </select>
-            </label>
-          </div>
+        {error && <div className={ui.errorBanner}>{error}</div>}
 
-          <div className={styles.grid}>
-            <label>
-              Total hours *
-              <input
-                type="number"
-                name="totalEstimatedHours"
-                min="1"
-                placeholder="24"
-                value={formData.totalEstimatedHours}
-                onChange={handleChange}
-                required
-              />
-            </label>
-            <label>
-              Target completion
-              <input
-                type="date"
-                name="targetCompletionDate"
-                value={formData.targetCompletionDate}
-                onChange={handleChange}
-              />
-            </label>
-          </div>
-
-          <ModuleForm modules={modules} setModules={setModules} />
-
-          {error && <div className={styles.error}>{error}</div>}
-
-          <div className={styles.actions}>
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={submitting}
-              className={styles.cancelBtn}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={submitting}
-              className={styles.submitBtn}
-            >
-              {submitting ? "Saving..." : "Save course"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className={ui.modalActions}>
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onCancel}
+            disabled={submitting}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" disabled={submitting}>
+            {submitting ? "Saving..." : "Save course"}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 

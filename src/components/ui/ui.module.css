@@ -1,0 +1,217 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.buttonPrimary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.buttonPrimary:hover {
+  background: var(--accent-dark);
+}
+
+.buttonGhost {
+  background: transparent;
+}
+
+.buttonGhost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.buttonDanger {
+  color: #c0392b;
+  border-color: #e0b4b1;
+  background: transparent;
+}
+
+.buttonDanger:hover {
+  border-color: #c0392b;
+}
+
+.buttonText {
+  background: transparent;
+  border: none;
+  padding: 6px 8px;
+  color: var(--text);
+}
+
+.buttonText:hover {
+  color: var(--accent);
+}
+
+.card {
+  border: 1px solid var(--border);
+  background: var(--background);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field label {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+.field input,
+.field select,
+.field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.fieldHint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 16px;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.modalPanel {
+  width: min(720px, 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modalHeader h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.modalKicker {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  color: var(--muted);
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.closeButton {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 6px;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  color: var(--accent);
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.errorBanner {
+  padding: 12px;
+  background: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+  font-weight: 600;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 18px;
+}
+
+.statLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.statValue {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.statHint {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 640px) {
+  .modalPanel {
+    padding: 18px;
+  }
+}

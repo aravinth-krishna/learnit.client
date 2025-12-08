@@ -14,22 +14,6 @@
   gap: 20px;
 }
 
-.backBtn {
-  padding: 10px 16px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-}
-
-.backBtn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
 .title {
   flex: 1;
   text-align: center;
@@ -103,30 +87,6 @@
   gap: 6px;
 }
 
-.editBtn {
-  padding: 10px 16px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.editBtn:hover {
-  background: var(--accent-dark);
-}
-
-.errorBanner {
-  padding: 14px;
-  background: #fee;
-  border: 1px solid #fcc;
-  color: #c33;
-  margin-bottom: 20px;
-}
-
 .loading,
 .error {
   text-align: center;
@@ -178,34 +138,6 @@
 .noteActions {
   display: flex;
   gap: 10px;
-}
-
-.noteBtnPrimary,
-.noteBtnGhost {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.noteBtnPrimary {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-}
-
-.noteBtnPrimary:hover {
-  background: var(--accent-dark);
-}
-
-.noteBtnGhost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
 }
 
 .notesEditor {
@@ -261,16 +193,6 @@
 
 .sectionHeader h2 {
   margin: 0;
-}
-
-.addBtn {
-  padding: 6px 12px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 1.1rem;
 }
 
 .notes {

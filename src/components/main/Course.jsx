@@ -5,6 +5,8 @@ import { courseApi } from "../../services";
 import CourseList from "../course/CourseList";
 import CreateCourseModal from "../course/CreateCourseModal";
 import EditCourseModal from "../course/EditCourseModal";
+import Button from "../ui/Button";
+import StatCard from "../ui/StatCard";
 import styles from "./Course.module.css";
 
 function Course() {
@@ -100,29 +102,17 @@ function Course() {
             Create, organize, and track your learning courses.
           </p>
         </div>
-        <button
-          className={styles.primaryBtn}
-          onClick={() => setShowCreate(true)}
-        >
+        <Button variant="primary" onClick={() => setShowCreate(true)}>
           <IoIosAdd size={18} /> New course
-        </button>
+        </Button>
       </header>
 
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       <div className={styles.statsRow}>
-        <div className={styles.statCard}>
-          <span>Active courses</span>
-          <strong>{stats.activeCourses}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span>Weekly focus</span>
-          <strong>{stats.weeklyFocus}</strong>
-        </div>
-        <div className={styles.statCard}>
-          <span>Next milestone</span>
-          <strong>{stats.nextMilestone}</strong>
-        </div>
+        <StatCard label="Active courses" value={stats.activeCourses} />
+        <StatCard label="Weekly focus" value={stats.weeklyFocus} />
+        <StatCard label="Next milestone" value={stats.nextMilestone} />
       </div>
 
       <CourseList

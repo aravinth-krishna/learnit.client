@@ -83,6 +83,29 @@
   line-height: 1.4;
 }
 
+.message p {
+  margin: 4px 0;
+}
+
+.message ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
+.message code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 0 4px;
+  border-radius: 3px;
+  font-family: var(
+    --font-mono,
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace
+  );
+}
+
 .assistant {
   border-color: var(--accent);
 }

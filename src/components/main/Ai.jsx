@@ -2,6 +2,42 @@ import { useEffect, useMemo, useState } from "react";
 import { aiApi } from "../../services";
 import styles from "./Ai.module.css";
 
+const escapeHtml = (str) =>
+  str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+const applyInlineMarkdown = (text) =>
+  text
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+
+const markdownToHtml = (text) => {
+  const escaped = escapeHtml(text || "");
+  const lines = escaped.split(/\r?\n/);
+  const html = [];
+  let inList = false;
+
+  for (const line of lines) {
+    if (/^\s*[-*]\s+/.test(line)) {
+      if (!inList) {
+        html.push("<ul>");
+        inList = true;
+      }
+      const item = line.replace(/^\s*[-*]\s+/, "");
+      html.push(`<li>${applyInlineMarkdown(item)}</li>`);
+    } else if (line.trim().length) {
+      if (inList) {
+        html.push("</ul>");
+        inList = false;
+      }
+      html.push(`<p>${applyInlineMarkdown(line)}</p>`);
+    }
+  }
+
+  if (inList) html.push("</ul>");
+  return html.join("") || "<p></p>";
+};
+
 function Ai() {
   const [messages, setMessages] = useState([
     {
@@ -175,9 +211,8 @@ function Ai() {
                 className={`${styles.message} ${
                   m.role === "assistant" ? styles.assistant : styles.user
                 }`}
-              >
-                {m.content}
-              </div>
+                dangerouslySetInnerHTML={{ __html: markdownToHtml(m.content) }}
+              ></div>
             ))}
             {loading && <div className={styles.message}>Thinking...</div>}
           </div>

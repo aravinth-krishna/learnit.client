@@ -225,7 +225,11 @@ function CourseDetails() {
               <FaClock /> Progress
             </h2>
             <ProgressCard
+              progressPercentage={course.progressPercentage}
+              completedModules={course.completedModules}
+              totalModules={course.totalModules}
               totalHours={course.totalEstimatedHours}
+              completedHours={course.completedHours}
               hoursRemaining={course.hoursRemaining}
             />
           </section>

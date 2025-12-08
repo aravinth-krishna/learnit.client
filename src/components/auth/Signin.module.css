@@ -64,7 +64,7 @@
   background: var(--auth-surface);
   color: var(--auth-ink);
   border: 1px solid var(--auth-border);
-  border-radius: 16px;
+  border-radius: 4px;
   box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
   padding: 28px;
   display: flex;
@@ -113,7 +113,7 @@
   background: rgba(239, 68, 68, 0.08);
   color: #b91c1c;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 4px;
   font-size: 0.95rem;
 }
 
@@ -137,7 +137,7 @@
 .field input {
   padding: 12px;
   border: 1px solid var(--auth-border);
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--surface);
   font-size: 1rem;
   color: var(--auth-ink);

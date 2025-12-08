@@ -10,6 +10,7 @@ import CourseDetails from "./components/course/CourseDetails.jsx";
 import Schedule from "./components/main/Schedule.jsx";
 import Progress from "./components/main/Progress.jsx";
 import Profile from "./components/main/Profile.jsx";
+import Ai from "./components/main/Ai.jsx";
 
 import Layout from "./layouts/Layout.jsx";
 import HomeLayout from "./layouts/HomeLayout.jsx";
@@ -48,6 +49,7 @@ const router = createBrowserRouter([
       { path: "schedule", element: <Schedule /> },
       { path: "progress", element: <Progress /> },
       { path: "profile", element: <Profile /> },
+      { path: "ai", element: <Ai /> },
     ],
   },
 ]);

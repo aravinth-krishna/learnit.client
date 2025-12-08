@@ -8,7 +8,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { IoIosLogOut } from "react-icons/io";
 import { MdOutlineMenuBook } from "react-icons/md";
 import { AiOutlineSchedule } from "react-icons/ai";
-import { BsGraphUp } from "react-icons/bs";
+import { BsGraphUp, BsChatDots } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
 import { BsSun, BsMoon } from "react-icons/bs";
 
@@ -43,6 +43,12 @@ const Sidebar = () => {
         label: "Profile",
         icon: <CgProfile size={22} />,
         activeKey: "profile",
+      },
+      {
+        path: "/app/ai",
+        label: "AI",
+        icon: <BsChatDots size={22} />,
+        activeKey: "ai",
       },
     ],
     []

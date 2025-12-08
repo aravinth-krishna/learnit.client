@@ -7,8 +7,9 @@ import { courseApi } from "./courseApi";
 import { scheduleApi } from "./scheduleApi";
 import { profileApi } from "./profileApi";
 import { progressApi } from "./progressApi";
+import { aiApi } from "./aiApi";
 
-export { authApi, courseApi, scheduleApi, profileApi, progressApi };
+export { authApi, courseApi, scheduleApi, profileApi, progressApi, aiApi };
 
 // Default export for backward compatibility
 export default {
@@ -17,4 +18,5 @@ export default {
   ...scheduleApi,
   ...profileApi,
   ...progressApi,
+  ...aiApi,
 };

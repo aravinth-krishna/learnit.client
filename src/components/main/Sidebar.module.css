@@ -25,17 +25,18 @@
   height: 28px;
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background 0.2s ease;
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+  transition: background 0.2s ease, border-color 0.2s ease;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 .toggleBtn:hover {
-  background: var(--bg);
+  background: var(--surface);
+  border-color: var(--accent);
 }
 
 .branding {
@@ -45,11 +46,8 @@
   overflow: hidden;
   padding: 6px 8px;
   border-radius: 12px;
-  background: linear-gradient(
-    135deg,
-    rgba(37, 99, 235, 0.08),
-    rgba(34, 211, 238, 0.08)
-  );
+  background: var(--surface);
+  border: 1px solid var(--border);
 }
 
 .logoMark {
@@ -104,18 +102,14 @@
 }
 
 .menuItem:hover {
-  background: rgba(37, 99, 235, 0.08);
-  color: var(--primary);
+  background: var(--bg);
+  color: var(--accent);
 }
 
 .active {
-  background: linear-gradient(
-    135deg,
-    var(--accent) 0%,
-    var(--accent-dark) 100%
-  );
-  color: white;
-  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
 }
 
 .icon {
@@ -127,12 +121,8 @@
 .focusCard {
   padding: 14px;
   border-radius: 14px;
-  background: linear-gradient(
-    145deg,
-    rgba(37, 99, 235, 0.08),
-    rgba(34, 211, 238, 0.08)
-  );
-  border: 1px solid rgba(148, 163, 184, 0.3);
+  background: var(--surface);
+  border: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -192,7 +182,7 @@
   padding: 10px 12px;
   border: none;
   border-radius: 12px;
-  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  background: #e11d48;
   color: white;
   display: flex;
   gap: 10px;

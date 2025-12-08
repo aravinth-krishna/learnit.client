@@ -1,6 +1,4 @@
-import Button from "../ui/Button";
-import Card from "../ui/Card";
-import Field from "../ui/Field";
+import { FaFolder, FaRegFile, FaPlus, FaTimes } from "react-icons/fa";
 import styles from "./ModuleForm.module.css";
 
 function ModuleForm({ modules, setModules }) {
@@ -16,7 +14,7 @@ function ModuleForm({ modules, setModules }) {
         m.id === rootId
           ? {
               ...m,
-              subModules: m.subModules.map((s) =>
+              subModules: (m.subModules || []).map((s) =>
                 s.id === subId ? { ...s, [field]: value } : s
               ),
             }
@@ -39,7 +37,7 @@ function ModuleForm({ modules, setModules }) {
           ? {
               ...m,
               subModules: [
-                ...m.subModules,
+                ...(m.subModules || []),
                 { id: crypto.randomUUID(), title: "", duration: "" },
               ],
             }
@@ -56,7 +54,10 @@ function ModuleForm({ modules, setModules }) {
     setModules((prev) =>
       prev.map((m) =>
         m.id === rootId
-          ? { ...m, subModules: m.subModules.filter((s) => s.id !== subId) }
+          ? {
+              ...m,
+              subModules: (m.subModules || []).filter((s) => s.id !== subId),
+            }
           : m
       )
     );
@@ -65,110 +66,127 @@ function ModuleForm({ modules, setModules }) {
   return (
     <div className={styles.section}>
       <div className={styles.header}>
-        <span>Course modules *</span>
-        <Button type="button" variant="primary" onClick={addRoot}>
-          + Add module
-        </Button>
+        <div>
+          <p className={styles.title}>Course modules *</p>
+          <p className={styles.subtitle}>Root modules with one sub-level.</p>
+        </div>
+        <button type="button" className={styles.primaryBtn} onClick={addRoot}>
+          <FaPlus />
+          Add module
+        </button>
       </div>
 
-      <div className={styles.list}>
+      {modules.length === 0 && (
+        <div className={styles.empty}>No modules yet.</div>
+      )}
+
+      <ul className={styles.tree}>
         {modules.map((module) => (
-          <Card key={module.id} className={styles.card}>
-            <Field label="Module title">
-              <input
-                type="text"
-                value={module.title}
-                onChange={(e) => updateRoot(module.id, "title", e.target.value)}
-                placeholder="Module title"
-                required
-              />
-            </Field>
-
-            <div className={styles.inlineFieldsSingleLine}>
-              <Field label="Hours (whole)">
-                <input
-                  type="number"
-                  placeholder="e.g. 2"
-                  value={module.duration}
-                  onChange={(e) =>
-                    updateRoot(module.id, "duration", e.target.value)
-                  }
-                  min="0"
-                  step="1"
-                  required
-                />
-              </Field>
-            </div>
-
-            <div className={styles.subHeaderRow}>
-              <span>Sub-modules (one level)</span>
-              <Button
-                type="button"
-                variant="text"
-                onClick={() => addSub(module.id)}
-              >
-                + Add sub-module
-              </Button>
-            </div>
-
-            {(module.subModules || []).length === 0 && (
-              <p className={styles.muted}>No sub-modules yet.</p>
-            )}
-
-            {(module.subModules || []).map((sub) => (
-              <div key={sub.id} className={styles.subCard}>
-                <Field label="Title">
+          <li className={styles.node} key={module.id}>
+            <div className={styles.row} style={{ "--depth": 0 }}>
+              <div className={styles.rowLeft}>
+                <span className={styles.icon}>
+                  <FaFolder />
+                </span>
+                <div className={styles.inlineForm}>
                   <input
                     type="text"
-                    value={sub.title}
+                    value={module.title}
                     onChange={(e) =>
-                      updateSub(module.id, sub.id, "title", e.target.value)
+                      updateRoot(module.id, "title", e.target.value)
                     }
-                    placeholder="Sub-module title"
+                    placeholder="Module title"
                     required
                   />
-                </Field>
-                <Field label="Hours (whole)">
                   <input
                     type="number"
-                    value={sub.duration}
+                    value={module.duration}
                     onChange={(e) =>
-                      updateSub(module.id, sub.id, "duration", e.target.value)
+                      updateRoot(module.id, "duration", e.target.value)
                     }
-                    placeholder="e.g. 1"
+                    placeholder="Hours"
                     min="0"
                     step="1"
                     required
                   />
-                </Field>
-                <div className={styles.actionsRow}>
-                  <Button
-                    type="button"
-                    variant="text"
-                    className={styles.dangerText}
-                    onClick={() => removeSub(module.id, sub.id)}
-                  >
-                    Remove sub-module
-                  </Button>
                 </div>
               </div>
-            ))}
-
-            <div className={styles.actionsRow}>
-              {modules.length > 1 && (
-                <Button
-                  type="button"
-                  variant="text"
-                  className={styles.dangerText}
-                  onClick={() => removeRoot(module.id)}
-                >
-                  Remove module
-                </Button>
-              )}
+              <div className={styles.actions}>
+                <button type="button" onClick={() => addSub(module.id)}>
+                  <FaPlus />
+                  Sub
+                </button>
+                {modules.length > 1 && (
+                  <button
+                    type="button"
+                    className={styles.danger}
+                    onClick={() => removeRoot(module.id)}
+                  >
+                    <FaTimes />
+                  </button>
+                )}
+              </div>
             </div>
-          </Card>
+
+            {(module.subModules || []).length > 0 && (
+              <ul className={styles.children}>
+                {(module.subModules || []).map((sub) => (
+                  <li className={styles.node} key={sub.id}>
+                    <div className={styles.row} style={{ "--depth": 1 }}>
+                      <div className={styles.rowLeft}>
+                        <span className={styles.icon}>
+                          <FaRegFile />
+                        </span>
+                        <div className={styles.inlineForm}>
+                          <input
+                            type="text"
+                            value={sub.title}
+                            onChange={(e) =>
+                              updateSub(
+                                module.id,
+                                sub.id,
+                                "title",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Sub-module title"
+                            required
+                          />
+                          <input
+                            type="number"
+                            value={sub.duration}
+                            onChange={(e) =>
+                              updateSub(
+                                module.id,
+                                sub.id,
+                                "duration",
+                                e.target.value
+                              )
+                            }
+                            placeholder="Hours"
+                            min="0"
+                            step="1"
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className={styles.actions}>
+                        <button
+                          type="button"
+                          className={styles.danger}
+                          onClick={() => removeSub(module.id, sub.id)}
+                        >
+                          <FaTimes />
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
         ))}
-      </div>
+      </ul>
     </div>
   );
 }

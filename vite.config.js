@@ -47,7 +47,6 @@ const target = env.ASPNETCORE_HTTPS_PORT
   ? env.ASPNETCORE_URLS.split(";")[0]
   : "https://localhost:7271";
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [plugin()],
   resolve: {
@@ -57,18 +56,16 @@ export default defineConfig({
     extensions: [".js", ".jsx", ".ts", ".tsx", ".json"],
   },
   server: {
+    port: 5173,
+    strictPort: true,
+    open: false,
     proxy: {
       "^/api": {
         target,
         secure: false,
         changeOrigin: true,
       },
-      "^/weatherforecast": {
-        target,
-        secure: false,
-      },
     },
-    port: parseInt(env.DEV_SERVER_PORT || "51338"),
     https: {
       key: fs.readFileSync(keyFilePath),
       cert: fs.readFileSync(certFilePath),

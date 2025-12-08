@@ -63,47 +63,6 @@ function Ai() {
     }
   };
 
-  const quickInsights = async (type) => {
-    setLoading(true);
-    try {
-      const apiCall =
-        type === "schedule"
-          ? aiApi.scheduleInsights
-          : type === "progress"
-          ? aiApi.progressInsights
-          : aiApi.scheduleInsights;
-      const data = await apiCall();
-      setInsights(data.insights || []);
-    } catch (err) {
-      setInsights([{ title: "Error", detail: err.message || "Failed" }]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateCourse = async () => {
-    if (!input.trim()) return;
-    setLoading(true);
-    try {
-      const draft = await aiApi.createCourse(input.trim());
-      const summary = `${draft.title} | ${draft.modules.length} modules | ${draft.totalEstimatedHours}h`;
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Drafted course: " + summary },
-      ]);
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: err.message || "Failed to generate course",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const loadFriends = async () => {
     try {
       const data = await aiApi.listFriends();
@@ -140,27 +99,6 @@ function Ai() {
             Chat, generate courses, get scheduling and progress insights.
           </p>
         </div>
-        <div className={styles.quickRow}>
-          <button
-            className={styles.pill}
-            onClick={() => quickInsights("schedule")}
-          >
-            <FiZap /> Schedule insights
-          </button>
-          <button
-            className={styles.pill}
-            onClick={() => quickInsights("progress")}
-          >
-            <FiBarChart2 /> Progress tips
-          </button>
-          <button
-            className={styles.pill}
-            onClick={generateCourse}
-            disabled={!input}
-          >
-            <FiSend /> Generate course
-          </button>
-        </div>
       </header>
 
       <div className={styles.tabs}>
@@ -183,7 +121,7 @@ function Ai() {
       </div>
 
       {activeTab === "chat" && (
-        <div className={styles.layout}>
+        <div className={styles.chatPanel}>
           <div className={styles.chatCard}>
             <div className={styles.messages}>
               {messages.map((m, idx) => (
@@ -201,24 +139,50 @@ function Ai() {
               {loading && <div className={styles.message}>Thinking...</div>}
             </div>
             <div className={styles.inputRow}>
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask anything about your study plan..."
-              />
-              <button
-                onClick={() => sendMessage(input)}
-                disabled={loading || !input.trim()}
-              >
-                <FiSend /> Send
-              </button>
+              <div className={styles.quickActions}>
+                <button
+                  type="button"
+                  className={styles.pill}
+                  onClick={() =>
+                    sendMessage("Give me 3 schedule tweaks for this week")
+                  }
+                  disabled={loading}
+                >
+                  <FiZap /> Schedule tips
+                </button>
+                <button
+                  type="button"
+                  className={styles.pill}
+                  onClick={() =>
+                    sendMessage(
+                      "Give me 3 quick progress insights and next actions"
+                    )
+                  }
+                  disabled={loading}
+                >
+                  <FiBarChart2 /> Progress tips
+                </button>
+              </div>
+              <div className={styles.inputFlex}>
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask anything about your study plan..."
+                />
+                <button
+                  onClick={() => sendMessage(input)}
+                  disabled={loading || !input.trim()}
+                >
+                  <FiSend /> Send
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {activeTab === "compare" && (
-        <div className={styles.compareGrid}>
+        <div className={styles.compareColumn}>
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <h3>Select a friend</h3>

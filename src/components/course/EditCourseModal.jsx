@@ -4,6 +4,7 @@ import Field from "../ui/Field";
 import Modal from "../ui/Modal";
 import ui from "../ui/ui.module.css";
 import ModuleForm from "./ModuleForm";
+import { aiApi } from "../../services";
 import styles from "./EditCourseModal.module.css";
 
 function EditCourseModal({ course, onSave, onCancel }) {
@@ -22,6 +23,9 @@ function EditCourseModal({ course, onSave, onCancel }) {
   const [externalLinks, setExternalLinks] = useState([]);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("manual");
 
   useEffect(() => {
     if (course) {
@@ -96,128 +100,220 @@ function EditCourseModal({ course, onSave, onCancel }) {
     }
   };
 
+  const handleAiGenerate = async () => {
+    if (!aiPrompt.trim()) return;
+    setAiLoading(true);
+    setError("");
+    try {
+      const draft = await aiApi.createCourse(aiPrompt.trim());
+      setFormData((prev) => ({
+        ...prev,
+        title: draft.title || prev.title,
+        description: draft.description || prev.description,
+        difficulty: draft.difficulty || prev.difficulty,
+        priority: draft.priority || prev.priority,
+        learningObjectives:
+          draft.description || prev.learningObjectives || "AI generated plan",
+        subjectArea: prev.subjectArea || "AI suggested",
+        totalEstimatedHours:
+          draft.totalEstimatedHours?.toString() || prev.totalEstimatedHours,
+        notes: prev.notes || "AI refreshed course structure",
+      }));
+
+      const mapped = (draft.modules || []).map((m) => ({
+        id: crypto.randomUUID(),
+        title: m.title,
+        duration: (m.estimatedHours ?? "").toString(),
+        subModules: (m.subModules || []).map((s) => ({
+          id: crypto.randomUUID(),
+          title: s.title,
+          duration: (s.estimatedHours ?? "").toString(),
+        })),
+      }));
+      if (mapped.length) setModules(mapped);
+      else
+        setModules([
+          {
+            id: crypto.randomUUID(),
+            title: "Kickoff",
+            duration: "2",
+            subModules: [],
+          },
+        ]);
+      setActiveTab("manual");
+    } catch (err) {
+      setError(err.message || "Failed to generate course");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <Modal
       kicker="Edit course"
       title="Update course details"
       onClose={onCancel}
     >
-      <form onSubmit={handleSubmit} className={styles.form}>
-        <div className={ui.formGrid}>
-          <Field label="Title *">
-            <input
-              type="text"
-              name="title"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
-          </Field>
-          <Field label="Subject area">
-            <input
-              type="text"
-              name="subjectArea"
-              value={formData.subjectArea}
-              onChange={handleChange}
-            />
-          </Field>
-        </div>
+      <div className={ui.tabs}>
+        <button
+          type="button"
+          className={`${ui.tab} ${activeTab === "manual" ? ui.active : ""}`}
+          onClick={() => setActiveTab("manual")}
+        >
+          Manual
+        </button>
+        <button
+          type="button"
+          className={`${ui.tab} ${activeTab === "ai" ? ui.active : ""}`}
+          onClick={() => setActiveTab("ai")}
+        >
+          Ask AI
+        </button>
+      </div>
 
-        <Field label="Description">
+      {activeTab === "ai" && (
+        <div className={styles.aiPane}>
+          <p>
+            Describe how you want to update this course. We’ll draft a new
+            structure.
+          </p>
           <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows={2}
+            rows={4}
+            value={aiPrompt}
+            onChange={(e) => setAiPrompt(e.target.value)}
+            placeholder="e.g., Expand with a capstone project and more hands-on React hooks practice"
           />
-        </Field>
-
-        <Field label="Learning objectives">
-          <textarea
-            name="learningObjectives"
-            value={formData.learningObjectives}
-            onChange={handleChange}
-            rows={2}
-          />
-        </Field>
-
-        <div className={ui.formGrid}>
-          <Field label="Difficulty">
-            <select
-              name="difficulty"
-              value={formData.difficulty}
-              onChange={handleChange}
-              required
+          <div className={ui.modalActions}>
+            <Button
+              type="button"
+              variant="primary"
+              onClick={handleAiGenerate}
+              disabled={aiLoading}
             >
-              <option value="">Select difficulty</option>
-              <option value="Beginner">Beginner</option>
-              <option value="Intermediate">Intermediate</option>
-              <option value="Advanced">Advanced</option>
-            </select>
-          </Field>
-          <Field label="Priority">
-            <select
-              name="priority"
-              value={formData.priority}
+              {aiLoading ? "Generating..." : "Generate with AI"}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "manual" && (
+        <form onSubmit={handleSubmit} className={styles.form}>
+          <div className={ui.formGrid}>
+            <Field label="Title *">
+              <input
+                type="text"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                required
+              />
+            </Field>
+            <Field label="Subject area">
+              <input
+                type="text"
+                name="subjectArea"
+                value={formData.subjectArea}
+                onChange={handleChange}
+              />
+            </Field>
+          </div>
+
+          <Field label="Description">
+            <textarea
+              name="description"
+              value={formData.description}
               onChange={handleChange}
-              required
+              rows={2}
+            />
+          </Field>
+
+          <Field label="Learning objectives">
+            <textarea
+              name="learningObjectives"
+              value={formData.learningObjectives}
+              onChange={handleChange}
+              rows={2}
+            />
+          </Field>
+
+          <div className={ui.formGrid}>
+            <Field label="Difficulty">
+              <select
+                name="difficulty"
+                value={formData.difficulty}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select difficulty</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+              </select>
+            </Field>
+            <Field label="Priority">
+              <select
+                name="priority"
+                value={formData.priority}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select priority</option>
+                <option value="Low">Low</option>
+                <option value="Medium">Medium</option>
+                <option value="High">High</option>
+              </select>
+            </Field>
+          </div>
+
+          <div className={ui.formGrid}>
+            <Field label="Total hours *">
+              <input
+                type="number"
+                name="totalEstimatedHours"
+                value={formData.totalEstimatedHours}
+                onChange={handleChange}
+                min="1"
+                required
+              />
+            </Field>
+            <Field label="Target completion">
+              <input
+                type="date"
+                name="targetCompletionDate"
+                value={formData.targetCompletionDate}
+                onChange={handleChange}
+              />
+            </Field>
+          </div>
+
+          <Field label="Notes">
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              rows={3}
+            />
+          </Field>
+
+          <ModuleForm modules={modules} setModules={setModules} />
+
+          {error && <div className={ui.errorBanner}>{error}</div>}
+
+          <div className={ui.modalActions}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onCancel}
+              disabled={submitting}
             >
-              <option value="">Select priority</option>
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-            </select>
-          </Field>
-        </div>
-
-        <div className={ui.formGrid}>
-          <Field label="Total hours *">
-            <input
-              type="number"
-              name="totalEstimatedHours"
-              value={formData.totalEstimatedHours}
-              onChange={handleChange}
-              min="1"
-              required
-            />
-          </Field>
-          <Field label="Target completion">
-            <input
-              type="date"
-              name="targetCompletionDate"
-              value={formData.targetCompletionDate}
-              onChange={handleChange}
-            />
-          </Field>
-        </div>
-
-        <Field label="Notes">
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            rows={3}
-          />
-        </Field>
-
-        <ModuleForm modules={modules} setModules={setModules} />
-
-        {error && <div className={ui.errorBanner}>{error}</div>}
-
-        <div className={ui.modalActions}>
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onCancel}
-            disabled={submitting}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" variant="primary" disabled={submitting}>
-            {submitting ? "Updating..." : "Update course"}
-          </Button>
-        </div>
-      </form>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={submitting}>
+              {submitting ? "Updating..." : "Update course"}
+            </Button>
+          </div>
+        </form>
+      )}
     </Modal>
   );
 }

@@ -21,6 +21,12 @@
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.14);
 }
 
+.header > div > h1 {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: row;
+}
+
 .kicker {
   margin: 0;
   text-transform: uppercase;
@@ -68,6 +74,10 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 14px;
+}
+
+.chatPanel {
+  width: 100%;
 }
 
 .tabs {
@@ -164,16 +174,29 @@
 
 .inputRow {
   display: flex;
-  gap: 8px;
-  padding: 10px;
+  gap: 10px;
+  padding: 14px;
   border-top: 1px solid var(--border);
   background: var(--surface);
   border-radius: 0 0 10px 10px;
 }
 
+.quickActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.inputFlex {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+}
+
 .inputRow input {
   flex: 1;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: 4px;
   background: var(--bg);
@@ -201,6 +224,12 @@
 .compareGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.compareColumn {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
@@ -269,6 +298,19 @@
   background: rgba(0, 0, 0, 0.06);
   padding: 2px 4px;
   border-radius: 4px;
+}
+
+.markdown table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+}
+
+.markdown th,
+.markdown td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
 }
 
 .muted {

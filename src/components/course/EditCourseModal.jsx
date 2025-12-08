@@ -106,6 +106,7 @@ function EditCourseModal({ course, onSave, onCancel }) {
     setError("");
     try {
       const draft = await aiApi.createCourse(aiPrompt.trim());
+      console.log("AI course draft (edit)", draft);
       setFormData((prev) => ({
         ...prev,
         title: draft.title || prev.title,
@@ -113,11 +114,15 @@ function EditCourseModal({ course, onSave, onCancel }) {
         difficulty: draft.difficulty || prev.difficulty,
         priority: draft.priority || prev.priority,
         learningObjectives:
-          draft.description || prev.learningObjectives || "AI generated plan",
-        subjectArea: prev.subjectArea || "AI suggested",
+          draft.learningObjectives ||
+          prev.learningObjectives ||
+          "AI generated plan",
+        subjectArea: draft.subjectArea || prev.subjectArea || "AI suggested",
         totalEstimatedHours:
           draft.totalEstimatedHours?.toString() || prev.totalEstimatedHours,
-        notes: prev.notes || "AI refreshed course structure",
+        targetCompletionDate:
+          draft.targetCompletionDate || prev.targetCompletionDate,
+        notes: draft.notes || prev.notes || "AI refreshed course structure",
       }));
 
       const mapped = (draft.modules || []).map((m) => ({

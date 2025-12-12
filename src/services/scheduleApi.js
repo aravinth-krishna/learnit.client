@@ -27,6 +27,10 @@ export const scheduleApi = {
     return http.delete(`/api/schedule/${id}`);
   },
 
+  async resetSchedule() {
+    return http.delete("/api/schedule/reset");
+  },
+
   // Module Scheduling
   async getAvailableModules() {
     return http.get("/api/schedule/available-modules");

@@ -15,6 +15,7 @@ export default function Schedule() {
   const [availableModules, setAvailableModules] = useState([]);
   const [showAutoSchedule, setShowAutoSchedule] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [editingEvent, setEditingEvent] = useState(null);
   const [editForm, setEditForm] = useState({
     title: "",
@@ -131,6 +132,22 @@ export default function Schedule() {
     } catch (err) {
       console.error("Auto-schedule failed", err);
       setError(err.message || "Failed to auto-schedule modules");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetSchedule = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const result = await scheduleApi.resetSchedule();
+      await loadEvents();
+      setShowResetConfirm(false);
+      setNotification(result.message || "Schedule cleared");
+      setTimeout(() => setNotification(""), 4000);
+    } catch (err) {
+      setError(err.message || "Failed to reset schedule");
     } finally {
       setLoading(false);
     }
@@ -276,7 +293,7 @@ export default function Schedule() {
   // Hover effects for better UX
   function handleEventMouseEnter(info) {
     const el = info.el;
-    el.style.cursor = "pointer";
+    el.style.cursor = "grab";
     el.style.transform = "scale(1.02)";
     el.style.transition = "transform 0.1s ease";
   }
@@ -496,6 +513,15 @@ export default function Schedule() {
           >
             🚀 Auto-schedule modules
           </button>
+
+          <button
+            className={styles.secondaryBtn}
+            type="button"
+            onClick={() => setShowResetConfirm(true)}
+            disabled={loading}
+          >
+            🧹 Reset schedule
+          </button>
         </div>
       </div>
 
@@ -538,8 +564,8 @@ export default function Schedule() {
             center: "title",
             right: "dayGridMonth,timeGridWeek,timeGridDay",
           }}
-          slotMinTime="06:00:00"
-          slotMaxTime="23:00:00"
+          slotMinTime="08:00:00"
+          slotMaxTime="20:00:00"
           slotDuration="00:30:00"
           snapDuration="00:15:00"
           height="70vh"
@@ -560,8 +586,8 @@ export default function Schedule() {
           }}
           businessHours={{
             daysOfWeek: [1, 2, 3, 4, 5],
-            startTime: "09:00",
-            endTime: "17:00",
+            startTime: "08:00",
+            endTime: "18:00",
           }}
           eventConstraint="businessHours"
         />
@@ -683,6 +709,12 @@ export default function Schedule() {
               <div>
                 <p className={styles.kicker}>Edit Event</p>
                 <h2>Modify Schedule Item</h2>
+                {editingEvent.courseModule && (
+                  <p className={styles.subtle}>
+                    Linked to {editingEvent.courseModule.courseTitle} ·{" "}
+                    {editingEvent.courseModule.title}
+                  </p>
+                )}
               </div>
               <button
                 className={styles.iconBtn}
@@ -792,7 +824,8 @@ export default function Schedule() {
                     <option value="">Choose a module (optional)</option>
                     {availableModules.map((module) => (
                       <option key={module.id} value={module.id}>
-                        {module.title} ({module.courseTitle})
+                        {module.title} · {module.courseTitle} (
+                        {module.estimatedHours}h)
                       </option>
                     ))}
                   </select>
@@ -831,6 +864,51 @@ export default function Schedule() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset schedule confirmation */}
+      {showResetConfirm && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <div>
+                <p className={styles.kicker}>Reset</p>
+                <h2>Clear all scheduled events?</h2>
+                <p className={styles.subtle}>
+                  This removes every event from your calendar. Linked modules
+                  remain untouched.
+                </p>
+              </div>
+              <button
+                className={styles.iconBtn}
+                type="button"
+                onClick={() => setShowResetConfirm(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            {error && <div className={styles.errorMessage}>{error}</div>}
+
+            <div className={styles.formActions}>
+              <button
+                className={styles.secondaryBtn}
+                type="button"
+                onClick={() => setShowResetConfirm(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.dangerBtn}
+                type="button"
+                onClick={handleResetSchedule}
+                disabled={loading}
+              >
+                Clear all events
+              </button>
             </div>
           </div>
         </div>

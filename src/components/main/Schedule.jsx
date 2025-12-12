@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import FullCalendar from "@fullcalendar/react";
-import timeGridPlugin from "@fullcalendar/timegrid";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import { scheduleApi } from "../../services";
 import { ScheduleInsights } from "../schedule/ScheduleInsights";
+import { AutoScheduleModal } from "./schedule/AutoScheduleModal";
+import { EditEventModal } from "./schedule/EditEventModal";
+import { ResetScheduleModal } from "./schedule/ResetScheduleModal";
+import { ScheduleCalendar } from "./schedule/ScheduleCalendar";
+import { ScheduleHeader } from "./schedule/ScheduleHeader";
 import styles from "./Schedule.module.css";
 
 export default function Schedule() {
@@ -48,6 +49,12 @@ export default function Schedule() {
     focusPreference: "morning",
   });
   const [notification, setNotification] = useState("");
+
+  const updateAutoOptions = (updates) =>
+    setAutoOptions((prev) => ({ ...prev, ...updates }));
+
+  const updateEditForm = (updates) =>
+    setEditForm((prev) => ({ ...prev, ...updates }));
 
   useEffect(() => {
     loadEvents();
@@ -511,51 +518,16 @@ export default function Schedule() {
         <div className={styles.notification}>{notification}</div>
       )}
 
-      <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.kicker}>AI-powered scheduling</p>
-          <h1>Study planner</h1>
-          <p className={styles.subtle}>
-            Intelligent time blocking for optimal learning outcomes
-          </p>
-        </div>
-
-        <div className={styles.controls}>
-          <div className={styles.productivityBadge}>
-            <span>Productivity Score</span>
-            <strong>{productivityScore}%</strong>
-          </div>
-
-          <button
-            className={styles.lightBtn}
-            onClick={() => {
-              const api = calendarRef.current?.getApi();
-              api?.today();
-            }}
-            type="button"
-          >
-            Today
-          </button>
-
-          <button
-            className={styles.primaryBtn}
-            type="button"
-            onClick={() => setShowAutoSchedule(true)}
-            disabled={loading}
-          >
-            🚀 Auto-schedule modules
-          </button>
-
-          <button
-            className={styles.secondaryBtn}
-            type="button"
-            onClick={() => setShowResetConfirm(true)}
-            disabled={loading}
-          >
-            🧹 Reset schedule
-          </button>
-        </div>
-      </div>
+      <ScheduleHeader
+        productivityScore={productivityScore}
+        onToday={() => {
+          const api = calendarRef.current?.getApi();
+          api?.today();
+        }}
+        onAutoSchedule={() => setShowAutoSchedule(true)}
+        onReset={() => setShowResetConfirm(true)}
+        loading={loading}
+      />
 
       <div className={styles.calendarCard}>
         {error && (
@@ -569,59 +541,17 @@ export default function Schedule() {
             {error}
           </div>
         )}
-        <FullCalendar
-          ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="timeGridWeek"
+        <ScheduleCalendar
+          calendarRef={calendarRef}
           events={events}
-          selectable={true}
-          editable={true}
-          selectMirror={true}
-          nowIndicator={true}
-          allDaySlot={false}
-          dragScroll={true}
-          eventStartEditable={true}
-          eventDurationEditable={true}
-          eventResizableFromStart={true}
-          select={handleSelect}
-          dateClick={handleDateClick}
-          eventDrop={handleEventDrop}
-          eventResize={handleEventResize}
-          eventClick={handleEventClick}
-          eventMouseEnter={handleEventMouseEnter}
-          eventMouseLeave={handleEventMouseLeave}
-          eventDidMount={handleEventDidMount}
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
-          }}
-          slotMinTime="08:00:00"
-          slotMaxTime="20:00:00"
-          slotDuration="00:30:00"
-          snapDuration="00:15:00"
-          height="70vh"
-          eventDisplay="block"
-          eventBackgroundColor="#1eaf53"
-          eventBorderColor="#1eaf53"
-          eventTextColor="white"
-          dayHeaderFormat={{ weekday: "short" }}
-          slotLabelFormat={{
-            hour: "numeric",
-            minute: "2-digit",
-            meridiem: "short",
-          }}
-          eventTimeFormat={{
-            hour: "numeric",
-            minute: "2-digit",
-            meridiem: "short",
-          }}
-          businessHours={{
-            daysOfWeek: [1, 2, 3, 4, 5],
-            startTime: "08:00",
-            endTime: "18:00",
-          }}
-          eventConstraint="businessHours"
+          onSelect={handleSelect}
+          onDateClick={handleDateClick}
+          onEventDrop={handleEventDrop}
+          onEventResize={handleEventResize}
+          onEventClick={handleEventClick}
+          onEventMouseEnter={handleEventMouseEnter}
+          onEventMouseLeave={handleEventMouseLeave}
+          onEventDidMount={handleEventDidMount}
         />
       </div>
 
@@ -659,410 +589,41 @@ export default function Schedule() {
       </div>
 
       {/* Auto-schedule options */}
-      {showAutoSchedule && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <div>
-                <p className={styles.kicker}>Auto-plan</p>
-                <h2>Tailor your schedule</h2>
-                <p className={styles.subtle}>
-                  Uses your profile preferences by default; tweak the knobs
-                  below for this run.
-                </p>
-              </div>
-              <button
-                className={styles.iconBtn}
-                type="button"
-                onClick={() => setShowAutoSchedule(false)}
-              >
-                ×
-              </button>
-            </div>
-
-            <div className={styles.modalForm}>
-              <label>
-                Start from
-                <input
-                  type="datetime-local"
-                  value={autoOptions.startDateTime}
-                  onChange={(e) =>
-                    setAutoOptions((prev) => ({
-                      ...prev,
-                      startDateTime: e.target.value,
-                    }))
-                  }
-                />
-              </label>
-
-              <div className={styles.formGrid}>
-                <label>
-                  Day start hour
-                  <input
-                    type="number"
-                    min="5"
-                    max="12"
-                    value={autoOptions.preferredStartHour}
-                    onChange={(e) =>
-                      setAutoOptions((prev) => ({
-                        ...prev,
-                        preferredStartHour: Number(e.target.value) || 8,
-                      }))
-                    }
-                  />
-                </label>
-                <label>
-                  Day end hour
-                  <input
-                    type="number"
-                    min={autoOptions.preferredStartHour + 2}
-                    max="22"
-                    value={autoOptions.preferredEndHour}
-                    onChange={(e) =>
-                      setAutoOptions((prev) => ({
-                        ...prev,
-                        preferredEndHour:
-                          Number(e.target.value) || prev.preferredEndHour,
-                      }))
-                    }
-                  />
-                </label>
-              </div>
-
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={autoOptions.includeWeekends}
-                  onChange={(e) =>
-                    setAutoOptions((prev) => ({
-                      ...prev,
-                      includeWeekends: e.target.checked,
-                    }))
-                  }
-                />
-                Allow weekends
-              </label>
-
-              <div className={styles.formGrid}>
-                <label>
-                  Max daily hours
-                  <input
-                    type="number"
-                    min="3"
-                    max="8"
-                    value={autoOptions.maxDailyHours}
-                    onChange={(e) =>
-                      setAutoOptions((prev) => ({
-                        ...prev,
-                        maxDailyHours:
-                          Number(e.target.value) || prev.maxDailyHours,
-                      }))
-                    }
-                  />
-                </label>
-                <label>
-                  Max session minutes
-                  <input
-                    type="number"
-                    min="30"
-                    max="180"
-                    step="15"
-                    value={autoOptions.maxSessionMinutes}
-                    onChange={(e) =>
-                      setAutoOptions((prev) => ({
-                        ...prev,
-                        maxSessionMinutes:
-                          Number(e.target.value) || prev.maxSessionMinutes,
-                      }))
-                    }
-                  />
-                </label>
-                <label>
-                  Buffer between blocks (min)
-                  <input
-                    type="number"
-                    min="5"
-                    max="45"
-                    value={autoOptions.bufferMinutes}
-                    onChange={(e) =>
-                      setAutoOptions((prev) => ({
-                        ...prev,
-                        bufferMinutes:
-                          Number(e.target.value) || prev.bufferMinutes,
-                      }))
-                    }
-                  />
-                </label>
-                <label>
-                  Weekly cap (hours)
-                  <input
-                    type="number"
-                    min="0"
-                    max="60"
-                    value={autoOptions.weeklyLimitHours}
-                    onChange={(e) =>
-                      setAutoOptions((prev) => ({
-                        ...prev,
-                        weeklyLimitHours: Number(e.target.value),
-                      }))
-                    }
-                  />
-                </label>
-              </div>
-
-              <label>
-                Focus preference
-                <select
-                  value={autoOptions.focusPreference}
-                  onChange={(e) =>
-                    setAutoOptions((prev) => ({
-                      ...prev,
-                      focusPreference: e.target.value,
-                    }))
-                  }
-                >
-                  <option value="balanced">Balanced</option>
-                  <option value="morning">Mornings</option>
-                  <option value="evening">Evenings</option>
-                </select>
-              </label>
-
-              {error && <div className={styles.errorMessage}>{error}</div>}
-
-              <div className={styles.formActions}>
-                <button
-                  className={styles.secondaryBtn}
-                  type="button"
-                  onClick={() => setShowAutoSchedule(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={styles.primaryBtn}
-                  type="button"
-                  onClick={handleAutoSchedule}
-                  disabled={loading}
-                >
-                  Run auto-schedule
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <AutoScheduleModal
+        isOpen={showAutoSchedule}
+        autoOptions={autoOptions}
+        onChange={updateAutoOptions}
+        onClose={() => setShowAutoSchedule(false)}
+        onSubmit={handleAutoSchedule}
+        loading={loading}
+        error={error}
+      />
 
       {/* Edit Event Modal */}
-      {showEditModal && editingEvent && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <div>
-                <p className={styles.kicker}>Edit Event</p>
-                <h2>Modify Schedule Item</h2>
-                {editingEvent.courseModule && (
-                  <p className={styles.subtle}>
-                    Linked to {editingEvent.courseModule.courseTitle} ·{" "}
-                    {editingEvent.courseModule.title}
-                  </p>
-                )}
-              </div>
-              <button
-                className={styles.iconBtn}
-                type="button"
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditingEvent(null);
-                  setError("");
-                }}
-              >
-                ×
-              </button>
-            </div>
-
-            <div className={styles.modalForm}>
-              <label>
-                Event Title *
-                <input
-                  type="text"
-                  value={editForm.title}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, title: e.target.value }))
-                  }
-                  placeholder="Enter event title"
-                  required
-                />
-              </label>
-
-              <div className={styles.formGrid}>
-                <label>
-                  Start Time *
-                  <input
-                    type="datetime-local"
-                    value={editForm.start}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        start: e.target.value,
-                      }))
-                    }
-                    required
-                  />
-                </label>
-                <label>
-                  End Time
-                  <input
-                    type="datetime-local"
-                    value={editForm.end}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, end: e.target.value }))
-                    }
-                  />
-                </label>
-              </div>
-
-              <label className={styles.checkboxLabel}>
-                <input
-                  type="checkbox"
-                  checked={editForm.allDay}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      allDay: e.target.checked,
-                    }))
-                  }
-                />
-                All-day event
-              </label>
-
-              {/* Course Module Information */}
-              {editingEvent.courseModule && (
-                <div className={styles.moduleInfo}>
-                  <h4>Linked Course Module</h4>
-                  <div className={styles.moduleCard}>
-                    <strong>{editingEvent.courseModule.title}</strong>
-                    <small>from {editingEvent.courseModule.courseTitle}</small>
-                  </div>
-                  <label className={styles.checkboxLabel}>
-                    <input
-                      type="checkbox"
-                      checked={editForm.unlinkFromModule}
-                      onChange={(e) =>
-                        setEditForm((prev) => ({
-                          ...prev,
-                          unlinkFromModule: e.target.checked,
-                        }))
-                      }
-                    />
-                    Disconnect from course module
-                  </label>
-                </div>
-              )}
-
-              {/* Link to Module */}
-              {!editingEvent.courseModuleId && availableModules.length > 0 && (
-                <label>
-                  Link to Course Module
-                  <select
-                    value={editForm.linkToModule}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({
-                        ...prev,
-                        linkToModule: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">Choose a module (optional)</option>
-                    {availableModules.map((module) => (
-                      <option key={module.id} value={module.id}>
-                        {module.title} · {module.courseTitle} (
-                        {module.estimatedHours}h)
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-
-              {error && <div className={styles.errorMessage}>{error}</div>}
-
-              <div className={styles.formActions}>
-                <button
-                  className={styles.dangerBtn}
-                  type="button"
-                  onClick={handleDeleteEvent}
-                >
-                  Delete Event
-                </button>
-                <div className={styles.rightActions}>
-                  <button
-                    className={styles.secondaryBtn}
-                    type="button"
-                    onClick={() => {
-                      setShowEditModal(false);
-                      setEditingEvent(null);
-                      setError("");
-                    }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    className={styles.primaryBtn}
-                    type="button"
-                    onClick={handleSaveEvent}
-                    disabled={!editForm.title.trim()}
-                  >
-                    Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <EditEventModal
+        isOpen={showEditModal}
+        editingEvent={editingEvent}
+        availableModules={availableModules}
+        editForm={editForm}
+        onChange={updateEditForm}
+        onDelete={handleDeleteEvent}
+        onSave={handleSaveEvent}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingEvent(null);
+          setError("");
+        }}
+        error={error}
+      />
 
       {/* Reset schedule confirmation */}
-      {showResetConfirm && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <div>
-                <p className={styles.kicker}>Reset</p>
-                <h2>Clear all scheduled events?</h2>
-                <p className={styles.subtle}>
-                  This removes every event from your calendar. Linked modules
-                  remain untouched.
-                </p>
-              </div>
-              <button
-                className={styles.iconBtn}
-                type="button"
-                onClick={() => setShowResetConfirm(false)}
-              >
-                ×
-              </button>
-            </div>
-
-            {error && <div className={styles.errorMessage}>{error}</div>}
-
-            <div className={styles.formActions}>
-              <button
-                className={styles.secondaryBtn}
-                type="button"
-                onClick={() => setShowResetConfirm(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className={styles.dangerBtn}
-                type="button"
-                onClick={handleResetSchedule}
-                disabled={loading}
-              >
-                Clear all events
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ResetScheduleModal
+        isOpen={showResetConfirm}
+        error={error}
+        onClose={() => setShowResetConfirm(false)}
+        onConfirm={handleResetSchedule}
+        loading={loading}
+      />
     </section>
   );
 }

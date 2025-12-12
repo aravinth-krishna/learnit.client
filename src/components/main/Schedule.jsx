@@ -10,6 +10,16 @@ import styles from "./Schedule.module.css";
 export default function Schedule() {
   const calendarRef = useRef(null);
 
+  const getNextMondayStart = () => {
+    const now = new Date();
+    const nextMonday = new Date(now);
+    const day = nextMonday.getDay();
+    const diff = (day === 0 ? 1 : 8) - day;
+    nextMonday.setDate(nextMonday.getDate() + diff);
+    nextMonday.setHours(9, 0, 0, 0);
+    return nextMonday.toISOString().slice(0, 16);
+  };
+
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,6 +35,17 @@ export default function Schedule() {
     allDay: false,
     linkToModule: "",
     unlinkFromModule: false,
+  });
+  const [autoOptions, setAutoOptions] = useState({
+    startDateTime: getNextMondayStart(),
+    preferredStartHour: 8,
+    preferredEndHour: 18,
+    includeWeekends: false,
+    maxDailyHours: 5,
+    maxSessionMinutes: 90,
+    bufferMinutes: 15,
+    weeklyLimitHours: 15,
+    focusPreference: "morning",
   });
   const [notification, setNotification] = useState("");
 
@@ -106,30 +127,40 @@ export default function Schedule() {
       setLoading(true);
       setError("");
 
-      // Start scheduling from next Monday at 9 AM
-      const now = new Date();
-      const nextMonday = new Date(now);
-      const day = nextMonday.getDay();
-      const diff = (day === 0 ? 1 : 8) - day; // Next Monday
-      nextMonday.setDate(nextMonday.getDate() + diff);
-      nextMonday.setHours(9, 0, 0, 0);
+      const startDate = autoOptions.startDateTime
+        ? new Date(autoOptions.startDateTime)
+        : null;
 
-      const result = await scheduleApi.autoScheduleModules(
-        nextMonday.toISOString()
-      );
+      const payload = {
+        startDateTime:
+          startDate && !Number.isNaN(startDate.valueOf())
+            ? startDate.toISOString()
+            : null,
+        preferredStartHour: Number(autoOptions.preferredStartHour),
+        preferredEndHour: Number(autoOptions.preferredEndHour),
+        includeWeekends: autoOptions.includeWeekends,
+        maxDailyHours: Number(autoOptions.maxDailyHours),
+        maxSessionMinutes: Number(autoOptions.maxSessionMinutes),
+        bufferMinutes: Number(autoOptions.bufferMinutes),
+        weeklyLimitHours: Number(autoOptions.weeklyLimitHours),
+        focusPreference: autoOptions.focusPreference,
+      };
+
+      const result = await scheduleApi.autoScheduleModules(payload);
 
       if (result.scheduledEvents > 0) {
         // Reload events to show the newly scheduled ones
         await loadEvents();
         await loadAvailableModules();
-        alert(
-          `Successfully scheduled ${result.scheduledEvents} course modules!`
+        setNotification(
+          `Scheduled ${result.scheduledEvents} focused blocks (up to ${payload.maxSessionMinutes} minutes each).`
         );
       } else {
-        alert("No course modules available to schedule.");
+        setNotification("No course modules available to schedule.");
       }
 
       setShowAutoSchedule(false);
+      setTimeout(() => setNotification(""), 5000);
     } catch (err) {
       console.error("Auto-schedule failed", err);
       setError(err.message || "Failed to auto-schedule modules");
@@ -509,7 +540,7 @@ export default function Schedule() {
           <button
             className={styles.primaryBtn}
             type="button"
-            onClick={handleAutoSchedule}
+            onClick={() => setShowAutoSchedule(true)}
             disabled={loading}
           >
             🚀 Auto-schedule modules
@@ -626,6 +657,199 @@ export default function Schedule() {
           🎯 Adjust learning goals
         </button>
       </div>
+
+      {/* Auto-schedule options */}
+      {showAutoSchedule && (
+        <div className={styles.modalOverlay}>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <div>
+                <p className={styles.kicker}>Auto-plan</p>
+                <h2>Tailor your schedule</h2>
+                <p className={styles.subtle}>
+                  Uses your profile preferences by default; tweak the knobs
+                  below for this run.
+                </p>
+              </div>
+              <button
+                className={styles.iconBtn}
+                type="button"
+                onClick={() => setShowAutoSchedule(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className={styles.modalForm}>
+              <label>
+                Start from
+                <input
+                  type="datetime-local"
+                  value={autoOptions.startDateTime}
+                  onChange={(e) =>
+                    setAutoOptions((prev) => ({
+                      ...prev,
+                      startDateTime: e.target.value,
+                    }))
+                  }
+                />
+              </label>
+
+              <div className={styles.formGrid}>
+                <label>
+                  Day start hour
+                  <input
+                    type="number"
+                    min="5"
+                    max="12"
+                    value={autoOptions.preferredStartHour}
+                    onChange={(e) =>
+                      setAutoOptions((prev) => ({
+                        ...prev,
+                        preferredStartHour: Number(e.target.value) || 8,
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  Day end hour
+                  <input
+                    type="number"
+                    min={autoOptions.preferredStartHour + 2}
+                    max="22"
+                    value={autoOptions.preferredEndHour}
+                    onChange={(e) =>
+                      setAutoOptions((prev) => ({
+                        ...prev,
+                        preferredEndHour:
+                          Number(e.target.value) || prev.preferredEndHour,
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={autoOptions.includeWeekends}
+                  onChange={(e) =>
+                    setAutoOptions((prev) => ({
+                      ...prev,
+                      includeWeekends: e.target.checked,
+                    }))
+                  }
+                />
+                Allow weekends
+              </label>
+
+              <div className={styles.formGrid}>
+                <label>
+                  Max daily hours
+                  <input
+                    type="number"
+                    min="3"
+                    max="8"
+                    value={autoOptions.maxDailyHours}
+                    onChange={(e) =>
+                      setAutoOptions((prev) => ({
+                        ...prev,
+                        maxDailyHours:
+                          Number(e.target.value) || prev.maxDailyHours,
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  Max session minutes
+                  <input
+                    type="number"
+                    min="30"
+                    max="180"
+                    step="15"
+                    value={autoOptions.maxSessionMinutes}
+                    onChange={(e) =>
+                      setAutoOptions((prev) => ({
+                        ...prev,
+                        maxSessionMinutes:
+                          Number(e.target.value) || prev.maxSessionMinutes,
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  Buffer between blocks (min)
+                  <input
+                    type="number"
+                    min="5"
+                    max="45"
+                    value={autoOptions.bufferMinutes}
+                    onChange={(e) =>
+                      setAutoOptions((prev) => ({
+                        ...prev,
+                        bufferMinutes:
+                          Number(e.target.value) || prev.bufferMinutes,
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  Weekly cap (hours)
+                  <input
+                    type="number"
+                    min="0"
+                    max="60"
+                    value={autoOptions.weeklyLimitHours}
+                    onChange={(e) =>
+                      setAutoOptions((prev) => ({
+                        ...prev,
+                        weeklyLimitHours: Number(e.target.value),
+                      }))
+                    }
+                  />
+                </label>
+              </div>
+
+              <label>
+                Focus preference
+                <select
+                  value={autoOptions.focusPreference}
+                  onChange={(e) =>
+                    setAutoOptions((prev) => ({
+                      ...prev,
+                      focusPreference: e.target.value,
+                    }))
+                  }
+                >
+                  <option value="balanced">Balanced</option>
+                  <option value="morning">Mornings</option>
+                  <option value="evening">Evenings</option>
+                </select>
+              </label>
+
+              {error && <div className={styles.errorMessage}>{error}</div>}
+
+              <div className={styles.formActions}>
+                <button
+                  className={styles.secondaryBtn}
+                  type="button"
+                  onClick={() => setShowAutoSchedule(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className={styles.primaryBtn}
+                  type="button"
+                  onClick={handleAutoSchedule}
+                  disabled={loading}
+                >
+                  Run auto-schedule
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Event Modal */}
       {showEditModal && editingEvent && (

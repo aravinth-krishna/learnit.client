@@ -36,8 +36,8 @@ export const scheduleApi = {
     return http.get("/api/schedule/available-modules");
   },
 
-  async autoScheduleModules(startDateTime = null) {
-    return http.post("/api/schedule/auto-schedule", { startDateTime });
+  async autoScheduleModules(options = {}) {
+    return http.post("/api/schedule/auto-schedule", options);
   },
 
   async linkEventToModule(eventId, moduleId) {

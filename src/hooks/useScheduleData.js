@@ -94,8 +94,8 @@ export function useScheduleData() {
   );
 
   const autoSchedule = useCallback(
-    async (startDateTimeIso) => {
-      const result = await scheduleApi.autoScheduleModules(startDateTimeIso);
+    async (options = {}) => {
+      const result = await scheduleApi.autoScheduleModules(options);
       await loadEvents();
       await loadAvailableModules();
       return result;

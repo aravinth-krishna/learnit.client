@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { profileApi, aiApi } from "../../services";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import { ProfileTabs } from "./profile/ProfileTabs";
+import { ProfileInfoCard } from "./profile/ProfileInfoCard";
+import { PreferencesCard } from "./profile/PreferencesCard";
+import { ThemeCard } from "./profile/ThemeCard";
+import { PasswordCard } from "./profile/PasswordCard";
+import { FriendsCard } from "./profile/FriendsCard";
 import styles from "./Profile.module.css";
 
 function Profile() {
@@ -190,6 +196,23 @@ function Profile() {
     }
   };
 
+  const handleThemeToggle = async (enabled) => {
+    setDarkMode(enabled);
+    setPreferences((prev) => ({ ...prev, darkMode: enabled }));
+
+    try {
+      await profileApi.updatePreferences({
+        ...preferences,
+        darkMode: enabled,
+      });
+    } catch (err) {
+      setDarkMode(!enabled);
+      setPreferences((prev) => ({ ...prev, darkMode: !enabled }));
+      setError("Failed to update theme preference");
+      setTimeout(() => setError(""), 3000);
+    }
+  };
+
   if (loading) {
     return (
       <section className={styles.profile}>
@@ -225,342 +248,60 @@ function Profile() {
 
       {success && <div className={styles.successMessage}>{success}</div>}
 
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${
-            activeSection === "profile" ? styles.active : ""
-          }`}
-          onClick={() => setActiveSection("profile")}
-        >
-          Profile Info
-        </button>
-        <button
-          className={`${styles.tab} ${
-            activeSection === "preferences" ? styles.active : ""
-          }`}
-          onClick={() => setActiveSection("preferences")}
-        >
-          Preferences
-        </button>
-        <button
-          className={`${styles.tab} ${
-            activeSection === "security" ? styles.active : ""
-          }`}
-          onClick={() => setActiveSection("security")}
-        >
-          Security
-        </button>
-        <button
-          className={`${styles.tab} ${
-            activeSection === "friends" ? styles.active : ""
-          }`}
-          onClick={() => setActiveSection("friends")}
-        >
-          Friends
-        </button>
-      </div>
+      <ProfileTabs activeSection={activeSection} onChange={setActiveSection} />
 
       {activeSection === "profile" && (
         <div className={styles.grid}>
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <p className={styles.kicker}>Basics</p>
-              <h2>User information</h2>
-            </div>
-
-            <form onSubmit={handleProfileUpdate}>
-              <label>
-                Full Name
-                <input
-                  type="text"
-                  value={profile.fullName}
-                  placeholder="Your name"
-                  onChange={(e) =>
-                    setProfile((prev) => ({
-                      ...prev,
-                      fullName: e.target.value,
-                    }))
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Email Address
-                <input
-                  type="email"
-                  value={profile.email}
-                  placeholder="Your email"
-                  onChange={(e) =>
-                    setProfile((prev) => ({ ...prev, email: e.target.value }))
-                  }
-                  required
-                />
-              </label>
-
-              <div className={styles.cardActions}>
-                <button
-                  type="submit"
-                  className={styles.primaryBtn}
-                  disabled={saving}
-                >
-                  {saving ? "Updating..." : "Update Profile"}
-                </button>
-              </div>
-            </form>
-          </section>
+          <ProfileInfoCard
+            profile={profile}
+            saving={saving}
+            onChange={(updates) =>
+              setProfile((prev) => ({ ...prev, ...updates }))
+            }
+            onSubmit={handleProfileUpdate}
+          />
         </div>
       )}
 
       {activeSection === "preferences" && (
         <div className={styles.grid}>
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <p className={styles.kicker}>Study</p>
-              <h2>Learning preferences</h2>
-            </div>
+          <PreferencesCard
+            preferences={preferences}
+            saving={saving}
+            onChange={(updates) =>
+              setPreferences((prev) => ({ ...prev, ...updates }))
+            }
+            onSubmit={handlePreferencesUpdate}
+          />
 
-            <form onSubmit={handlePreferencesUpdate}>
-              <label>
-                Preferred Study Speed
-                <select
-                  value={preferences.studySpeed}
-                  onChange={(e) =>
-                    setPreferences((prev) => ({
-                      ...prev,
-                      studySpeed: e.target.value,
-                    }))
-                  }
-                >
-                  <option value="slow">Slow & Deep</option>
-                  <option value="normal">Balanced</option>
-                  <option value="fast">Fast Paced</option>
-                </select>
-              </label>
-
-              <label>
-                Max Session Time (minutes)
-                <input
-                  value={preferences.maxSessionMinutes}
-                  onChange={(e) =>
-                    setPreferences((prev) => ({
-                      ...prev,
-                      maxSessionMinutes: Number(e.target.value),
-                    }))
-                  }
-                  type="number"
-                  min="15"
-                  max="240"
-                  placeholder="60"
-                />
-              </label>
-
-              <label className={styles.rangeLabel}>
-                Weekly Study Limit:{" "}
-                <strong>{preferences.weeklyStudyLimitHours} hrs</strong>
-                <input
-                  type="range"
-                  min="1"
-                  max="40"
-                  value={preferences.weeklyStudyLimitHours}
-                  onChange={(e) =>
-                    setPreferences((prev) => ({
-                      ...prev,
-                      weeklyStudyLimitHours: Number(e.target.value),
-                    }))
-                  }
-                />
-              </label>
-
-              <div className={styles.cardActions}>
-                <button
-                  type="submit"
-                  className={styles.primaryBtn}
-                  disabled={saving}
-                >
-                  {saving ? "Updating..." : "Update Preferences"}
-                </button>
-              </div>
-            </form>
-          </section>
-
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <p className={styles.kicker}>Display</p>
-              <h2>Theme settings</h2>
-            </div>
-
-            <div className={styles.toggleRow}>
-              <div>
-                <p>Dark mode</p>
-                <small>Great for late study sessions.</small>
-              </div>
-              <label className={styles.switch}>
-                <input
-                  type="checkbox"
-                  checked={isDarkMode}
-                  onChange={async (e) => {
-                    const enabled = e.target.checked;
-                    setDarkMode(enabled); // Immediate UI update
-                    setPreferences((prev) => ({ ...prev, darkMode: enabled }));
-
-                    // Update backend
-                    try {
-                      await profileApi.updatePreferences({
-                        ...preferences,
-                        darkMode: enabled,
-                      });
-                    } catch (err) {
-                      // Revert on error
-                      setDarkMode(!enabled);
-                      setPreferences((prev) => ({
-                        ...prev,
-                        darkMode: !enabled,
-                      }));
-                      setError("Failed to update theme preference");
-                      setTimeout(() => setError(""), 3000);
-                    }
-                  }}
-                />
-                <span className={styles.slider}></span>
-              </label>
-            </div>
-
-            <div className={styles.displayNote}>
-              <span />
-              <p>Changes apply immediately across the entire app.</p>
-            </div>
-          </section>
+          <ThemeCard isDarkMode={isDarkMode} onToggle={handleThemeToggle} />
         </div>
       )}
 
       {activeSection === "security" && (
         <div className={styles.grid}>
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <p className={styles.kicker}>Security</p>
-              <h2>Change password</h2>
-            </div>
-
-            <form onSubmit={handlePasswordChange}>
-              <label>
-                Current Password
-                <input
-                  type="password"
-                  value={passwordData.currentPassword}
-                  placeholder="••••••••"
-                  onChange={(e) =>
-                    setPasswordData((prev) => ({
-                      ...prev,
-                      currentPassword: e.target.value,
-                    }))
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                New Password
-                <input
-                  type="password"
-                  value={passwordData.newPassword}
-                  placeholder="••••••••"
-                  onChange={(e) =>
-                    setPasswordData((prev) => ({
-                      ...prev,
-                      newPassword: e.target.value,
-                    }))
-                  }
-                  required
-                  minLength="6"
-                />
-              </label>
-
-              <label>
-                Confirm New Password
-                <input
-                  type="password"
-                  value={passwordData.confirmPassword}
-                  placeholder="••••••••"
-                  onChange={(e) =>
-                    setPasswordData((prev) => ({
-                      ...prev,
-                      confirmPassword: e.target.value,
-                    }))
-                  }
-                  required
-                  minLength="6"
-                />
-              </label>
-
-              <div className={styles.cardActions}>
-                <button
-                  type="submit"
-                  className={styles.dangerBtn}
-                  disabled={saving}
-                >
-                  {saving ? "Changing..." : "Change Password"}
-                </button>
-              </div>
-            </form>
-          </section>
+          <PasswordCard
+            passwordData={passwordData}
+            saving={saving}
+            onChange={(updates) =>
+              setPasswordData((prev) => ({ ...prev, ...updates }))
+            }
+            onSubmit={handlePasswordChange}
+          />
         </div>
       )}
 
       {activeSection === "friends" && (
         <div className={styles.grid}>
-          <section className={styles.card}>
-            <div className={styles.cardHeader}>
-              <p className={styles.kicker}>Friends</p>
-              <h2>Connect with Learnit users</h2>
-              <small>Add by email, no confirmation required.</small>
-            </div>
-
-            <form className={styles.inlineForm} onSubmit={handleAddFriend}>
-              <input
-                type="email"
-                placeholder="friend@email.com"
-                value={friendEmail}
-                onChange={(e) => setFriendEmail(e.target.value)}
-                required
-              />
-              <button
-                type="submit"
-                className={styles.primaryBtn}
-                disabled={saving}
-              >
-                {saving ? "Adding..." : "Add Friend"}
-              </button>
-            </form>
-
-            <div className={styles.listHeader}>
-              <p>Friends ({friends.length})</p>
-              {friendsLoading && <small>Refreshing…</small>}
-            </div>
-            <ul className={styles.friendList}>
-              {friends.map((f) => (
-                <li key={f.id} className={styles.friendItem}>
-                  <div>
-                    <strong>{f.displayName}</strong>
-                    <p className={styles.muted}>{f.email}</p>
-                    <p className={styles.muted}>
-                      {f.completionRate}% complete · {f.weeklyHours}h/wk
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className={styles.linkBtn}
-                    onClick={() => handleRemoveFriend(f.id)}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-              {!friends.length && !friendsLoading && (
-                <li className={styles.muted}>No friends yet.</li>
-              )}
-            </ul>
-          </section>
+          <FriendsCard
+            friends={friends}
+            friendsLoading={friendsLoading}
+            friendEmail={friendEmail}
+            saving={saving}
+            onEmailChange={setFriendEmail}
+            onAdd={handleAddFriend}
+            onRemove={handleRemoveFriend}
+          />
         </div>
       )}
     </section>

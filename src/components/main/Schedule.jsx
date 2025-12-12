@@ -6,6 +6,8 @@ import { EditEventModal } from "./schedule/EditEventModal";
 import { ResetScheduleModal } from "./schedule/ResetScheduleModal";
 import { ScheduleCalendar } from "./schedule/ScheduleCalendar";
 import { ScheduleHeader } from "./schedule/ScheduleHeader";
+import { MetricsRow } from "./schedule/MetricsRow";
+import { QuickActions } from "./schedule/QuickActions";
 import styles from "./Schedule.module.css";
 
 export default function Schedule() {
@@ -511,6 +513,7 @@ export default function Schedule() {
   const productivityScore = 78;
   const weeklyGoal = "15 hours";
   const completedThisWeek = "12.5 hours";
+  const aiConfidence = 92;
 
   return (
     <section className={styles.page}>
@@ -555,38 +558,16 @@ export default function Schedule() {
         />
       </div>
 
-      <div className={styles.metricsRow}>
-        <div className={styles.metricCard}>
-          <span>Weekly Goal</span>
-          <strong>{weeklyGoal}</strong>
-        </div>
-        <div className={styles.metricCard}>
-          <span>Completed</span>
-          <strong>{completedThisWeek}</strong>
-        </div>
-        <div className={styles.metricCard}>
-          <span>Focus Score</span>
-          <strong>{productivityScore}%</strong>
-        </div>
-        <div className={styles.metricCard}>
-          <span>AI Confidence</span>
-          <strong>92%</strong>
-        </div>
-      </div>
+      <MetricsRow
+        weeklyGoal={weeklyGoal}
+        completedThisWeek={completedThisWeek}
+        productivityScore={productivityScore}
+        aiConfidence={aiConfidence}
+      />
 
       <ScheduleInsights aiInsights={aiInsights} events={events} />
 
-      <div className={styles.quickActions}>
-        <button className={styles.quickBtn} type="button">
-          📊 Generate progress report
-        </button>
-        <button className={styles.quickBtn} type="button">
-          ⚡ Optimize for energy levels
-        </button>
-        <button className={styles.quickBtn} type="button">
-          🎯 Adjust learning goals
-        </button>
-      </div>
+      <QuickActions />
 
       {/* Auto-schedule options */}
       <AutoScheduleModal

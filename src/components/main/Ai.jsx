@@ -1,13 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { aiApi } from "../../services";
-import ReactMarkdown from "react-markdown";
-import {
-  FiSend,
-  FiZap,
-  FiBarChart2,
-  FiUsers,
-  FiMessageCircle,
-} from "react-icons/fi";
+import { FiMessageCircle } from "react-icons/fi";
+import { AiTabs } from "./ai/AiTabs";
+import { ChatPanel } from "./ai/ChatPanel";
+import { ComparePanel } from "./ai/ComparePanel";
 import styles from "./Ai.module.css";
 
 function Ai() {
@@ -101,147 +97,28 @@ function Ai() {
         </div>
       </header>
 
-      <div className={styles.tabs}>
-        <button
-          className={`${styles.tab} ${
-            activeTab === "chat" ? styles.active : ""
-          }`}
-          onClick={() => setActiveTab("chat")}
-        >
-          Chat
-        </button>
-        <button
-          className={`${styles.tab} ${
-            activeTab === "compare" ? styles.active : ""
-          }`}
-          onClick={() => setActiveTab("compare")}
-        >
-          Insights & Friends
-        </button>
-      </div>
+      <AiTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === "chat" && (
-        <div className={styles.chatPanel}>
-          <div className={styles.chatCard}>
-            <div className={styles.messages}>
-              {messages.map((m, idx) => (
-                <div
-                  key={idx}
-                  className={`${styles.message} ${
-                    m.role === "assistant" ? styles.assistant : styles.user
-                  }`}
-                >
-                  <ReactMarkdown className={styles.markdown}>
-                    {m.content}
-                  </ReactMarkdown>
-                </div>
-              ))}
-              {loading && <div className={styles.message}>Thinking...</div>}
-            </div>
-            <div className={styles.inputRow}>
-              <div className={styles.quickActions}>
-                <button
-                  type="button"
-                  className={styles.pill}
-                  onClick={() =>
-                    sendMessage("Give me 3 schedule tweaks for this week")
-                  }
-                  disabled={loading}
-                >
-                  <FiZap /> Schedule tips
-                </button>
-                <button
-                  type="button"
-                  className={styles.pill}
-                  onClick={() =>
-                    sendMessage(
-                      "Give me 3 quick progress insights and next actions"
-                    )
-                  }
-                  disabled={loading}
-                >
-                  <FiBarChart2 /> Progress tips
-                </button>
-              </div>
-              <div className={styles.inputFlex}>
-                <input
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask anything about your study plan..."
-                />
-                <button
-                  onClick={() => sendMessage(input)}
-                  disabled={loading || !input.trim()}
-                >
-                  <FiSend /> Send
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ChatPanel
+          messages={messages}
+          loading={loading}
+          input={input}
+          onInputChange={setInput}
+          onSend={() => sendMessage(input)}
+          onQuickSend={sendMessage}
+        />
       )}
 
       {activeTab === "compare" && (
-        <div className={styles.compareColumn}>
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h3>Select a friend</h3>
-              <small>We’ll compare them with your progress</small>
-            </div>
-            <ul className={styles.friendList}>
-              {friends.map((f) => (
-                <li key={f.id}>
-                  <label className={styles.friendRow}>
-                    <input
-                      type="radio"
-                      name="friendCompare"
-                      checked={selectedFriendIds.includes(f.id)}
-                      onChange={() => setSelectedFriendIds([f.id])}
-                    />
-                    <div>
-                      <strong>{f.displayName}</strong>
-                      <p className={styles.muted}>
-                        {f.completionRate}% · {f.weeklyHours}h/wk · {f.email}
-                      </p>
-                    </div>
-                  </label>
-                </li>
-              ))}
-              {!friends.length && (
-                <li className={styles.muted}>
-                  No friends yet. Add them from Profile → Friends.
-                </li>
-              )}
-            </ul>
-            <button
-              className={styles.primaryBtn}
-              onClick={compareFriends}
-              disabled={!selectedFriendIds.length}
-            >
-              <FiUsers /> Compare with AI
-            </button>
-          </div>
-
-          <div className={styles.card}>
-            <div className={styles.cardHeader}>
-              <h3>Insights</h3>
-              <small>User vs selected friend</small>
-            </div>
-            <div className={styles.insightBox}>
-              {insights.length ? (
-                insights.map((ins, i) => (
-                  <div key={i} className={styles.insightBlock}>
-                    <ReactMarkdown className={styles.markdown}>
-                      {ins.detail}
-                    </ReactMarkdown>
-                  </div>
-                ))
-              ) : (
-                <p className={styles.muted}>No insights yet.</p>
-              )}
-            </div>
-          </div>
-        </div>
+        <ComparePanel
+          friends={friends}
+          selectedFriendIds={selectedFriendIds}
+          insights={insights}
+          loading={loading}
+          onSelectFriend={(id) => setSelectedFriendIds([id])}
+          onCompare={compareFriends}
+        />
       )}
     </section>
   );

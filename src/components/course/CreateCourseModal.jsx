@@ -7,6 +7,26 @@ import ModuleForm from "./ModuleForm";
 import { aiApi } from "../../services";
 import styles from "./CreateCourseModal.module.css";
 
+const toHoursString = (value, fallback = "1") => {
+  const num = Number.parseFloat(value);
+  if (Number.isFinite(num) && num > 0) return Math.round(num).toString();
+  return fallback;
+};
+
+const normalizeLearningObjectives = (val) => {
+  if (Array.isArray(val)) {
+    return val
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter(Boolean)
+      .join("\n");
+  }
+  if (typeof val === "string") return val.trim();
+  return "";
+};
+
+const fallbackDate = () =>
+  new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10);
+
 function CreateCourseModal({ onSave, onCancel }) {
   const [formData, setFormData] = useState({
     title: "",
@@ -83,50 +103,66 @@ function CreateCourseModal({ onSave, onCancel }) {
     setError("");
     try {
       const draft = await aiApi.createCourse(aiPrompt.trim());
-      console.log("AI course draft (create)", draft);
+
+      const learningObjectives = normalizeLearningObjectives(
+        draft.learningObjectives
+      );
+
+      const moduleDurationTotal = (draft.modules || []).reduce((sum, m) => {
+        const hours = Number.parseFloat(m.estimatedHours);
+        return Number.isFinite(hours) && hours > 0 ? sum + hours : sum;
+      }, 0);
+      const totalHours = Number.parseInt(draft.totalEstimatedHours, 10);
+
+      const targetDate = draft.targetCompletionDate
+        ? draft.targetCompletionDate.slice(0, 10)
+        : fallbackDate();
+
       setFormData((prev) => ({
         ...prev,
-        title: draft.title || prev.title,
-        description: draft.description || prev.description,
-        difficulty: draft.difficulty || prev.difficulty,
-        priority: draft.priority || prev.priority,
+        title: draft.title?.trim() || prev.title,
+        description: draft.description?.trim() || prev.description,
+        difficulty: draft.difficulty?.trim() || prev.difficulty,
+        priority: draft.priority?.trim() || prev.priority,
         learningObjectives:
-          draft.learningObjectives ||
-          prev.learningObjectives ||
-          "AI generated plan",
-        subjectArea: draft.subjectArea || prev.subjectArea || "AI suggested",
+          learningObjectives || prev.learningObjectives || "Learning goals",
+        subjectArea: draft.subjectArea?.trim() || prev.subjectArea,
         totalEstimatedHours:
-          draft.totalEstimatedHours?.toString() ||
-          prev.totalEstimatedHours ||
-          "24",
-        targetCompletionDate:
-          draft.targetCompletionDate ||
-          prev.targetCompletionDate ||
-          new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10),
-        notes: draft.notes || prev.notes || "AI drafted course structure",
+          Number.isFinite(totalHours) && totalHours > 0
+            ? totalHours.toString()
+            : moduleDurationTotal > 0
+            ? Math.round(moduleDurationTotal).toString()
+            : prev.totalEstimatedHours || "",
+        targetCompletionDate: targetDate,
+        notes: draft.notes?.trim() || prev.notes,
       }));
 
       const mapped = (draft.modules || []).map((m) => ({
         id: crypto.randomUUID(),
-        title: m.title,
-        duration: (m.estimatedHours ?? "").toString(),
+        title: m.title?.trim() || "",
+        duration: toHoursString(m.estimatedHours, "1"),
         subModules: (m.subModules || []).map((s) => ({
           id: crypto.randomUUID(),
-          title: s.title,
-          duration: (s.estimatedHours ?? "").toString(),
+          title: s.title?.trim() || "",
+          duration: toHoursString(s.estimatedHours, "1"),
         })),
       }));
 
-      if (mapped.length) setModules(mapped);
-      else
+      if (mapped.length) {
+        setModules(mapped);
+      } else {
         setModules([
           {
             id: crypto.randomUUID(),
             title: "Kickoff",
             duration: "2",
-            subModules: [],
+            subModules: [
+              { id: crypto.randomUUID(), title: "Overview", duration: "1" },
+            ],
           },
         ]);
+      }
+
       setActiveTab("manual");
     } catch (err) {
       setError(err.message || "Failed to generate course");

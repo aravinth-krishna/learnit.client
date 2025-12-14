@@ -216,12 +216,6 @@ function Profile() {
   if (loading) {
     return (
       <section className={styles.profile}>
-        <div className={styles.pageHeader}>
-          <div>
-            <p className={styles.kicker}>Account</p>
-            <h1>Your profile</h1>
-          </div>
-        </div>
         <div
           style={{
             textAlign: "center",
@@ -237,13 +231,6 @@ function Profile() {
 
   return (
     <section className={styles.profile}>
-      <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.kicker}>Account</p>
-          <h1>Your profile</h1>
-        </div>
-      </div>
-
       {error && <div className={styles.errorMessage}>{error}</div>}
 
       {success && <div className={styles.successMessage}>{success}</div>}

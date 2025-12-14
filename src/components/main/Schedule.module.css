@@ -43,6 +43,12 @@
   padding: 12px;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
+
+.actionButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
 .kicker {
   margin: 0;
   letter-spacing: 0.16em;

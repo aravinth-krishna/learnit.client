@@ -4,18 +4,43 @@ import styles from "./Layout.module.css";
 import Sidebar from "../components/main/Sidebar";
 import { AuthContext } from "../context/AuthContext";
 
-const PAGE_TITLES = {
-  course: "Courses",
-  schedule: "Schedule",
-  progress: "Progress",
-  profile: "Profile",
+const PAGE_META = {
+  course: {
+    title: "Courses",
+    kicker: "Course workspace",
+    subtitle: "Create, organize, and track your learning courses.",
+  },
+  schedule: {
+    title: "Schedule",
+    kicker: "Study planner",
+    subtitle: "Plan and manage your sessions with auto-scheduling.",
+  },
+  progress: {
+    title: "Progress",
+    kicker: "Insights",
+    subtitle: "Track streaks, hours, and milestones.",
+  },
+  profile: {
+    title: "Profile",
+    kicker: "Account",
+    subtitle: "Manage your info, preferences, theme, and friends.",
+  },
+  ai: {
+    title: "AI",
+    kicker: "AI workspace",
+    subtitle: "Chat, compare friends, and draft courses.",
+  },
 };
 
 const Layout = () => {
   const location = useLocation();
   const { user } = useContext(AuthContext);
   const section = location.pathname.split("/")[2] || "dashboard";
-  const title = PAGE_TITLES[section] || "Dashboard";
+  const meta = PAGE_META[section] || {
+    title: "Dashboard",
+    kicker: "Learning workspace",
+    subtitle: "Stay organized and on track.",
+  };
 
   const { displayName, displayRole, initials, email } = useMemo(() => {
     const name = user?.fullName || user?.name || "";
@@ -45,8 +70,13 @@ const Layout = () => {
       <div className={styles.mainArea}>
         <header className={styles.topbar}>
           <div>
-            <p className={styles.kicker}>Learning workspace</p>
-            <h1 className={styles.topTitle}>{title}</h1>
+            <p className={styles.kicker}>
+              {meta.kicker || "Learning workspace"}
+            </p>
+            <h1 className={styles.topTitle}>{meta.title || "Dashboard"}</h1>
+            {meta.subtitle && (
+              <p className={styles.topSubtitle}>{meta.subtitle}</p>
+            )}
           </div>
 
           <div className={styles.topRight}>

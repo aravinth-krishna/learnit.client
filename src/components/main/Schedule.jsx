@@ -4,7 +4,6 @@ import { AutoScheduleModal } from "./schedule/AutoScheduleModal";
 import { EditEventModal } from "./schedule/EditEventModal";
 import { ResetScheduleModal } from "./schedule/ResetScheduleModal";
 import { ScheduleCalendar } from "./schedule/ScheduleCalendar";
-import { ScheduleHeader } from "./schedule/ScheduleHeader";
 import { MetricsRow } from "./schedule/MetricsRow";
 import { NextSessions } from "./schedule/NextSessions";
 import styles from "./Schedule.module.css";
@@ -489,12 +488,6 @@ export default function Schedule() {
         <div className={styles.notification}>{notification}</div>
       )}
 
-      <ScheduleHeader
-        onAutoSchedule={() => setShowAutoSchedule(true)}
-        onReset={() => setShowResetConfirm(true)}
-        loading={loading}
-      />
-
       <div className={styles.layout}>
         <div className={styles.leftPane}>
           <div className={styles.calendarCard}>
@@ -525,6 +518,28 @@ export default function Schedule() {
         </div>
 
         <div className={styles.rightPane}>
+          <div className={styles.sideCard}>
+            <div className={styles.actionButtons}>
+              <button
+                className={styles.primaryBtn}
+                type="button"
+                onClick={() => setShowAutoSchedule(true)}
+                disabled={loading}
+              >
+                🚀 Auto-schedule modules
+              </button>
+
+              <button
+                className={styles.secondaryBtn}
+                type="button"
+                onClick={() => setShowResetConfirm(true)}
+                disabled={loading}
+              >
+                🧹 Reset schedule
+              </button>
+            </div>
+          </div>
+
           <div className={styles.sideCard}>
             <MetricsRow
               weeklyGoal={weeklyGoal}

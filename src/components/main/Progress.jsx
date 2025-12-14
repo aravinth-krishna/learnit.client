@@ -39,12 +39,6 @@ function Progress() {
   if (loading) {
     return (
       <section className={styles.page}>
-        <div className={styles.pageHeader}>
-          <div>
-            <p className={styles.kicker}>Insights</p>
-            <h1>Progress overview</h1>
-          </div>
-        </div>
         <div style={{ textAlign: "center", padding: "40px" }}>
           Loading progress data...
         </div>
@@ -55,12 +49,6 @@ function Progress() {
   if (error || !dashboardData) {
     return (
       <section className={styles.page}>
-        <div className={styles.pageHeader}>
-          <div>
-            <p className={styles.kicker}>Insights</p>
-            <h1>Progress overview</h1>
-          </div>
-        </div>
         <div style={{ textAlign: "center", padding: "40px", color: "#c33" }}>
           {error || "Failed to load progress data"}
         </div>
@@ -97,11 +85,7 @@ function Progress() {
 
   return (
     <section className={styles.page}>
-      <div className={styles.pageHeader}>
-        <div>
-          <p className={styles.kicker}>Insights</p>
-          <h1>Progress overview</h1>
-        </div>
+      <div className={styles.pageHeaderMeta}>
         <span className={styles.subtitle}>
           Updated {new Date(stats.lastUpdated).toLocaleDateString()}
         </span>

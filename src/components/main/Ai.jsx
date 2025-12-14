@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { aiApi } from "../../services";
-import { FiMessageCircle } from "react-icons/fi";
 import { AiTabs } from "./ai/AiTabs";
 import { ChatPanel } from "./ai/ChatPanel";
 import { ComparePanel } from "./ai/ComparePanel";
@@ -85,18 +84,6 @@ function Ai() {
 
   return (
     <section className={styles.page}>
-      <header className={styles.header}>
-        <div>
-          <p className={styles.kicker}>AI Workspace</p>
-          <h1>
-            <FiMessageCircle className={styles.icon} /> Assistant
-          </h1>
-          <p className={styles.subtle}>
-            Chat, generate courses, get scheduling and progress insights.
-          </p>
-        </div>
-      </header>
-
       <AiTabs activeTab={activeTab} onChange={setActiveTab} />
 
       {activeTab === "chat" && (

@@ -48,6 +48,13 @@
   color: var(--text-strong);
 }
 
+.topSubtitle {
+  margin: 4px 0 0;
+  color: var(--text-soft);
+  font-size: 0.95rem;
+  max-width: 720px;
+}
+
 .topRight {
   display: flex;
   align-items: center;

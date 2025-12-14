@@ -7,36 +7,9 @@
   margin: 0 auto;
 }
 
-.pageHero {
+.pageActions {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-.kicker {
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.75rem;
-  color: var(--muted);
-  font-weight: 600;
-  margin: 0;
-}
-
-.pageHero h1 {
-  margin: 8px 0 0;
-  font-size: 2rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.subtle {
-  color: var(--muted);
-  max-width: 520px;
-  line-height: 1.6;
-  margin: 12px 0 0;
-  font-size: 0.95rem;
+  justify-content: flex-end;
 }
 
 .errorMessage {
@@ -58,14 +31,6 @@
   .page {
     padding: 16px;
     gap: 24px;
-  }
-
-  .pageHero {
-    flex-direction: column;
-  }
-
-  .pageHero h1 {
-    font-size: 1.5rem;
   }
 
   .statsRow {

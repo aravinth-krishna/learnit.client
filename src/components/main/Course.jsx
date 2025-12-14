@@ -94,18 +94,11 @@ function Course() {
 
   return (
     <section className={styles.page}>
-      <header className={styles.pageHero}>
-        <div>
-          <p className={styles.kicker}>Course Management</p>
-          <h1>Course workspace</h1>
-          <p className={styles.subtle}>
-            Create, organize, and track your learning courses.
-          </p>
-        </div>
+      <div className={styles.pageActions}>
         <Button variant="primary" onClick={() => setShowCreate(true)}>
           <IoIosAdd size={18} /> New course
         </Button>
-      </header>
+      </div>
 
       {error && <div className={styles.errorMessage}>{error}</div>}
 

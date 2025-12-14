@@ -103,6 +103,7 @@ function CreateCourseModal({ onSave, onCancel }) {
     setError("");
     try {
       const draft = await aiApi.createCourse(aiPrompt.trim());
+      console.log("[AI create-course draft]", draft);
 
       const clampOption = (val, options, fallback) => {
         if (!val) return fallback;
@@ -190,8 +191,11 @@ function CreateCourseModal({ onSave, onCancel }) {
         };
       });
 
-      const usableModules =
-        safeModules.length >= 3 ? safeModules : modulesFallback();
+      let usableModules = safeModules;
+      if (safeModules.length < 3) {
+        const fillers = modulesFallback().slice(0, 3 - safeModules.length);
+        usableModules = [...safeModules, ...fillers];
+      }
 
       const moduleDurationTotal = usableModules.reduce((sum, m) => {
         const hours = Number.parseFloat(m.duration);

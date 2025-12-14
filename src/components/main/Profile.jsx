@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { profileApi, aiApi } from "../../services";
-import { useTheme } from "../../context/ThemeContext.jsx";
+import { useTheme } from "../../context/useTheme";
 import { ProfileInfoCard } from "./profile/ProfileInfoCard";
 import { ThemeCard } from "./profile/ThemeCard";
 import { PasswordCard } from "./profile/PasswordCard";

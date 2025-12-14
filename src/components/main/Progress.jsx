@@ -37,13 +37,7 @@ function Progress() {
   };
 
   if (loading) {
-    return (
-      <section className={styles.page}>
-        <div style={{ textAlign: "center", padding: "40px" }}>
-          Loading progress data...
-        </div>
-      </section>
-    );
+    return <section className={styles.page}>Loading progress data...</section>;
   }
 
   if (error || !dashboardData) {
@@ -80,7 +74,6 @@ function Progress() {
       value: `${stats.totalCompletedHours} hrs`,
     },
     { icon: "📊", label: "Completion Rate", value: `${stats.completionRate}%` },
-    { icon: "⚡", label: "Efficiency", value: `${stats.efficiency}%` },
   ];
 
   return (

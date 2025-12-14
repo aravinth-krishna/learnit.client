@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IoIosAdd } from "react-icons/io";
 import { courseApi } from "../../services";
 import CourseList from "../course/CourseList";
 import CreateCourseModal from "../course/CreateCourseModal";
 import EditCourseModal from "../course/EditCourseModal";
-import Button from "../ui/Button";
-import StatCard from "../ui/StatCard";
 import styles from "./Course.module.css";
 
 function Course() {
@@ -14,11 +11,6 @@ function Course() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [stats, setStats] = useState({
-    activeCourses: "00",
-    weeklyFocus: "0 hrs",
-    nextMilestone: "No courses yet",
-  });
 
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -26,7 +18,6 @@ function Course() {
 
   useEffect(() => {
     fetchCourses();
-    fetchStats();
   }, []);
 
   const fetchCourses = async () => {
@@ -42,24 +33,10 @@ function Course() {
     }
   };
 
-  const fetchStats = async () => {
-    try {
-      const data = await courseApi.getCourseStats();
-      setStats({
-        activeCourses: data.activeCourses,
-        weeklyFocus: data.weeklyFocus,
-        nextMilestone: data.nextMilestone,
-      });
-    } catch (err) {
-      console.error("Error fetching stats:", err);
-    }
-  };
-
   const handleCreateCourse = async (formData) => {
     await courseApi.createCourse(formData);
     setShowCreate(false);
     await fetchCourses();
-    await fetchStats();
   };
 
   const handleEditCourse = async (courseId) => {
@@ -77,7 +54,6 @@ function Course() {
     setShowEdit(false);
     setEditingCourse(null);
     await fetchCourses();
-    await fetchStats();
   };
 
   const handleDeleteCourse = async (id) => {
@@ -86,7 +62,6 @@ function Course() {
     try {
       await courseApi.deleteCourse(id);
       await fetchCourses();
-      await fetchStats();
     } catch (err) {
       setError(err.message || "Failed to delete course");
     }
@@ -94,19 +69,7 @@ function Course() {
 
   return (
     <section className={styles.page}>
-      <div className={styles.pageActions}>
-        <Button variant="primary" onClick={() => setShowCreate(true)}>
-          <IoIosAdd size={18} /> New course
-        </Button>
-      </div>
-
       {error && <div className={styles.errorMessage}>{error}</div>}
-
-      <div className={styles.statsRow}>
-        <StatCard label="Active courses" value={stats.activeCourses} />
-        <StatCard label="Weekly focus" value={stats.weeklyFocus} />
-        <StatCard label="Next milestone" value={stats.nextMilestone} />
-      </div>
 
       <CourseList
         courses={courses}
@@ -114,6 +77,7 @@ function Course() {
         onNavigate={(id) => navigate(`/app/course/${id}`)}
         onEdit={handleEditCourse}
         onDelete={handleDeleteCourse}
+        onCreate={() => setShowCreate(true)}
       />
 
       {showCreate && (

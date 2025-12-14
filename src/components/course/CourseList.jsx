@@ -1,9 +1,18 @@
 import { useState } from "react";
 import { FaSearch, FaSort, FaFilter } from "react-icons/fa";
+import { IoIosAdd } from "react-icons/io";
 import CourseCard from "./CourseCard";
+import Button from "../ui/Button";
 import styles from "./CourseList.module.css";
 
-function CourseList({ courses, loading, onEdit, onDelete, onNavigate }) {
+function CourseList({
+  courses,
+  loading,
+  onEdit,
+  onDelete,
+  onNavigate,
+  onCreate,
+}) {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
@@ -80,44 +89,6 @@ function CourseList({ courses, loading, onEdit, onDelete, onNavigate }) {
 
   return (
     <div className={styles.container}>
-      <div className={styles.controls}>
-        <div className={styles.searchBox}>
-          <FaSearch className={styles.icon} />
-          <input
-            type="text"
-            placeholder="Search courses..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-
-        <div className={styles.sortControls}>
-          <FaSort />
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-            {sortOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-          <select
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-          >
-            <option value="asc">Ascending</option>
-            <option value="desc">Descending</option>
-          </select>
-        </div>
-
-        <span className={styles.count}>
-          {loading
-            ? "Loading..."
-            : `${sortedCourses.length} course${
-                sortedCourses.length === 1 ? "" : "s"
-              }`}
-        </span>
-      </div>
-
       <div className={styles.body}>
         <aside className={styles.filtersPanel}>
           <div className={styles.filtersBar}>
@@ -154,25 +125,80 @@ function CourseList({ courses, loading, onEdit, onDelete, onNavigate }) {
           </div>
         </aside>
 
-        <section className={styles.cardsSection}>
-          {loading ? (
-            <div className={styles.emptyState}>Loading courses...</div>
-          ) : sortedCourses.length === 0 ? (
-            <div className={styles.emptyState}>No courses found</div>
-          ) : (
-            <div className={styles.grid}>
-              {sortedCourses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  onNavigate={onNavigate}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
+        <div className={styles.mainColumn}>
+          <div className={styles.controls}>
+            <div className={styles.searchRow}>
+              <div className={styles.searchBox}>
+                <FaSearch className={styles.icon} />
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                 />
-              ))}
+              </div>
+
+              <Button
+                variant="primary"
+                onClick={onCreate}
+                className={styles.newButton}
+              >
+                <IoIosAdd size={18} /> New course
+              </Button>
             </div>
-          )}
-        </section>
+
+            <div className={styles.metaRow}>
+              <div className={styles.sortControls}>
+                <FaSort />
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                >
+                  {sortOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                >
+                  <option value="asc">Ascending</option>
+                  <option value="desc">Descending</option>
+                </select>
+              </div>
+
+              <span className={styles.count}>
+                {loading
+                  ? "Loading..."
+                  : `${sortedCourses.length} course${
+                      sortedCourses.length === 1 ? "" : "s"
+                    }`}
+              </span>
+            </div>
+          </div>
+
+          <section className={styles.cardsSection}>
+            {loading ? (
+              <div className={styles.emptyState}>Loading courses...</div>
+            ) : sortedCourses.length === 0 ? (
+              <div className={styles.emptyState}>No courses found</div>
+            ) : (
+              <div className={styles.grid}>
+                {sortedCourses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    course={course}
+                    onNavigate={onNavigate}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
       </div>
     </div>
   );

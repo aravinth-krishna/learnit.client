@@ -78,37 +78,58 @@ function Progress() {
 
   return (
     <section className={styles.page}>
-      <div className={styles.pageHeaderMeta}>
-        <span className={styles.subtitle}>
-          Updated {new Date(stats.lastUpdated).toLocaleDateString()}
-        </span>
-      </div>
+      <div className={styles.topGrid}>
+        <div className={styles.leftStack}>
+          <div className={styles.section}>
+            <h2>Overall Progress</h2>
+            <div className={styles.progressBarOuter}>
+              <div
+                className={styles.progressBarInner}
+                style={{ width: `${stats.overallProgress}%` }}
+              />
+            </div>
+            <p className={styles.progressLabel}>
+              {stats.overallProgress}% Completed
+            </p>
+          </div>
 
-      {/* METRICS */}
-      <div className={styles.metricsRow}>
-        {metricsData.map((metric) => (
-          <div className={styles.metric} key={metric.label}>
-            <span className={styles.metricIcon}>{metric.icon}</span>
-            <div className={styles.metricText}>
-              <span className={styles.metricLabel}>{metric.label}</span>
-              <strong className={styles.metricValue}>{metric.value}</strong>
+          <div className={styles.section}>
+            <h2>Study Activity Heatmap</h2>
+            <div className={styles.heatmap}>
+              {activityHeatmap.map((val, i) => (
+                <div
+                  key={i}
+                  className={styles.heatBox}
+                  style={{
+                    background:
+                      val === 0
+                        ? "#e0e0e0"
+                        : val === 1
+                        ? "#b6e0ff"
+                        : val === 2
+                        ? "#64c0f0"
+                        : "#008dd0",
+                  }}
+                  title={`Activity level: ${val}`}
+                />
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* OVERALL PROGRESS */}
-      <div className={styles.section}>
-        <h2>Overall Progress</h2>
-        <div className={styles.progressBarOuter}>
-          <div
-            className={styles.progressBarInner}
-            style={{ width: `${stats.overallProgress}%` }}
-          />
         </div>
-        <p className={styles.progressLabel}>
-          {stats.overallProgress}% Completed
-        </p>
+
+        <div className={styles.metricsColumn}>
+          <div className={styles.metricsRow}>
+            {metricsData.map((metric) => (
+              <div className={styles.metric} key={metric.label}>
+                <span className={styles.metricIcon}>{metric.icon}</span>
+                <div className={styles.metricText}>
+                  <span className={styles.metricLabel}>{metric.label}</span>
+                  <strong className={styles.metricValue}>{metric.value}</strong>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* CHARTS */}
@@ -143,30 +164,6 @@ function Progress() {
               />
             </LineChart>
           </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* HEATMAP */}
-      <div className={styles.section}>
-        <h2>Study Activity Heatmap</h2>
-        <div className={styles.heatmap}>
-          {activityHeatmap.map((val, i) => (
-            <div
-              key={i}
-              className={styles.heatBox}
-              style={{
-                background:
-                  val === 0
-                    ? "#e0e0e0"
-                    : val === 1
-                    ? "#b6e0ff"
-                    : val === 2
-                    ? "#64c0f0"
-                    : "#008dd0",
-              }}
-              title={`Activity level: ${val}`}
-            />
-          ))}
         </div>
       </div>
 

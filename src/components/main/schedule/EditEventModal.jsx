@@ -84,6 +84,14 @@ export function EditEventModal({
               <label className={styles.checkboxLabel}>
                 <input
                   type="checkbox"
+                  checked={!!editForm.markComplete}
+                  onChange={(e) => onChange({ markComplete: e.target.checked })}
+                />
+                Mark module complete
+              </label>
+              <label className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
                   checked={editForm.unlinkFromModule}
                   onChange={(e) =>
                     onChange({ unlinkFromModule: e.target.checked })

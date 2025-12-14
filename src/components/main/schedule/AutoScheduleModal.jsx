@@ -5,6 +5,9 @@ export function AutoScheduleModal({
   isOpen,
   autoOptions,
   onChange,
+  courses = [],
+  onToggleCourse,
+  onMoveCourse,
   onClose,
   onSubmit,
   loading,
@@ -110,6 +113,73 @@ export function AutoScheduleModal({
                 }
               />
             </label>
+          </div>
+
+          <div className={styles.fieldCard}>
+            <div className={styles.fieldCardHeader}>
+              <span>Courses to schedule</span>
+              <small>Select and order priority</small>
+            </div>
+            <div className={styles.courseList}>
+              {courses.length === 0 && (
+                <p className={styles.subtle}>No courses found</p>
+              )}
+              {courses.map((course) => {
+                const idx = (autoOptions.courseOrder || []).indexOf(course.id);
+                const selected = idx !== -1;
+                return (
+                  <div
+                    key={course.id}
+                    className={`${styles.courseRow} ${
+                      selected ? styles.courseRowSelected : ""
+                    }`}
+                  >
+                    <label className={styles.checkboxLabel}>
+                      <input
+                        type="checkbox"
+                        checked={selected}
+                        onChange={() => onToggleCourse?.(course.id)}
+                      />
+                      <div className={styles.courseMeta}>
+                        <span className={styles.courseTitle}>
+                          {course.title}
+                        </span>
+                        {course.priority && (
+                          <small className={styles.subtle}>
+                            {course.priority} priority
+                          </small>
+                        )}
+                      </div>
+                    </label>
+                    {selected && (
+                      <div className={styles.orderControls}>
+                        <span className={styles.orderBadge}>#{idx + 1}</span>
+                        <div className={styles.orderBtns}>
+                          <button
+                            type="button"
+                            onClick={() => onMoveCourse?.(course.id, -1)}
+                            disabled={idx === 0}
+                            aria-label="Move up"
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onMoveCourse?.(course.id, 1)}
+                            disabled={
+                              idx === (autoOptions.courseOrder?.length || 0) - 1
+                            }
+                            aria-label="Move down"
+                          >
+                            ↓
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {error && <div className={styles.errorMessage}>{error}</div>}

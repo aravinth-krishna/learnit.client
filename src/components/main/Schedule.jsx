@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { scheduleApi } from "../../services";
+import { courseApi, scheduleApi } from "../../services";
 import { AutoScheduleModal } from "./schedule/AutoScheduleModal";
 import { EditEventModal } from "./schedule/EditEventModal";
 import { ResetScheduleModal } from "./schedule/ResetScheduleModal";
@@ -25,6 +25,30 @@ const getCourseColor = (courseId) => {
   return colorPalette[idx];
 };
 
+const decorateEventColors = (event) => {
+  if (!event.courseModuleId) {
+    return {
+      ...event,
+      backgroundColor: undefined,
+      borderColor: undefined,
+      textColor: "#fff",
+    };
+  }
+
+  const courseId = event.courseModule?.courseId;
+  const isCompleted = event.courseModule?.isCompleted;
+  const baseColor = getCourseColor(courseId);
+
+  const color = isCompleted ? "#94a3b8" : baseColor;
+
+  return {
+    ...event,
+    backgroundColor: color,
+    borderColor: color,
+    textColor: "#fff",
+  };
+};
+
 export default function Schedule() {
   const calendarRef = useRef(null);
 
@@ -38,6 +62,7 @@ export default function Schedule() {
   };
 
   const [events, setEvents] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [availableModules, setAvailableModules] = useState([]);
@@ -52,6 +77,7 @@ export default function Schedule() {
     allDay: false,
     linkToModule: "",
     unlinkFromModule: false,
+    markComplete: false,
   });
   const [autoOptions, setAutoOptions] = useState({
     startDate: getNextMondayDate(),
@@ -63,6 +89,7 @@ export default function Schedule() {
     maxSessionMinutes: 90,
     bufferMinutes: 15,
     weeklyLimitHours: 15,
+    courseOrder: [],
   });
   const [notification, setNotification] = useState("");
   const [weeklyMetrics, setWeeklyMetrics] = useState({
@@ -82,6 +109,29 @@ export default function Schedule() {
   const updateAutoOptions = (updates) =>
     setAutoOptions((prev) => ({ ...prev, ...updates }));
 
+  const toggleCourseSelection = (courseId) => {
+    setAutoOptions((prev) => {
+      const order = prev.courseOrder || [];
+      const exists = order.includes(courseId);
+      const next = exists
+        ? order.filter((id) => id !== courseId)
+        : [...order, courseId];
+      return { ...prev, courseOrder: next };
+    });
+  };
+
+  const moveCourseSelection = (courseId, delta) => {
+    setAutoOptions((prev) => {
+      const order = [...(prev.courseOrder || [])];
+      const idx = order.indexOf(courseId);
+      if (idx === -1) return prev;
+      const swapWith = idx + delta;
+      if (swapWith < 0 || swapWith >= order.length) return prev;
+      [order[idx], order[swapWith]] = [order[swapWith], order[idx]];
+      return { ...prev, courseOrder: order };
+    });
+  };
+
   const setEventsWithMetrics = (updater) => {
     setEvents((prev) => {
       const next = typeof updater === "function" ? updater(prev) : updater;
@@ -96,6 +146,7 @@ export default function Schedule() {
   useEffect(() => {
     loadEvents();
     loadAvailableModules();
+    loadCourses();
   }, []);
 
   const loadEvents = async () => {
@@ -105,11 +156,7 @@ export default function Schedule() {
       const data = await scheduleApi.getScheduleEvents();
       // Map backend DTOs to FullCalendar events
       const mapped = data.map((e) => {
-        const courseId = e.courseModule?.courseId;
-        const baseColor = getCourseColor(courseId);
-        const isCompleted = e.courseModule?.isCompleted;
-
-        return {
+        return decorateEventColors({
           id: String(e.id),
           title: e.title,
           start: e.startUtc,
@@ -117,18 +164,7 @@ export default function Schedule() {
           allDay: e.allDay,
           courseModuleId: e.courseModuleId,
           courseModule: e.courseModule,
-          backgroundColor: e.courseModuleId
-            ? isCompleted
-              ? "#94a3b8"
-              : baseColor
-            : undefined,
-          borderColor: e.courseModuleId
-            ? isCompleted
-              ? "#94a3b8"
-              : baseColor
-            : undefined,
-          textColor: "#fff",
-        };
+        });
       });
 
       setEvents(mapped);
@@ -150,30 +186,31 @@ export default function Schedule() {
     }
   };
 
+  const loadCourses = async () => {
+    try {
+      const data = await courseApi.getCourses();
+      setCourses(data || []);
+    } catch (err) {
+      console.error("Failed to load courses", err);
+    }
+  };
+
   const computeWeeklyMetrics = (list) => {
     const now = new Date();
-    const day = now.getDay();
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-    const weekStart = new Date(now);
-    weekStart.setHours(0, 0, 0, 0);
-    weekStart.setDate(weekStart.getDate() + diffToMonday);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekEnd.getDate() + 7);
-
     let scheduled = 0;
     let completed = 0;
 
     list.forEach((e) => {
+      if (!e.courseModuleId) return;
       const start = new Date(e.start);
       const end = e.end
         ? new Date(e.end)
         : new Date(start.getTime() + 60 * 60 * 1000);
-      if (start >= weekStart && start < weekEnd && e.courseModuleId) {
-        const hours = Math.max(0.25, (end - start) / (1000 * 60 * 60));
-        scheduled += hours;
-        if (end <= now) {
-          completed += hours;
-        }
+
+      const hours = Math.max(0.25, (end - start) / (1000 * 60 * 60));
+      scheduled += hours;
+      if (e.courseModule?.isCompleted || end <= now) {
+        completed += hours;
       }
     });
 
@@ -192,7 +229,7 @@ export default function Schedule() {
     };
 
     const created = await scheduleApi.createScheduleEvent(payload);
-    return {
+    return decorateEventColors({
       id: String(created.id),
       title: created.title,
       start: created.startUtc,
@@ -200,9 +237,7 @@ export default function Schedule() {
       allDay: created.allDay,
       courseModuleId: created.courseModuleId,
       courseModule: created.courseModule,
-      backgroundColor: created.courseModuleId ? "#4CAF50" : undefined,
-      borderColor: created.courseModuleId ? "#4CAF50" : undefined,
-    };
+    });
   };
 
   const updateEventOnServer = async (id, { title, start, end, allDay }) => {
@@ -245,6 +280,10 @@ export default function Schedule() {
         weeklyLimitHours: Number.isFinite(Number(autoOptions.weeklyLimitHours))
           ? Number(autoOptions.weeklyLimitHours)
           : null,
+        timezoneOffsetMinutes: new Date().getTimezoneOffset(),
+        courseOrderIds: Array.isArray(autoOptions.courseOrder)
+          ? autoOptions.courseOrder
+          : [],
       };
 
       const result = await scheduleApi.autoScheduleModules(payload);
@@ -365,13 +404,13 @@ export default function Schedule() {
       setEventsWithMetrics((prev) =>
         prev.map((e) =>
           e.id === event.id
-            ? {
+            ? decorateEventColors({
                 ...e,
                 title: event.title,
                 start: event.start?.toISOString?.() ?? event.start,
                 end: event.end?.toISOString?.() ?? event.end,
                 allDay: event.allDay,
-              }
+              })
             : e
         )
       );
@@ -400,13 +439,13 @@ export default function Schedule() {
       setEventsWithMetrics((prev) =>
         prev.map((e) =>
           e.id === event.id
-            ? {
+            ? decorateEventColors({
                 ...e,
                 title: event.title,
                 start: event.start?.toISOString?.() ?? event.start,
                 end: event.end?.toISOString?.() ?? event.end,
                 allDay: event.allDay,
-              }
+              })
             : e
         )
       );
@@ -463,6 +502,7 @@ export default function Schedule() {
       allDay: event.allDay || false,
       linkToModule: "",
       unlinkFromModule: false,
+      markComplete: !!currentEvent?.courseModule?.isCompleted,
     });
 
     setShowEditModal(true);
@@ -505,6 +545,16 @@ export default function Schedule() {
         await handleLinkToModule(editingEvent.id, moduleId);
       }
 
+      // Optionally mark linked module complete/incomplete
+      let moduleCompletionChanged = false;
+      if (!editForm.unlinkFromModule && editingEvent.courseModuleId) {
+        const currentCompleted = !!editingEvent.courseModule?.isCompleted;
+        if (editForm.markComplete !== currentCompleted) {
+          await courseApi.toggleModuleCompletion(editingEvent.courseModuleId);
+          moduleCompletionChanged = true;
+        }
+      }
+
       // Check if any event properties changed
       const startChanged =
         editForm.start !==
@@ -516,24 +566,18 @@ export default function Schedule() {
           : "");
       const allDayChanged = editForm.allDay !== (editingEvent.allDay || false);
       const titleChanged = editForm.title !== editingEvent.title;
+      const shouldUpdateEvent =
+        titleChanged || startChanged || endChanged || allDayChanged;
 
-      // Update event if any properties changed
-      if (titleChanged || startChanged || endChanged || allDayChanged) {
-        const startDate = editForm.start ? new Date(editForm.start) : null;
-        const endDate = editForm.end ? new Date(editForm.end) : null;
+      const startDate = editForm.start ? new Date(editForm.start) : null;
+      const endDate = editForm.end ? new Date(editForm.end) : null;
 
-        await updateEventOnServer(editingEvent.id, {
-          title: editForm.title,
-          start: startDate,
-          end: endDate,
-          allDay: editForm.allDay,
-        });
-
-        // Update local state
+      // Local helper to avoid duplication
+      const applyLocalUpdate = () =>
         setEventsWithMetrics((prev) =>
           prev.map((e) =>
             e.id === editingEvent.id
-              ? {
+              ? decorateEventColors({
                   ...e,
                   title: editForm.title,
                   start: startDate,
@@ -541,10 +585,37 @@ export default function Schedule() {
                   allDay: editForm.allDay,
                   startUtc: startDate?.toISOString(),
                   endUtc: endDate?.toISOString(),
-                }
+                  courseModule: moduleCompletionChanged
+                    ? {
+                        ...e.courseModule,
+                        isCompleted: editForm.markComplete,
+                      }
+                    : e.courseModule,
+                })
               : e
           )
         );
+
+      // Update event if any properties changed
+      if (shouldUpdateEvent) {
+        await updateEventOnServer(editingEvent.id, {
+          title: editForm.title,
+          start: startDate,
+          end: endDate,
+          allDay: editForm.allDay,
+        });
+
+        if (moduleCompletionChanged) {
+          await loadEvents();
+          await loadAvailableModules();
+        } else {
+          applyLocalUpdate();
+        }
+      }
+
+      if (!shouldUpdateEvent && moduleCompletionChanged) {
+        await loadEvents();
+        await loadAvailableModules();
       }
 
       setShowEditModal(false);
@@ -650,6 +721,9 @@ export default function Schedule() {
         isOpen={showAutoSchedule}
         autoOptions={autoOptions}
         onChange={updateAutoOptions}
+        courses={courses}
+        onToggleCourse={toggleCourseSelection}
+        onMoveCourse={moveCourseSelection}
         onClose={() => setShowAutoSchedule(false)}
         onSubmit={handleAutoSchedule}
         loading={loading}

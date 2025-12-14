@@ -181,16 +181,28 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
     const children = childrenMap[node.id] || [];
     const isEditing = editingId === node.id;
     const isAddingHere = addTarget === node.id;
+    const rowClass = `${styles.row} ${
+      node.isCompleted ? styles.completed : ""
+    }`;
+
+    const handleToggle = () => {
+      const childIds = depth === 0 ? children.map((c) => c.id) : [];
+      const targetState = !node.isCompleted;
+      onToggleCompletion([node.id, ...childIds], targetState);
+    };
 
     return (
       <li className={styles.node} key={node.id}>
-        <div className={styles.row} style={{ "--depth": depth }}>
+        <div className={rowClass} style={{ "--depth": depth }}>
           <div className={styles.rowLeft}>
-            <input
-              type="checkbox"
-              checked={!!node.isCompleted}
-              onChange={() => onToggleCompletion(node.id)}
-            />
+            <label className={styles.checkbox}>
+              <input
+                type="checkbox"
+                checked={!!node.isCompleted}
+                onChange={handleToggle}
+              />
+              <span className={styles.checkVisual} aria-hidden="true" />
+            </label>
             <span className={styles.icon}>
               {depth === 0 ? <FaFolder /> : <FaRegFile />}
             </span>

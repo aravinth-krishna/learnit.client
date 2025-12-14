@@ -81,6 +81,24 @@ function CourseDetails() {
     return { total, completed, percent };
   };
 
+  const handleToggleModules = async (moduleIds, targetCompleted) => {
+    try {
+      setError("");
+      const moduleMap = new Map(flatModules.map((m) => [m.id, m]));
+      const toToggle = moduleIds.filter(
+        (mid) => moduleMap.get(mid)?.isCompleted !== targetCompleted
+      );
+
+      for (const mid of toToggle) {
+        await courseApi.toggleModuleCompletion(mid);
+      }
+
+      await fetchCourse();
+    } catch (err) {
+      setError(err?.message || "Failed to update module");
+    }
+  };
+
   const flatModules = useMemo(() => {
     if (!course?.modules) return [];
     const roots = course.modules || [];
@@ -149,10 +167,7 @@ function CourseDetails() {
                 await courseApi.updateModule(moduleId, updates);
                 fetchCourse();
               }}
-              onToggleCompletion={async (moduleId) => {
-                await courseApi.toggleModuleCompletion(moduleId);
-                fetchCourse();
-              }}
+              onToggleCompletion={handleToggleModules}
               onAdd={async (payload) => {
                 await courseApi.createModule(id, payload);
                 fetchCourse();

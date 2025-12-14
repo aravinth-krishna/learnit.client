@@ -30,14 +30,6 @@ const Sidebar = () => {
         const data = await scheduleApi.getScheduleEvents();
 
         const now = new Date();
-        const day = now.getDay();
-        const diffToMonday = day === 0 ? -6 : 1 - day;
-        const weekStart = new Date(now);
-        weekStart.setHours(0, 0, 0, 0);
-        weekStart.setDate(weekStart.getDate() + diffToMonday);
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 7);
-
         let scheduled = 0;
         let completed = 0;
 
@@ -48,11 +40,9 @@ const Sidebar = () => {
             ? new Date(e.endUtc)
             : new Date(start.getTime() + 60 * 60 * 1000);
 
-          if (start >= weekStart && start < weekEnd) {
-            const hours = Math.max(0.25, (end - start) / (1000 * 60 * 60));
-            scheduled += hours;
-            if (end <= now) completed += hours;
-          }
+          const hours = Math.max(0.25, (end - start) / (1000 * 60 * 60));
+          scheduled += hours;
+          if (e.courseModule?.isCompleted || end <= now) completed += hours;
         });
 
         setWeekStats({
@@ -168,18 +158,24 @@ const Sidebar = () => {
         })}
       </nav>
 
-      <div className={styles.sectionLabel}>Focus</div>
-      <div className={styles.focusCard}>
-        <p>Week target</p>
-        <h3>{targetLabel}</h3>
-        <div className={styles.progressTrack}>
-          <span style={{ width: `${completionPct}%` }} />
-        </div>
-        {!collapsed && <small>{completionLabel}</small>}
-        {!collapsed && scheduleError && (
-          <small className={styles.errorText}>Schedule data unavailable</small>
-        )}
-      </div>
+      {!collapsed && (
+        <>
+          <div className={styles.sectionLabel}>Focus</div>
+          <div className={styles.focusCard}>
+            <p>Week target</p>
+            <h3>{targetLabel}</h3>
+            <div className={styles.progressTrack}>
+              <span style={{ width: `${completionPct}%` }} />
+            </div>
+            <small>{completionLabel}</small>
+            {scheduleError && (
+              <small className={styles.errorText}>
+                Schedule data unavailable
+              </small>
+            )}
+          </div>
+        </>
+      )}
 
       <div className={styles.footerSection}>
         <button

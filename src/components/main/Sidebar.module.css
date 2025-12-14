@@ -18,6 +18,22 @@
   min-width: 88px;
 }
 
+.collapsed .sectionLabel,
+.collapsed .focusCard,
+.collapsed .label,
+.collapsed .branding div {
+  display: none;
+}
+
+.collapsed .branding {
+  justify-content: center;
+  padding: 6px;
+}
+
+.collapsed .logoMark {
+  margin: 0 auto;
+}
+
 .toggleBtn {
   position: absolute;
   top: 20px;

@@ -27,7 +27,67 @@ function Progress() {
       setLoading(true);
       setError("");
       const data = await progressApi.getProgressDashboard();
-      setDashboardData(data);
+
+      const weeklyData = (data.weeklyData || data.WeeklyData || []).map(
+        (d) => ({
+          day: d.day || d.Day || "",
+          scheduled: Number(d.scheduled ?? d.Scheduled ?? 0),
+          completed: Number(d.completed ?? d.Completed ?? 0),
+        })
+      );
+
+      const derivedTotals = weeklyData.reduce(
+        (acc, d) => {
+          acc.scheduled += d.scheduled;
+          acc.completed += d.completed;
+          return acc;
+        },
+        { scheduled: 0, completed: 0 }
+      );
+
+      const stats = {
+        currentStreak: Number(
+          data.stats?.currentStreak ?? data.Stats?.CurrentStreak ?? 0
+        ),
+        longestStreak: Number(
+          data.stats?.longestStreak ?? data.Stats?.LongestStreak ?? 0
+        ),
+        totalScheduledHours:
+          Number(
+            data.stats?.totalScheduledHours ??
+              data.Stats?.TotalScheduledHours ??
+              0
+          ) || derivedTotals.scheduled,
+        totalCompletedHours:
+          Number(
+            data.stats?.totalCompletedHours ??
+              data.Stats?.TotalCompletedHours ??
+              0
+          ) || derivedTotals.completed,
+        completionRate: Number(
+          data.stats?.completionRate ?? data.Stats?.CompletionRate ?? 0
+        ),
+        overallProgress: Number(
+          data.stats?.overallProgress ?? data.Stats?.OverallProgress ?? 0
+        ),
+      };
+
+      const courseProgress = (
+        data.courseProgress ||
+        data.CourseProgress ||
+        []
+      ).map((c) => ({
+        id: c.id ?? c.Id,
+        title: c.title ?? c.Title,
+        progressPercentage: Number(
+          c.progressPercentage ?? c.ProgressPercentage ?? 0
+        ),
+      }));
+
+      const activityHeatmap =
+        data.activityHeatmap || data.ActivityHeatmap || [];
+
+      setDashboardData({ stats, weeklyData, courseProgress, activityHeatmap });
     } catch (err) {
       setError("Failed to load progress data");
       console.error("Progress data error:", err);
@@ -52,6 +112,18 @@ function Progress() {
 
   const { stats, weeklyData, courseProgress, activityHeatmap } = dashboardData;
 
+  const weeklyScheduledTotal = weeklyData.reduce(
+    (sum, d) => sum + d.scheduled,
+    0
+  );
+  const weeklyCompletedTotal = weeklyData.reduce(
+    (sum, d) => sum + d.completed,
+    0
+  );
+  const weeklyCompletionRate = weeklyScheduledTotal
+    ? Math.round((weeklyCompletedTotal / weeklyScheduledTotal) * 100)
+    : 0;
+
   const metricsData = [
     {
       icon: "🔥",
@@ -65,15 +137,19 @@ function Progress() {
     },
     {
       icon: "📅",
-      label: "Scheduled Hours",
-      value: `${stats.totalScheduledHours} hrs`,
+      label: "Week Target",
+      value: `${Math.round(weeklyScheduledTotal * 10) / 10} hrs`,
     },
     {
       icon: "⏳",
-      label: "Completed Hours",
-      value: `${stats.totalCompletedHours} hrs`,
+      label: "Completed",
+      value: `${Math.round(weeklyCompletedTotal * 10) / 10} hrs`,
     },
-    { icon: "📊", label: "Completion Rate", value: `${stats.completionRate}%` },
+    {
+      icon: "📊",
+      label: "Completion Rate",
+      value: `${weeklyCompletionRate}%`,
+    },
   ];
 
   return (

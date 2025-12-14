@@ -48,7 +48,7 @@ export function ScheduleCalendar({
       slotMaxTime="20:00:00"
       slotDuration="00:30:00"
       snapDuration="00:15:00"
-      height="70vh"
+      height="92vh"
       eventDisplay="block"
       eventBackgroundColor="#1eaf53"
       eventBorderColor="#1eaf53"

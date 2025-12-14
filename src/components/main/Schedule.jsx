@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { scheduleApi } from "../../services";
-import { ScheduleInsights } from "../schedule/ScheduleInsights";
 import { AutoScheduleModal } from "./schedule/AutoScheduleModal";
 import { EditEventModal } from "./schedule/EditEventModal";
 import { ResetScheduleModal } from "./schedule/ResetScheduleModal";
 import { ScheduleCalendar } from "./schedule/ScheduleCalendar";
 import { ScheduleHeader } from "./schedule/ScheduleHeader";
 import { MetricsRow } from "./schedule/MetricsRow";
-import { QuickActions } from "./schedule/QuickActions";
+import { NextSessions } from "./schedule/NextSessions";
 import styles from "./Schedule.module.css";
 
 export default function Schedule() {
@@ -481,39 +480,8 @@ export default function Schedule() {
     }
   };
 
-  // Dynamic AI insights based on available modules and schedule
-  const aiInsights = React.useMemo(() => {
-    const insights = [];
-
-    if (availableModules.length > 0) {
-      insights.push(
-        `📚 You have ${availableModules.length} unscheduled course modules ready to schedule.`
-      );
-      if (availableModules.length > 3) {
-        insights.push(
-          "🎯 Consider using auto-schedule to efficiently plan multiple modules."
-        );
-      }
-    }
-
-    const courseEvents = events.filter((e) => e.courseModuleId);
-    if (courseEvents.length > 0) {
-      insights.push(
-        `✅ ${courseEvents.length} scheduled sessions are linked to course modules.`
-      );
-    }
-
-    // Default insights
-    insights.push("⚡ Peak focus time: 9-11 AM. Schedule complex topics then.");
-    insights.push("💡 Group similar topics together for better retention.");
-
-    return insights.slice(0, 4); // Limit to 4 insights
-  }, [availableModules, events]);
-
-  const productivityScore = 78;
   const weeklyGoal = "15 hours";
   const completedThisWeek = "12.5 hours";
-  const aiConfidence = 92;
 
   return (
     <section className={styles.page}>
@@ -522,52 +490,51 @@ export default function Schedule() {
       )}
 
       <ScheduleHeader
-        productivityScore={productivityScore}
-        onToday={() => {
-          const api = calendarRef.current?.getApi();
-          api?.today();
-        }}
         onAutoSchedule={() => setShowAutoSchedule(true)}
         onReset={() => setShowResetConfirm(true)}
         loading={loading}
       />
 
-      <div className={styles.calendarCard}>
-        {error && (
-          <div
-            style={{
-              marginBottom: "8px",
-              color: "red",
-              fontSize: "0.9rem",
-            }}
-          >
-            {error}
+      <div className={styles.layout}>
+        <div className={styles.leftPane}>
+          <div className={styles.calendarCard}>
+            {error && (
+              <div
+                style={{
+                  marginBottom: "8px",
+                  color: "red",
+                  fontSize: "0.9rem",
+                }}
+              >
+                {error}
+              </div>
+            )}
+            <ScheduleCalendar
+              calendarRef={calendarRef}
+              events={events}
+              onSelect={handleSelect}
+              onDateClick={handleDateClick}
+              onEventDrop={handleEventDrop}
+              onEventResize={handleEventResize}
+              onEventClick={handleEventClick}
+              onEventMouseEnter={handleEventMouseEnter}
+              onEventMouseLeave={handleEventMouseLeave}
+              onEventDidMount={handleEventDidMount}
+            />
           </div>
-        )}
-        <ScheduleCalendar
-          calendarRef={calendarRef}
-          events={events}
-          onSelect={handleSelect}
-          onDateClick={handleDateClick}
-          onEventDrop={handleEventDrop}
-          onEventResize={handleEventResize}
-          onEventClick={handleEventClick}
-          onEventMouseEnter={handleEventMouseEnter}
-          onEventMouseLeave={handleEventMouseLeave}
-          onEventDidMount={handleEventDidMount}
-        />
+        </div>
+
+        <div className={styles.rightPane}>
+          <div className={styles.sideCard}>
+            <MetricsRow
+              weeklyGoal={weeklyGoal}
+              completedThisWeek={completedThisWeek}
+            />
+          </div>
+
+          <NextSessions events={events} />
+        </div>
       </div>
-
-      <MetricsRow
-        weeklyGoal={weeklyGoal}
-        completedThisWeek={completedThisWeek}
-        productivityScore={productivityScore}
-        aiConfidence={aiConfidence}
-      />
-
-      <ScheduleInsights aiInsights={aiInsights} events={events} />
-
-      <QuickActions />
 
       {/* Auto-schedule options */}
       <AutoScheduleModal

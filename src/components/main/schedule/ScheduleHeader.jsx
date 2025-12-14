@@ -1,13 +1,7 @@
 import React from "react";
 import styles from "../Schedule.module.css";
 
-export function ScheduleHeader({
-  productivityScore,
-  onToday,
-  onAutoSchedule,
-  onReset,
-  loading,
-}) {
+export function ScheduleHeader({ onAutoSchedule, onReset, loading }) {
   return (
     <div className={styles.pageHeader}>
       <div>
@@ -19,15 +13,6 @@ export function ScheduleHeader({
       </div>
 
       <div className={styles.controls}>
-        <div className={styles.productivityBadge}>
-          <span>Productivity Score</span>
-          <strong>{productivityScore}%</strong>
-        </div>
-
-        <button className={styles.lightBtn} onClick={onToday} type="button">
-          Today
-        </button>
-
         <button
           className={styles.primaryBtn}
           type="button"

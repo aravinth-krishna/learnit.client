@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { profileApi, aiApi } from "../../services";
 import { useTheme } from "../../context/ThemeContext.jsx";
-import { ProfileTabs } from "./profile/ProfileTabs";
 import { ProfileInfoCard } from "./profile/ProfileInfoCard";
-import { PreferencesCard } from "./profile/PreferencesCard";
 import { ThemeCard } from "./profile/ThemeCard";
 import { PasswordCard } from "./profile/PasswordCard";
 import { FriendsCard } from "./profile/FriendsCard";
@@ -38,17 +36,11 @@ function Profile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [activeSection, setActiveSection] = useState("profile");
 
   useEffect(() => {
     loadProfile();
+    loadFriends();
   }, []);
-
-  useEffect(() => {
-    if (activeSection === "friends") {
-      loadFriends();
-    }
-  }, [activeSection]);
 
   // Sync theme context when preferences are loaded
   useEffect(() => {
@@ -89,24 +81,6 @@ function Profile() {
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
       setError(err.message || "Failed to update profile");
-      setTimeout(() => setError(""), 3000);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handlePreferencesUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      setSaving(true);
-      setError("");
-      setSuccess("");
-
-      await profileApi.updatePreferences(preferences);
-      setSuccess("Preferences updated successfully!");
-      setTimeout(() => setSuccess(""), 3000);
-    } catch (err) {
-      setError(err.message || "Failed to update preferences");
       setTimeout(() => setError(""), 3000);
     } finally {
       setSaving(false);
@@ -235,62 +209,37 @@ function Profile() {
 
       {success && <div className={styles.successMessage}>{success}</div>}
 
-      <ProfileTabs activeSection={activeSection} onChange={setActiveSection} />
+      <div className={styles.grid}>
+        <ProfileInfoCard
+          profile={profile}
+          saving={saving}
+          onChange={(updates) =>
+            setProfile((prev) => ({ ...prev, ...updates }))
+          }
+          onSubmit={handleProfileUpdate}
+        />
 
-      {activeSection === "profile" && (
-        <div className={styles.grid}>
-          <ProfileInfoCard
-            profile={profile}
-            saving={saving}
-            onChange={(updates) =>
-              setProfile((prev) => ({ ...prev, ...updates }))
-            }
-            onSubmit={handleProfileUpdate}
-          />
-        </div>
-      )}
+        <PasswordCard
+          passwordData={passwordData}
+          saving={saving}
+          onChange={(updates) =>
+            setPasswordData((prev) => ({ ...prev, ...updates }))
+          }
+          onSubmit={handlePasswordChange}
+        />
 
-      {activeSection === "preferences" && (
-        <div className={styles.grid}>
-          <PreferencesCard
-            preferences={preferences}
-            saving={saving}
-            onChange={(updates) =>
-              setPreferences((prev) => ({ ...prev, ...updates }))
-            }
-            onSubmit={handlePreferencesUpdate}
-          />
+        <ThemeCard isDarkMode={isDarkMode} onToggle={handleThemeToggle} />
 
-          <ThemeCard isDarkMode={isDarkMode} onToggle={handleThemeToggle} />
-        </div>
-      )}
-
-      {activeSection === "security" && (
-        <div className={styles.grid}>
-          <PasswordCard
-            passwordData={passwordData}
-            saving={saving}
-            onChange={(updates) =>
-              setPasswordData((prev) => ({ ...prev, ...updates }))
-            }
-            onSubmit={handlePasswordChange}
-          />
-        </div>
-      )}
-
-      {activeSection === "friends" && (
-        <div className={styles.grid}>
-          <FriendsCard
-            friends={friends}
-            friendsLoading={friendsLoading}
-            friendEmail={friendEmail}
-            saving={saving}
-            onEmailChange={setFriendEmail}
-            onAdd={handleAddFriend}
-            onRemove={handleRemoveFriend}
-          />
-        </div>
-      )}
+        <FriendsCard
+          friends={friends}
+          friendsLoading={friendsLoading}
+          friendEmail={friendEmail}
+          saving={saving}
+          onEmailChange={setFriendEmail}
+          onAdd={handleAddFriend}
+          onRemove={handleRemoveFriend}
+        />
+      </div>
     </section>
   );
 }

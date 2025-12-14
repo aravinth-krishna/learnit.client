@@ -8,12 +8,33 @@ function ProgressCard({
   completedHours,
   hoursRemaining,
 }) {
+  const remaining = hoursRemaining ?? 0;
+  const pct = progressPercentage ?? null;
+
+  const effectiveTotalHours = (() => {
+    if (totalHours && totalHours > 0) return totalHours;
+    if (pct && pct > 0 && pct < 100) {
+      const denom = 1 - pct / 100;
+      return denom > 0 ? Math.round((remaining / denom) * 10) / 10 : remaining;
+    }
+    return remaining;
+  })();
+
   const derivedProgress =
-    progressPercentage ??
-    (totalHours > 0 ? ((totalHours - hoursRemaining) / totalHours) * 100 : 0);
+    pct !== null && pct !== undefined
+      ? pct
+      : effectiveTotalHours > 0
+      ? ((effectiveTotalHours - remaining) / effectiveTotalHours) * 100
+      : 0;
 
   const hoursDone =
-    completedHours ?? Math.max(0, totalHours - (hoursRemaining ?? 0));
+    completedHours && completedHours > 0
+      ? completedHours
+      : Math.max(
+          0,
+          Math.round(((totalHours ?? effectiveTotalHours) - remaining) * 10) /
+            10
+        );
 
   return (
     <div className={styles.card}>

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import styles from "./Sidebar.module.css";
 import { useLogout } from "../../hooks/useLogout";
 import { useTheme } from "../../context/useTheme";
+import { useProgressDashboard } from "../../hooks/useProgressDashboard";
 
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { IoIosLogOut } from "react-icons/io";
@@ -17,6 +18,42 @@ const Sidebar = () => {
   const location = useLocation();
   const { logout } = useLogout();
   const { isDarkMode, toggleDarkMode } = useTheme();
+  const {
+    stats,
+    loading: progressLoading,
+    error: progressError,
+  } = useProgressDashboard();
+
+  const formatHours = (hours) => {
+    if (hours === null || hours === undefined) return "--";
+    const rounded = Math.round(hours * 10) / 10;
+    const display = Number.isInteger(rounded)
+      ? rounded.toFixed(0)
+      : rounded.toFixed(1);
+    return `${display} hrs`;
+  };
+
+  const targetHours =
+    stats?.totalScheduledHours || stats?.totalCompletedHours || 0;
+  const completedHours = stats?.totalCompletedHours || 0;
+  const completionPct = targetHours
+    ? Math.min(100, Math.round((completedHours / targetHours) * 100))
+    : 0;
+
+  const hasStats = Boolean(stats);
+  const targetLabel =
+    progressLoading && !hasStats
+      ? "Loading..."
+      : progressError && !hasStats
+      ? "Unavailable"
+      : formatHours(targetHours);
+
+  const completionLabel =
+    progressLoading && !hasStats
+      ? "Syncing progress"
+      : progressError && !hasStats
+      ? "Progress unavailable"
+      : `${completionPct}% complete`;
 
   const menuItems = useMemo(
     () => [
@@ -99,11 +136,14 @@ const Sidebar = () => {
       <div className={styles.sectionLabel}>Focus</div>
       <div className={styles.focusCard}>
         <p>Week target</p>
-        <h3>12 hrs</h3>
+        <h3>{targetLabel}</h3>
         <div className={styles.progressTrack}>
-          <span style={{ width: "65%" }} />
+          <span style={{ width: `${completionPct}%` }} />
         </div>
-        {!collapsed && <small>65% complete</small>}
+        {!collapsed && <small>{completionLabel}</small>}
+        {!collapsed && progressError && (
+          <small className={styles.errorText}>Progress data unavailable</small>
+        )}
       </div>
 
       <div className={styles.footerSection}>

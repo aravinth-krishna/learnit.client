@@ -154,6 +154,10 @@
   background: var(--accent);
 }
 
+.errorText {
+  color: #d92c3a;
+}
+
 .footerSection {
   margin-top: auto;
   display: flex;

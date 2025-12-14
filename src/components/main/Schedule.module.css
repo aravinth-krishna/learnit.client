@@ -565,6 +565,12 @@
   font-size: 0.92rem;
 }
 
+.progressError {
+  margin-top: 8px;
+  color: #d92c3a;
+  font-size: 0.9rem;
+}
+
 /* Notification styles */
 .notification {
   background: #ffebee;

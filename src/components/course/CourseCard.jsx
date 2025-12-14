@@ -16,11 +16,23 @@ function CourseCard({ course, onNavigate, onEdit, onDelete }) {
     difficulty,
   } = course;
 
-  const progress =
-    progressPercentage ??
-    (totalEstimatedHours > 0
-      ? ((totalEstimatedHours - hoursRemaining) / totalEstimatedHours) * 100
-      : 0);
+  const safeTotalHours = totalEstimatedHours ?? 0;
+  const safeHoursRemaining =
+    hoursRemaining ?? Math.max(0, safeTotalHours - (completedHours ?? 0));
+
+  const derivedFromHours =
+    safeTotalHours > 0
+      ? ((safeTotalHours - safeHoursRemaining) / safeTotalHours) * 100
+      : 0;
+
+  const hasServerProgress =
+    progressPercentage !== null && progressPercentage !== undefined;
+
+  const progress = hasServerProgress
+    ? progressPercentage === 0 && derivedFromHours > 0
+      ? derivedFromHours
+      : progressPercentage
+    : derivedFromHours;
 
   const moduleLabel =
     totalModules !== undefined
@@ -28,7 +40,7 @@ function CourseCard({ course, onNavigate, onEdit, onDelete }) {
       : `${Math.round(progress)}%`;
 
   const hoursDone =
-    completedHours ?? Math.max(0, totalEstimatedHours - hoursRemaining);
+    completedHours ?? Math.max(0, safeTotalHours - safeHoursRemaining);
 
   const handlePlay = (e) => {
     e.stopPropagation();
@@ -94,7 +106,7 @@ function CourseCard({ course, onNavigate, onEdit, onDelete }) {
           <div className={styles.text}>
             <span className={styles.percent}>{Math.round(progress)}%</span>
             <span className={styles.remaining}>
-              {moduleLabel} · {hoursRemaining}h left
+              {moduleLabel} · {safeHoursRemaining}h left
             </span>
           </div>
         </div>

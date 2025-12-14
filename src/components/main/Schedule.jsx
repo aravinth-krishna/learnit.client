@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { scheduleApi } from "../../services";
+import { useProgressDashboard } from "../../hooks/useProgressDashboard";
 import { AutoScheduleModal } from "./schedule/AutoScheduleModal";
 import { EditEventModal } from "./schedule/EditEventModal";
 import { ResetScheduleModal } from "./schedule/ResetScheduleModal";
@@ -10,6 +11,11 @@ import styles from "./Schedule.module.css";
 
 export default function Schedule() {
   const calendarRef = useRef(null);
+  const {
+    stats: progressStats,
+    loading: progressLoading,
+    error: progressError,
+  } = useProgressDashboard();
 
   const getNextMondayStart = () => {
     const now = new Date();
@@ -49,6 +55,15 @@ export default function Schedule() {
     focusPreference: "morning",
   });
   const [notification, setNotification] = useState("");
+
+  const formatHours = (hours) => {
+    if (hours === null || hours === undefined) return "0 hours";
+    const rounded = Math.round(hours * 10) / 10;
+    const display = Number.isInteger(rounded)
+      ? rounded.toFixed(0)
+      : rounded.toFixed(1);
+    return `${display} hours`;
+  };
 
   const updateAutoOptions = (updates) =>
     setAutoOptions((prev) => ({ ...prev, ...updates }));
@@ -479,8 +494,21 @@ export default function Schedule() {
     }
   };
 
-  const weeklyGoal = "15 hours";
-  const completedThisWeek = "12.5 hours";
+  const weeklyTargetHours =
+    progressStats?.totalScheduledHours ??
+    progressStats?.totalCompletedHours ??
+    0;
+  const completedThisWeekHours = progressStats?.totalCompletedHours ?? 0;
+
+  const weeklyGoal =
+    progressLoading && !progressStats
+      ? "Loading..."
+      : formatHours(weeklyTargetHours);
+
+  const completedThisWeek =
+    progressLoading && !progressStats
+      ? "Loading..."
+      : formatHours(completedThisWeekHours);
 
   return (
     <section className={styles.page}>
@@ -544,7 +572,13 @@ export default function Schedule() {
             <MetricsRow
               weeklyGoal={weeklyGoal}
               completedThisWeek={completedThisWeek}
+              loading={progressLoading && !progressStats}
             />
+            {progressError && (
+              <div className={styles.progressError}>
+                Progress data unavailable.
+              </div>
+            )}
           </div>
 
           <NextSessions events={events} />

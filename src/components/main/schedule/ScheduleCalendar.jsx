@@ -44,15 +44,12 @@ export function ScheduleCalendar({
         center: "title",
         right: "dayGridMonth,timeGridWeek,timeGridDay",
       }}
-      slotMinTime="08:00:00"
-      slotMaxTime="20:00:00"
+      slotMinTime="05:00:00"
+      slotMaxTime="23:30:00"
       slotDuration="00:30:00"
       snapDuration="00:15:00"
       height="92vh"
       eventDisplay="block"
-      eventBackgroundColor="#1eaf53"
-      eventBorderColor="#1eaf53"
-      eventTextColor="white"
       dayHeaderFormat={{ weekday: "short" }}
       slotLabelFormat={{
         hour: "numeric",
@@ -65,11 +62,10 @@ export function ScheduleCalendar({
         meridiem: "short",
       }}
       businessHours={{
-        daysOfWeek: [1, 2, 3, 4, 5],
-        startTime: "08:00",
-        endTime: "18:00",
+        daysOfWeek: [0, 1, 2, 3, 4, 5, 6],
+        startTime: "05:00",
+        endTime: "22:00",
       }}
-      eventConstraint="businessHours"
     />
   );
 }

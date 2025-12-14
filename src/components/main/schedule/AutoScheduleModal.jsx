@@ -18,10 +18,10 @@ export function AutoScheduleModal({
         <div className={styles.modalHeader}>
           <div>
             <p className={styles.kicker}>Auto-plan</p>
-            <h2>Tailor your schedule</h2>
+            <h2>Quick schedule</h2>
             <p className={styles.subtle}>
-              Uses your profile preferences by default; tweak the knobs below
-              for this run.
+              Choose your day window and block size; we will place focused
+              sessions without overlaps.
             </p>
           </div>
           <button className={styles.iconBtn} type="button" onClick={onClose}>
@@ -30,41 +30,29 @@ export function AutoScheduleModal({
         </div>
 
         <div className={styles.modalForm}>
-          <label>
-            Start from
-            <input
-              type="datetime-local"
-              value={autoOptions.startDateTime}
-              onChange={(e) => onChange({ startDateTime: e.target.value })}
-            />
-          </label>
-
-          <div className={styles.formGrid}>
-            <label>
-              Day start hour
+          <div className={styles.modalGrid}>
+            <label className={styles.fieldCard}>
+              <span>Start date</span>
               <input
-                type="number"
-                min="5"
-                max="12"
-                value={autoOptions.preferredStartHour}
-                onChange={(e) =>
-                  onChange({ preferredStartHour: Number(e.target.value) || 8 })
-                }
+                type="date"
+                value={autoOptions.startDate}
+                onChange={(e) => onChange({ startDate: e.target.value })}
               />
             </label>
-            <label>
-              Day end hour
+            <label className={styles.fieldCard}>
+              <span>Day start</span>
               <input
-                type="number"
-                min={autoOptions.preferredStartHour + 2}
-                max="22"
-                value={autoOptions.preferredEndHour}
-                onChange={(e) =>
-                  onChange({
-                    preferredEndHour:
-                      Number(e.target.value) || autoOptions.preferredEndHour,
-                  })
-                }
+                type="time"
+                value={autoOptions.dayStart}
+                onChange={(e) => onChange({ dayStart: e.target.value })}
+              />
+            </label>
+            <label className={styles.fieldCard}>
+              <span>Day end</span>
+              <input
+                type="time"
+                value={autoOptions.dayEnd}
+                onChange={(e) => onChange({ dayEnd: e.target.value })}
               />
             </label>
           </div>
@@ -78,24 +66,9 @@ export function AutoScheduleModal({
             Allow weekends
           </label>
 
-          <div className={styles.formGrid}>
-            <label>
-              Max daily hours
-              <input
-                type="number"
-                min="3"
-                max="8"
-                value={autoOptions.maxDailyHours}
-                onChange={(e) =>
-                  onChange({
-                    maxDailyHours:
-                      Number(e.target.value) || autoOptions.maxDailyHours,
-                  })
-                }
-              />
-            </label>
-            <label>
-              Max session minutes
+          <div className={styles.inlineTriple}>
+            <label className={styles.fieldCard}>
+              <span>Max session minutes</span>
               <input
                 type="number"
                 min="30"
@@ -110,8 +83,8 @@ export function AutoScheduleModal({
                 }
               />
             </label>
-            <label>
-              Buffer between blocks (min)
+            <label className={styles.fieldCard}>
+              <span>Buffer (min)</span>
               <input
                 type="number"
                 min="5"
@@ -125,8 +98,8 @@ export function AutoScheduleModal({
                 }
               />
             </label>
-            <label>
-              Weekly cap (hours)
+            <label className={styles.fieldCard}>
+              <span>Weekly cap (hours)</span>
               <input
                 type="number"
                 min="0"
@@ -138,18 +111,6 @@ export function AutoScheduleModal({
               />
             </label>
           </div>
-
-          <label>
-            Focus preference
-            <select
-              value={autoOptions.focusPreference}
-              onChange={(e) => onChange({ focusPreference: e.target.value })}
-            >
-              <option value="balanced">Balanced</option>
-              <option value="morning">Mornings</option>
-              <option value="evening">Evenings</option>
-            </select>
-          </label>
 
           {error && <div className={styles.errorMessage}>{error}</div>}
 

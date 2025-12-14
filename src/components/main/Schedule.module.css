@@ -514,6 +514,41 @@
   gap: 14px;
 }
 
+.modalGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.fieldCard {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldCard span {
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+.fieldCard input,
+.fieldCard select {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 9px 10px;
+  background: var(--surface);
+}
+
+.inlineTriple {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
 .modalForm label {
   display: flex;
   flex-direction: column;

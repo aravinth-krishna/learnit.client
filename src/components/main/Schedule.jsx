@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { scheduleApi } from "../../services";
-import { useProgressDashboard } from "../../hooks/useProgressDashboard";
 import { AutoScheduleModal } from "./schedule/AutoScheduleModal";
 import { EditEventModal } from "./schedule/EditEventModal";
 import { ResetScheduleModal } from "./schedule/ResetScheduleModal";
@@ -9,22 +8,33 @@ import { MetricsRow } from "./schedule/MetricsRow";
 import { NextSessions } from "./schedule/NextSessions";
 import styles from "./Schedule.module.css";
 
+const colorPalette = [
+  "#2563eb",
+  "#16a34a",
+  "#db2777",
+  "#ea580c",
+  "#7c3aed",
+  "#0ea5e9",
+  "#d97706",
+  "#22c55e",
+];
+
+const getCourseColor = (courseId) => {
+  if (courseId === null || courseId === undefined) return "#1eaf53";
+  const idx = Math.abs(courseId) % colorPalette.length;
+  return colorPalette[idx];
+};
+
 export default function Schedule() {
   const calendarRef = useRef(null);
-  const {
-    stats: progressStats,
-    loading: progressLoading,
-    error: progressError,
-  } = useProgressDashboard();
 
-  const getNextMondayStart = () => {
+  const getNextMondayDate = () => {
     const now = new Date();
     const nextMonday = new Date(now);
     const day = nextMonday.getDay();
     const diff = (day === 0 ? 1 : 8) - day;
     nextMonday.setDate(nextMonday.getDate() + diff);
-    nextMonday.setHours(9, 0, 0, 0);
-    return nextMonday.toISOString().slice(0, 16);
+    return nextMonday.toISOString().slice(0, 10);
   };
 
   const [events, setEvents] = useState([]);
@@ -44,17 +54,21 @@ export default function Schedule() {
     unlinkFromModule: false,
   });
   const [autoOptions, setAutoOptions] = useState({
-    startDateTime: getNextMondayStart(),
-    preferredStartHour: 8,
+    startDate: getNextMondayDate(),
+    preferredStartHour: 9,
     preferredEndHour: 18,
+    dayStart: "09:00",
+    dayEnd: "18:00",
     includeWeekends: false,
-    maxDailyHours: 5,
     maxSessionMinutes: 90,
     bufferMinutes: 15,
     weeklyLimitHours: 15,
-    focusPreference: "morning",
   });
   const [notification, setNotification] = useState("");
+  const [weeklyMetrics, setWeeklyMetrics] = useState({
+    scheduled: 0,
+    completed: 0,
+  });
 
   const formatHours = (hours) => {
     if (hours === null || hours === undefined) return "0 hours";
@@ -67,6 +81,14 @@ export default function Schedule() {
 
   const updateAutoOptions = (updates) =>
     setAutoOptions((prev) => ({ ...prev, ...updates }));
+
+  const setEventsWithMetrics = (updater) => {
+    setEvents((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      computeWeeklyMetrics(next);
+      return next;
+    });
+  };
 
   const updateEditForm = (updates) =>
     setEditForm((prev) => ({ ...prev, ...updates }));
@@ -82,8 +104,12 @@ export default function Schedule() {
       setError("");
       const data = await scheduleApi.getScheduleEvents();
       // Map backend DTOs to FullCalendar events
-      setEvents(
-        data.map((e) => ({
+      const mapped = data.map((e) => {
+        const courseId = e.courseModule?.courseId;
+        const baseColor = getCourseColor(courseId);
+        const isCompleted = e.courseModule?.isCompleted;
+
+        return {
           id: String(e.id),
           title: e.title,
           start: e.startUtc,
@@ -91,10 +117,22 @@ export default function Schedule() {
           allDay: e.allDay,
           courseModuleId: e.courseModuleId,
           courseModule: e.courseModule,
-          backgroundColor: e.courseModuleId ? "#4CAF50" : undefined, // Green for course modules
-          borderColor: e.courseModuleId ? "#4CAF50" : undefined,
-        }))
-      );
+          backgroundColor: e.courseModuleId
+            ? isCompleted
+              ? "#94a3b8"
+              : baseColor
+            : undefined,
+          borderColor: e.courseModuleId
+            ? isCompleted
+              ? "#94a3b8"
+              : baseColor
+            : undefined,
+          textColor: "#fff",
+        };
+      });
+
+      setEvents(mapped);
+      computeWeeklyMetrics(mapped);
     } catch (err) {
       console.error("Failed to load schedule events", err);
       setError(err.message || "Failed to load schedule");
@@ -110,6 +148,39 @@ export default function Schedule() {
     } catch (err) {
       console.error("Failed to load available modules", err);
     }
+  };
+
+  const computeWeeklyMetrics = (list) => {
+    const now = new Date();
+    const day = now.getDay();
+    const diffToMonday = day === 0 ? -6 : 1 - day;
+    const weekStart = new Date(now);
+    weekStart.setHours(0, 0, 0, 0);
+    weekStart.setDate(weekStart.getDate() + diffToMonday);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+
+    let scheduled = 0;
+    let completed = 0;
+
+    list.forEach((e) => {
+      const start = new Date(e.start);
+      const end = e.end
+        ? new Date(e.end)
+        : new Date(start.getTime() + 60 * 60 * 1000);
+      if (start >= weekStart && start < weekEnd && e.courseModuleId) {
+        const hours = Math.max(0.25, (end - start) / (1000 * 60 * 60));
+        scheduled += hours;
+        if (end <= now) {
+          completed += hours;
+        }
+      }
+    });
+
+    setWeeklyMetrics({
+      scheduled: Math.round(scheduled * 10) / 10,
+      completed: Math.round(completed * 10) / 10,
+    });
   };
 
   const createEventOnServer = async ({ title, start, end, allDay }) => {
@@ -149,8 +220,10 @@ export default function Schedule() {
       setLoading(true);
       setError("");
 
-      const startDate = autoOptions.startDateTime
-        ? new Date(autoOptions.startDateTime)
+      const startDate = autoOptions.startDate
+        ? new Date(
+            `${autoOptions.startDate}T${autoOptions.dayStart || "09:00"}`
+          )
         : null;
 
       const payload = {
@@ -158,14 +231,20 @@ export default function Schedule() {
           startDate && !Number.isNaN(startDate.valueOf())
             ? startDate.toISOString()
             : null,
-        preferredStartHour: Number(autoOptions.preferredStartHour),
-        preferredEndHour: Number(autoOptions.preferredEndHour),
+        preferredStartHour:
+          Number(autoOptions.dayStart?.split(":")[0]) ||
+          Number(autoOptions.preferredStartHour) ||
+          9,
+        preferredEndHour:
+          Number(autoOptions.dayEnd?.split(":")[0]) ||
+          Number(autoOptions.preferredEndHour) ||
+          18,
         includeWeekends: autoOptions.includeWeekends,
-        maxDailyHours: Number(autoOptions.maxDailyHours),
         maxSessionMinutes: Number(autoOptions.maxSessionMinutes),
         bufferMinutes: Number(autoOptions.bufferMinutes),
-        weeklyLimitHours: Number(autoOptions.weeklyLimitHours),
-        focusPreference: autoOptions.focusPreference,
+        weeklyLimitHours: Number.isFinite(Number(autoOptions.weeklyLimitHours))
+          ? Number(autoOptions.weeklyLimitHours)
+          : null,
       };
 
       const result = await scheduleApi.autoScheduleModules(payload);
@@ -180,8 +259,6 @@ export default function Schedule() {
       } else {
         setNotification("No course modules available to schedule.");
       }
-
-      setShowAutoSchedule(false);
       setTimeout(() => setNotification(""), 5000);
     } catch (err) {
       console.error("Auto-schedule failed", err);
@@ -224,7 +301,6 @@ export default function Schedule() {
       await scheduleApi.unlinkEventFromModule(eventId);
       await loadEvents();
       await loadAvailableModules();
-      alert("Event unlinked from course module!");
     } catch (err) {
       console.error("Failed to unlink event from module", err);
       setError(err.message || "Failed to unlink event from module");
@@ -247,7 +323,7 @@ export default function Schedule() {
         end: info.endStr,
         allDay: info.allDay,
       });
-      setEvents((prev) => [...prev, created]);
+      setEventsWithMetrics((prev) => [...prev, created]);
     } catch (err) {
       alert(err.message || "Failed to create event");
     }
@@ -268,7 +344,7 @@ export default function Schedule() {
         end,
         allDay: info.allDay,
       });
-      setEvents((prev) => [...prev, created]);
+      setEventsWithMetrics((prev) => [...prev, created]);
     } catch (err) {
       alert(err.message || "Failed to create event");
     }
@@ -286,7 +362,7 @@ export default function Schedule() {
         allDay: event.allDay,
       });
 
-      setEvents((prev) =>
+      setEventsWithMetrics((prev) =>
         prev.map((e) =>
           e.id === event.id
             ? {
@@ -321,7 +397,7 @@ export default function Schedule() {
         allDay: event.allDay,
       });
 
-      setEvents((prev) =>
+      setEventsWithMetrics((prev) =>
         prev.map((e) =>
           e.id === event.id
             ? {
@@ -454,7 +530,7 @@ export default function Schedule() {
         });
 
         // Update local state
-        setEvents((prev) =>
+        setEventsWithMetrics((prev) =>
           prev.map((e) =>
             e.id === editingEvent.id
               ? {
@@ -485,7 +561,9 @@ export default function Schedule() {
     if (confirm("Are you sure you want to delete this event?")) {
       try {
         await deleteEventOnServer(editingEvent.id);
-        setEvents((prev) => prev.filter((e) => e.id !== editingEvent.id));
+        setEventsWithMetrics((prev) =>
+          prev.filter((e) => e.id !== editingEvent.id)
+        );
         setShowEditModal(false);
         setEditingEvent(null);
       } catch (err) {
@@ -494,21 +572,8 @@ export default function Schedule() {
     }
   };
 
-  const weeklyTargetHours =
-    progressStats?.totalScheduledHours ??
-    progressStats?.totalCompletedHours ??
-    0;
-  const completedThisWeekHours = progressStats?.totalCompletedHours ?? 0;
-
-  const weeklyGoal =
-    progressLoading && !progressStats
-      ? "Loading..."
-      : formatHours(weeklyTargetHours);
-
-  const completedThisWeek =
-    progressLoading && !progressStats
-      ? "Loading..."
-      : formatHours(completedThisWeekHours);
+  const weeklyGoal = formatHours(weeklyMetrics.scheduled);
+  const completedThisWeek = formatHours(weeklyMetrics.completed);
 
   return (
     <section className={styles.page}>
@@ -572,13 +637,8 @@ export default function Schedule() {
             <MetricsRow
               weeklyGoal={weeklyGoal}
               completedThisWeek={completedThisWeek}
-              loading={progressLoading && !progressStats}
+              loading={false}
             />
-            {progressError && (
-              <div className={styles.progressError}>
-                Progress data unavailable.
-              </div>
-            )}
           </div>
 
           <NextSessions events={events} />

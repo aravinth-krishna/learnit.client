@@ -15,6 +15,7 @@
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
+  color: #0f172a;
 }
 
 .center {
@@ -25,7 +26,18 @@
 
 .center li {
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 600;
+}
+
+.center a,
+.logo a {
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.center a:hover,
+.logo a:hover {
+  color: #0b1220;
 }
 
 .center li:hover {

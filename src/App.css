@@ -72,3 +72,16 @@ select {
   outline: none;
   background: none;
 }
+
+input,
+textarea,
+select {
+  color: var(--text-strong);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}

@@ -104,12 +104,97 @@ function CreateCourseModal({ onSave, onCancel }) {
     try {
       const draft = await aiApi.createCourse(aiPrompt.trim());
 
+      const clampOption = (val, options, fallback) => {
+        if (!val) return fallback;
+        const found = options.find(
+          (opt) => opt.toLowerCase() === val.toLowerCase()
+        );
+        return found || fallback;
+      };
+
+      const normalizeSubject = (val) => {
+        const subjects = [
+          "Programming",
+          "Data Science",
+          "Web Development",
+          "Design",
+          "Business",
+          "Science",
+          "Mathematics",
+          "Language",
+          "Other",
+        ];
+        if (!val) return "Other";
+        const exact = subjects.find(
+          (s) => s.toLowerCase() === val.toLowerCase()
+        );
+        return exact || "Other";
+      };
+
+      const difficulty = clampOption(
+        draft.difficulty,
+        ["Beginner", "Intermediate", "Advanced"],
+        "Intermediate"
+      );
+
+      const priority = clampOption(
+        draft.priority,
+        ["High", "Medium", "Low"],
+        "Medium"
+      );
+
+      const subjectArea = normalizeSubject(draft.subjectArea);
+
+      const modulesFallback = () => {
+        const subject = subjectArea === "Other" ? "Course" : subjectArea;
+        return ["Foundations", "Applied Practice", "Project"]
+          .map((title, idx) => ({
+            id: crypto.randomUUID(),
+            title: `${subject} ${title}`,
+            duration: "3",
+            subModules: [
+              { id: crypto.randomUUID(), title: "Lesson 1", duration: "1" },
+              { id: crypto.randomUUID(), title: "Lesson 2", duration: "1" },
+            ],
+          }))
+          .map((m, idx) => ({ ...m, order: idx }));
+      };
+
       const learningObjectives = normalizeLearningObjectives(
         draft.learningObjectives
       );
 
-      const moduleDurationTotal = (draft.modules || []).reduce((sum, m) => {
+      const safeModules = (draft.modules || []).map((m, idx) => {
         const hours = Number.parseFloat(m.estimatedHours);
+        const duration = Number.isFinite(hours) && hours > 0 ? hours : 2;
+        const subModules = (m.subModules || []).map((s, subIdx) => {
+          const sh = Number.parseFloat(s.estimatedHours);
+          const subDuration = Number.isFinite(sh) && sh > 0 ? sh : 1;
+          return {
+            id: crypto.randomUUID(),
+            title: s.title?.trim() || `Lesson ${subIdx + 1}`,
+            duration: toHoursString(subDuration, "1"),
+          };
+        });
+
+        return {
+          id: crypto.randomUUID(),
+          title: m.title?.trim() || `Module ${idx + 1}`,
+          duration: toHoursString(duration, "2"),
+          subModules: subModules.length
+            ? subModules
+            : [
+                { id: crypto.randomUUID(), title: "Lesson 1", duration: "1" },
+                { id: crypto.randomUUID(), title: "Lesson 2", duration: "1" },
+              ],
+        };
+      });
+
+      const usableModules =
+        safeModules.length >= 3 ? safeModules : modulesFallback();
+
+      const moduleDurationTotal = usableModules.reduce((sum, m) => {
+        const hours = Number.parseFloat(m.duration);
         return Number.isFinite(hours) && hours > 0 ? sum + hours : sum;
       }, 0);
       const totalHours = Number.parseInt(draft.totalEstimatedHours, 10);
@@ -122,11 +207,11 @@ function CreateCourseModal({ onSave, onCancel }) {
         ...prev,
         title: draft.title?.trim() || prev.title,
         description: draft.description?.trim() || prev.description,
-        difficulty: draft.difficulty?.trim() || prev.difficulty,
-        priority: draft.priority?.trim() || prev.priority,
+        difficulty,
+        priority,
         learningObjectives:
           learningObjectives || prev.learningObjectives || "Learning goals",
-        subjectArea: draft.subjectArea?.trim() || prev.subjectArea,
+        subjectArea,
         totalEstimatedHours:
           Number.isFinite(totalHours) && totalHours > 0
             ? totalHours.toString()
@@ -136,32 +221,7 @@ function CreateCourseModal({ onSave, onCancel }) {
         targetCompletionDate: targetDate,
         notes: draft.notes?.trim() || prev.notes,
       }));
-
-      const mapped = (draft.modules || []).map((m) => ({
-        id: crypto.randomUUID(),
-        title: m.title?.trim() || "",
-        duration: toHoursString(m.estimatedHours, "1"),
-        subModules: (m.subModules || []).map((s) => ({
-          id: crypto.randomUUID(),
-          title: s.title?.trim() || "",
-          duration: toHoursString(s.estimatedHours, "1"),
-        })),
-      }));
-
-      if (mapped.length) {
-        setModules(mapped);
-      } else {
-        setModules([
-          {
-            id: crypto.randomUUID(),
-            title: "Kickoff",
-            duration: "2",
-            subModules: [
-              { id: crypto.randomUUID(), title: "Overview", duration: "1" },
-            ],
-          },
-        ]);
-      }
+      setModules(usableModules);
 
       setActiveTab("manual");
     } catch (err) {

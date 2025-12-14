@@ -36,16 +36,17 @@ function CourseDetails() {
     fetchCourse();
   }, [id]);
 
-  const fetchCourse = async () => {
+  const fetchCourse = async (options = {}) => {
+    const { silent = false } = options;
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const data = await courseApi.getCourse(id);
       setCourse(data);
       setNoteDraft(data.notes || "");
     } catch (err) {
       setError(err.message);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -84,18 +85,44 @@ function CourseDetails() {
   const handleToggleModules = async (moduleIds, targetCompleted) => {
     try {
       setError("");
+
+      // Optimistic local update to avoid page reload flicker
+      setCourse((prev) => {
+        if (!prev) return prev;
+        const ids = new Set(moduleIds);
+
+        const updatedModules = (prev.modules || []).map((mod) => {
+          const topHit = ids.has(mod.id);
+          const updatedSubs = (mod.subModules || []).map((sm) => ({
+            ...sm,
+            isCompleted:
+              ids.has(sm.id) || topHit ? targetCompleted : sm.isCompleted,
+          }));
+
+          return {
+            ...mod,
+            isCompleted: topHit ? targetCompleted : mod.isCompleted,
+            subModules: updatedSubs,
+          };
+        });
+
+        return { ...prev, modules: updatedModules };
+      });
+
       const moduleMap = new Map(flatModules.map((m) => [m.id, m]));
       const toToggle = moduleIds.filter(
         (mid) => moduleMap.get(mid)?.isCompleted !== targetCompleted
       );
 
-      for (const mid of toToggle) {
-        await courseApi.toggleModuleCompletion(mid);
-      }
+      await Promise.all(
+        toToggle.map((mid) => courseApi.toggleModuleCompletion(mid))
+      );
 
-      await fetchCourse();
+      // Refresh quietly to ensure totals stay accurate
+      fetchCourse({ silent: true });
     } catch (err) {
       setError(err?.message || "Failed to update module");
+      fetchCourse({ silent: true });
     }
   };
 

@@ -383,6 +383,55 @@
   margin: 0;
 }
 
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 12px;
+  background: var(--bg);
+  cursor: pointer;
+}
+
+.checkboxRow input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+}
+
+/* Enforce horizontal layout inside modal forms where label defaults are column */
+.modalForm .checkboxRow {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+}
+
+.modalForm .checkboxLabel,
+.courseRow .checkboxLabel {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.checkboxContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.checkboxTitle {
+  font-weight: 650;
+  color: var(--text-strong);
+}
+
+.checkboxNote {
+  color: var(--text-soft);
+  font-size: 0.85rem;
+}
+
 .moduleInfo {
   margin: 10px 0;
   padding: 14px;

@@ -60,13 +60,18 @@ export function AutoScheduleModal({
             </label>
           </div>
 
-          <label className={styles.checkboxLabel}>
+          <label className={styles.checkboxRow}>
             <input
               type="checkbox"
               checked={autoOptions.includeWeekends}
               onChange={(e) => onChange({ includeWeekends: e.target.checked })}
             />
-            Allow weekends
+            <div className={styles.checkboxContent}>
+              <span className={styles.checkboxTitle}>Allow weekends</span>
+              <small className={styles.checkboxNote}>
+                Include Saturday and Sunday when auto-placing sessions.
+              </small>
+            </div>
           </label>
 
           <div className={styles.inlineTriple}>

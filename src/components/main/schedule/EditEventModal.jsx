@@ -65,13 +65,18 @@ export function EditEventModal({
             </label>
           </div>
 
-          <label className={styles.checkboxLabel}>
+          <label className={styles.checkboxRow}>
             <input
               type="checkbox"
               checked={editForm.allDay}
               onChange={(e) => onChange({ allDay: e.target.checked })}
             />
-            All-day event
+            <div className={styles.checkboxContent}>
+              <span className={styles.checkboxTitle}>All-day event</span>
+              <small className={styles.checkboxNote}>
+                Blocks the entire day and hides start/end times.
+              </small>
+            </div>
           </label>
 
           {editingEvent.courseModule && (
@@ -81,15 +86,22 @@ export function EditEventModal({
                 <strong>{editingEvent.courseModule.title}</strong>
                 <small>from {editingEvent.courseModule.courseTitle}</small>
               </div>
-              <label className={styles.checkboxLabel}>
+              <label className={styles.checkboxRow}>
                 <input
                   type="checkbox"
                   checked={!!editForm.markComplete}
                   onChange={(e) => onChange({ markComplete: e.target.checked })}
                 />
-                Mark module complete
+                <div className={styles.checkboxContent}>
+                  <span className={styles.checkboxTitle}>
+                    Mark module complete
+                  </span>
+                  <small className={styles.checkboxNote}>
+                    Marks this linked module as done when you save.
+                  </small>
+                </div>
               </label>
-              <label className={styles.checkboxLabel}>
+              <label className={styles.checkboxRow}>
                 <input
                   type="checkbox"
                   checked={editForm.unlinkFromModule}
@@ -97,7 +109,14 @@ export function EditEventModal({
                     onChange({ unlinkFromModule: e.target.checked })
                   }
                 />
-                Disconnect from course module
+                <div className={styles.checkboxContent}>
+                  <span className={styles.checkboxTitle}>
+                    Disconnect from course module
+                  </span>
+                  <small className={styles.checkboxNote}>
+                    Keep the event but remove its course module link.
+                  </small>
+                </div>
               </label>
             </div>
           )}

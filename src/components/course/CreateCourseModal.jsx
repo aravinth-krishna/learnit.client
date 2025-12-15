@@ -14,18 +14,120 @@ const toHoursString = (value, fallback = "1") => {
 };
 
 const normalizeLearningObjectives = (val) => {
-  if (Array.isArray(val)) {
-    return val
+  const clean = (items) =>
+    items
       .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter(Boolean)
-      .join("\n");
+      .filter(Boolean);
+
+  if (Array.isArray(val)) {
+    return clean(val).join("\n");
   }
-  if (typeof val === "string") return val.trim();
+
+  if (typeof val === "string") {
+    const parts = clean(val.split(/[\n;•]+/));
+    if (parts.length > 1) return parts.join("\n");
+    return val.trim();
+  }
   return "";
 };
 
 const fallbackDate = () =>
   new Date(Date.now() + 28 * 86400000).toISOString().slice(0, 10);
+
+const createLookup = (obj = {}) => {
+  const map = new Map(
+    Object.entries(obj || {}).map(([key, value]) => [key.toLowerCase(), value])
+  );
+
+  return (...keys) => {
+    for (const key of keys) {
+      const val = map.get(key.toLowerCase());
+      if (val !== undefined) return val;
+    }
+    return undefined;
+  };
+};
+
+const normalizeAiDraft = (raw) => {
+  const root = createLookup(raw || {});
+
+  const normalizeSubModule = (sub, idx) => {
+    const pick = createLookup(sub || {});
+    const estimatedHours = pick(
+      "estimatedhours",
+      "estimated_hours",
+      "hours",
+      "duration"
+    );
+
+    return {
+      title: pick("title")?.toString().trim() || `Lesson ${idx + 1}`,
+      description:
+        pick("description", "detail", "desc", "notes")?.toString().trim() || "",
+      estimatedHours,
+    };
+  };
+
+  const normalizeModule = (mod, idx) => {
+    const pick = createLookup(mod || {});
+    const rawSubs = pick(
+      "submodules",
+      "sub_modules",
+      "subModules",
+      "submodule",
+      "sub_module"
+    );
+
+    const estimatedHours = pick(
+      "estimatedhours",
+      "estimated_hours",
+      "hours",
+      "duration"
+    );
+
+    return {
+      title: pick("title")?.toString().trim() || `Module ${idx + 1}`,
+      description:
+        pick("description", "detail", "desc", "notes")?.toString().trim() || "",
+      estimatedHours,
+      subModules: Array.isArray(rawSubs)
+        ? rawSubs.map((s, subIdx) => normalizeSubModule(s, subIdx))
+        : [],
+    };
+  };
+
+  const rawModules = root("modules") || [];
+
+  return {
+    title: root("title"),
+    description: root("description"),
+    subjectArea: root("subjectarea", "subject_area", "subject"),
+    learningObjectives: root(
+      "learningobjectives",
+      "learning_objectives",
+      "objectives",
+      "goals"
+    ),
+    difficulty: root("difficulty", "level"),
+    priority: root("priority", "prio"),
+    totalEstimatedHours: root(
+      "totalestimatedhours",
+      "total_estimated_hours",
+      "hours",
+      "totalhours"
+    ),
+    targetCompletionDate: root(
+      "targetcompletiondate",
+      "target_completion_date",
+      "due",
+      "deadline"
+    ),
+    notes: root("notes"),
+    modules: Array.isArray(rawModules)
+      ? rawModules.map((m, idx) => normalizeModule(m, idx))
+      : [],
+  };
+};
 
 function CreateCourseModal({ onSave, onCancel }) {
   const [formData, setFormData] = useState({
@@ -102,8 +204,9 @@ function CreateCourseModal({ onSave, onCancel }) {
     setAiLoading(true);
     setError("");
     try {
-      const draft = await aiApi.createCourse(aiPrompt.trim());
-      console.log("[AI create-course draft]", draft);
+      const rawDraft = await aiApi.createCourse(aiPrompt.trim());
+      const draft = normalizeAiDraft(rawDraft);
+      console.log("[AI create-course draft]", rawDraft);
 
       const clampOption = (val, options, fallback) => {
         if (!val) return fallback;

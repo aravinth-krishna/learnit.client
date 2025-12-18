@@ -1,0 +1,1 @@
+c:\Users\AravinthKrishna\source\repos\Learnit\Learnit.client\obj\Release\client.esproj.CoreCompileInputs.cache

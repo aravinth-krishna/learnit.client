@@ -28,11 +28,7 @@ function CourseCard({ course, onNavigate, onEdit, onDelete }) {
   const hasServerProgress =
     progressPercentage !== null && progressPercentage !== undefined;
 
-  const progress = hasServerProgress
-    ? progressPercentage === 0 && derivedFromHours > 0
-      ? derivedFromHours
-      : progressPercentage
-    : derivedFromHours;
+  const progress = hasServerProgress ? progressPercentage : derivedFromHours;
 
   const moduleLabel =
     totalModules !== undefined

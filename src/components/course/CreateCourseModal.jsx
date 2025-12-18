@@ -62,8 +62,6 @@ const normalizeAiDraft = (raw) => {
 
     return {
       title: pick("title")?.toString().trim() || `Lesson ${idx + 1}`,
-      description:
-        pick("description", "detail", "desc", "notes")?.toString().trim() || "",
       estimatedHours,
     };
   };
@@ -87,8 +85,6 @@ const normalizeAiDraft = (raw) => {
 
     return {
       title: pick("title")?.toString().trim() || `Module ${idx + 1}`,
-      description:
-        pick("description", "detail", "desc", "notes")?.toString().trim() || "",
       estimatedHours,
       subModules: Array.isArray(rawSubs)
         ? rawSubs.map((s, subIdx) => normalizeSubModule(s, subIdx))
@@ -174,15 +170,11 @@ function CreateCourseModal({ onSave, onCancel }) {
       tempId: idx + 1,
       title: m.title,
       estimatedHours: toHours(m.duration),
-      notes: "",
       subModules: (m.subModules || [])
         .filter((s) => s.title.trim() && s.duration)
         .map((s, subIdx) => ({
           title: s.title,
           estimatedHours: toHours(s.duration),
-          description: "",
-          notes: "",
-          order: subIdx,
         })),
     }));
 

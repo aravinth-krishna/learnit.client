@@ -3,7 +3,6 @@ import {
   FaEdit,
   FaPlus,
   FaSave,
-  FaStickyNote,
   FaTimes,
   FaFolder,
   FaRegFile,
@@ -13,8 +12,6 @@ import styles from "./ModuleTree.module.css";
 const emptyModule = {
   title: "",
   estimatedHours: "",
-  description: "",
-  notes: "",
 };
 
 function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
@@ -70,8 +67,6 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
         estimatedHours: addValues.estimatedHours
           ? parseInt(addValues.estimatedHours, 10)
           : 0,
-        description: addValues.description?.trim() || "",
-        notes: addValues.notes?.trim() || "",
         parentModuleId: addTarget ?? null,
       });
       setAddTarget(undefined);
@@ -90,8 +85,6 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
     setFormValues({
       title: module.title,
       estimatedHours: module.estimatedHours ?? "",
-      description: module.description || "",
-      notes: module.notes || "",
     });
   };
 
@@ -102,11 +95,9 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
     try {
       await onUpdate(editingId, {
         title: formValues.title,
-        description: formValues.description,
         estimatedHours: formValues.estimatedHours
           ? parseInt(formValues.estimatedHours, 10)
           : 0,
-        notes: formValues.notes,
       });
       setEditingId(null);
       setFormValues(emptyModule);
@@ -158,25 +149,21 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
           </button>
         </div>
       </div>
-      <textarea
-        value={addValues.description}
-        onChange={(e) =>
-          setAddValues({ ...addValues, description: e.target.value })
-        }
-        placeholder="Description (optional)"
-        rows={2}
-      />
     </div>
   );
 
   const renderNode = (node, depth = 0, visited = new Set()) => {
-    if (!node || visited.has(node.id) || depth > 10) {
+    const nodeKey = node?.parentModuleId
+      ? `sub-${node.parentModuleId}-${node.id}`
+      : `mod-${node?.id}`;
+
+    if (!node || visited.has(nodeKey) || depth > 10) {
       // Prevent cycles or runaway depth from malformed parent links
       return null;
     }
 
     const nextVisited = new Set(visited);
-    nextVisited.add(node.id);
+    nextVisited.add(nodeKey);
 
     const children = childrenMap[node.id] || [];
     const isEditing = editingId === node.id;
@@ -192,7 +179,7 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
     };
 
     return (
-      <li className={styles.node} key={node.id}>
+      <li className={styles.node} key={nodeKey}>
         <div className={rowClass} style={{ "--depth": depth }}>
           <div className={styles.rowLeft}>
             <label className={styles.checkbox}>
@@ -233,11 +220,6 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
             ) : (
               <div className={styles.labelBlock}>
                 <span className={styles.title}>{node.title}</span>
-                {(node.description || node.notes) && (
-                  <span className={styles.muted}>
-                    {node.description || node.notes}
-                  </span>
-                )}
               </div>
             )}
           </div>
@@ -281,28 +263,6 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
             )}
           </div>
         </div>
-
-        {isEditing && (
-          <div className={styles.editNotes} style={{ "--depth": depth }}>
-            <textarea
-              value={formValues.description}
-              onChange={(e) =>
-                setFormValues({ ...formValues, description: e.target.value })
-              }
-              placeholder="Description"
-              rows={2}
-            />
-            <textarea
-              value={formValues.notes}
-              onChange={(e) =>
-                setFormValues({ ...formValues, notes: e.target.value })
-              }
-              placeholder="Notes"
-              rows={2}
-            />
-          </div>
-        )}
-
         {isAddingHere && renderAddRow(node.id, depth + 1)}
 
         {children.length > 0 && (

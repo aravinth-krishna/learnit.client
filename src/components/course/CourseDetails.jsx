@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   FaArrowLeft,
   FaClock,
   FaBook,
+  FaPlus,
   FaStickyNote,
   FaLink,
   FaCog,
@@ -24,6 +25,7 @@ import styles from "./CourseDetails.module.css";
 function CourseDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const moduleTreeRef = useRef(null);
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -185,10 +187,19 @@ function CourseDetails() {
       <div className={styles.content}>
         <main className={styles.main}>
           <section className={styles.section}>
-            <h2>
-              <FaBook /> Course Modules
-            </h2>
+            <div className={styles.sectionHeader}>
+              <h2>
+                <FaBook /> Course Modules
+              </h2>
+              <Button
+                variant="primary"
+                onClick={() => moduleTreeRef.current?.openAddRoot?.()}
+              >
+                <FaPlus /> Add Module
+              </Button>
+            </div>
             <ModuleTree
+              ref={moduleTreeRef}
               modules={flatModules}
               courseTitle={course?.title || ""}
               onUpdate={async (moduleId, updates) => {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import {
   FaEdit,
   FaPlus,
@@ -15,13 +15,10 @@ const emptyModule = {
   estimatedHours: "",
 };
 
-function ModuleTree({
-  modules = [],
-  courseTitle = "",
-  onUpdate,
-  onToggleCompletion,
-  onAdd,
-}) {
+const ModuleTree = forwardRef(function ModuleTree(
+  { modules = [], courseTitle = "", onUpdate, onToggleCompletion, onAdd },
+  ref
+) {
   const [editingId, setEditingId] = useState(null);
   const [formValues, setFormValues] = useState(emptyModule);
   const [addTarget, setAddTarget] = useState(undefined);
@@ -60,6 +57,14 @@ function ModuleTree({
     setEditingId(null);
     setAddValues(emptyModule);
   };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      openAddRoot: () => startAdd(null),
+    }),
+    []
+  );
 
   const handleAdd = async () => {
     if (!addValues.title.trim()) {
@@ -242,43 +247,51 @@ function ModuleTree({
             )}
           </div>
           <div className={styles.actions}>
-            <span className={styles.badge}>{node.estimatedHours ?? 0}h</span>
-            {isEditing ? (
-              <>
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  disabled={pending}
-                  title="Save"
-                >
-                  <FaSave />
-                </button>
-                <button type="button" onClick={cancelEditing} title="Cancel">
-                  <FaTimes />
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => startEdit(node)}
-                  className={styles.iconBtn}
-                  title="Edit"
-                >
-                  <FaEdit />
-                </button>
-                {depth === 0 && (
+            <div className={styles.actionBtns}>
+              {isEditing ? (
+                <>
                   <button
                     type="button"
-                    onClick={() => startAdd(node.id)}
+                    onClick={handleSave}
+                    disabled={pending}
+                    title="Save"
                     className={styles.iconBtn}
-                    title="Add"
                   >
-                    <FaPlus />
+                    <FaSave />
                   </button>
-                )}
-              </>
-            )}
+                  <button
+                    type="button"
+                    onClick={cancelEditing}
+                    title="Cancel"
+                    className={styles.iconBtn}
+                  >
+                    <FaTimes />
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => startEdit(node)}
+                    className={`${styles.iconBtn} ${styles.hoverOnly}`}
+                    title="Edit"
+                  >
+                    <FaEdit />
+                  </button>
+                  {depth === 0 && (
+                    <button
+                      type="button"
+                      onClick={() => startAdd(node.id)}
+                      className={`${styles.iconBtn} ${styles.hoverOnly}`}
+                      title="Add"
+                    >
+                      <FaPlus />
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+            <span className={styles.badge}>{node.estimatedHours ?? 0}h</span>
           </div>
         </div>
         {isAddingHere && renderAddRow(node.id, depth + 1)}
@@ -294,22 +307,6 @@ function ModuleTree({
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <div>
-          <p className={styles.title}>Modules</p>
-          <p className={styles.subtitle}>
-            Root modules with a single sub-module level.
-          </p>
-        </div>
-        <button
-          type="button"
-          className={styles.primaryBtn}
-          onClick={() => startAdd(null)}
-        >
-          <FaPlus />
-        </button>
-      </div>
-
       {error && <div className={styles.error}>{error}</div>}
 
       {addTarget === null && renderAddRow(null, 0)}
@@ -344,6 +341,6 @@ function ModuleTree({
       )}
     </div>
   );
-}
+});
 
 export default ModuleTree;

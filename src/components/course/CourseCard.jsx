@@ -120,7 +120,7 @@ function CourseCard({ course, onNavigate, onEdit, onDelete }) {
               <FaEdit />
             </button>
             <button
-              className={styles.iconBtn}
+              className={`${styles.iconBtn} ${styles.iconBtnDanger}`}
               onClick={handleDelete}
               title="Delete"
             >

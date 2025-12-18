@@ -6,16 +6,17 @@
 
 .item {
   border: 1px solid var(--border);
-  background: var(--background);
+  background: var(--bg);
   padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  border-radius: var(--radius);
 }
 
 .item:hover {
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
 }
 
 .content {
@@ -49,12 +50,12 @@
 
 .title {
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-strong);
 }
 
 .url {
   font-size: 0.8rem;
-  color: var(--accent);
+  color: var(--primary);
   text-decoration: none;
   word-break: break-all;
 }
@@ -78,13 +79,13 @@
 }
 
 .actions button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  color: var(--primary);
 }
 
 .actions button:last-child:hover {
-  border-color: #dc3545;
-  color: #dc3545;
+  border-color: var(--danger);
+  color: var(--danger);
 }
 
 .form {

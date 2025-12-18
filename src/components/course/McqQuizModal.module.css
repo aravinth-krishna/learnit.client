@@ -21,8 +21,9 @@
   padding: 12px;
   border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--accent);
+  color: var(--success);
   font-weight: 700;
+  border-radius: var(--radius);
 }
 
 .list {
@@ -35,8 +36,9 @@
 
 .questionCard {
   border: 1px solid var(--border);
-  background: var(--background);
+  background: var(--bg);
   padding: 12px;
+  border-radius: var(--radius);
 }
 
 .questionText {

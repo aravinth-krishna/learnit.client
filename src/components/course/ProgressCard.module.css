@@ -12,15 +12,16 @@
 
 .stat {
   padding: 16px;
-  background: var(--background);
+  background: var(--bg);
   border: 1px solid var(--border);
   text-align: center;
+  border-radius: var(--radius);
 }
 
 .value {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .label {
@@ -40,14 +41,19 @@
 
 .bar {
   height: 10px;
-  background: var(--background);
+  background: var(--bg);
   border: 1px solid var(--border);
   overflow: hidden;
+  border-radius: 999px;
 }
 
 .fill {
   height: 100%;
-  background: var(--accent);
+  background: linear-gradient(
+    90deg,
+    var(--success),
+    color-mix(in srgb, var(--success) 65%, var(--primary))
+  );
   transition: width 0.3s;
 }
 
@@ -59,7 +65,7 @@
 }
 
 .percent {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .details {
@@ -71,10 +77,11 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  background: var(--background);
+  background: var(--bg);
   border: 1px solid var(--border);
   font-weight: 600;
   font-size: 0.9rem;
+  border-radius: var(--radius);
 }
 
 .modulesLabel {
@@ -85,5 +92,5 @@
 }
 
 .modulesValue {
-  color: var(--text);
+  color: var(--text-strong);
 }

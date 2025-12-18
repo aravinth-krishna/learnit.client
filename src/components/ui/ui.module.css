@@ -3,24 +3,29 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 8px 14px;
+  padding: 9px 14px;
   border: 1px solid var(--border);
   background: var(--surface);
-  color: var(--text);
+  color: var(--text-strong);
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .buttonPrimary {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
+  background: var(--primary, var(--accent));
+  border-color: var(--primary, var(--accent));
+  color: var(--primary-foreground, #fff);
 }
 
 .buttonPrimary:hover {
-  background: var(--accent-dark);
+  background: var(--primary-dark, var(--accent-dark));
 }
 
 .buttonGhost {
@@ -28,37 +33,39 @@
 }
 
 .buttonGhost:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
 .buttonDanger {
-  color: #c0392b;
-  border-color: #e0b4b1;
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--border));
   background: transparent;
 }
 
 .buttonDanger:hover {
-  border-color: #c0392b;
+  border-color: var(--danger);
+  background: var(--danger-bg);
 }
 
 .buttonText {
   background: transparent;
   border: none;
   padding: 6px 8px;
-  color: var(--text);
+  color: var(--text-strong);
 }
 
 .buttonText:hover {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .card {
   border: 1px solid var(--border);
-  background: var(--background);
-  border-radius: 4px;
+  background: var(--surface);
+  border-radius: var(--radius);
   padding: 14px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--shadow-sm);
 }
 
 .field {
@@ -69,7 +76,7 @@
 
 .field label {
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-strong);
   font-size: 0.95rem;
 }
 
@@ -81,13 +88,15 @@
   background: var(--surface);
   font-family: inherit;
   font-size: 0.95rem;
+  border-radius: var(--radius-sm);
 }
 
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 60%, var(--border));
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .fieldHint {
@@ -98,7 +107,8 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -112,7 +122,8 @@
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 24px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -152,7 +163,7 @@
 }
 
 .closeButton:hover {
-  color: var(--accent);
+  color: var(--primary);
 }
 
 .modalBody {
@@ -177,10 +188,11 @@
 
 .errorBanner {
   padding: 12px;
-  background: #fee;
-  border: 1px solid #fcc;
-  color: #c33;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-border);
+  color: var(--danger-foreground);
   font-weight: 600;
+  border-radius: var(--radius-sm);
 }
 
 .statCard {
@@ -190,6 +202,8 @@
   border: 1px solid var(--border);
   background: var(--surface);
   padding: 18px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .statLabel {
@@ -215,24 +229,25 @@
   cursor: pointer;
   font-weight: 650;
   color: var(--text-soft);
-  border-radius: 4px 4px 0 0;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
 }
 
 .tab:hover {
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
 }
 
 .active {
-  color: var(--accent);
-  border-color: var(--accent);
-  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.08);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--border));
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  box-shadow: var(--shadow-sm);
 }
 
 .statValue {
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--text);
+  color: var(--text-strong);
 }
 
 .statHint {

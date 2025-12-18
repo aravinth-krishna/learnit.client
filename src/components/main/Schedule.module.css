@@ -31,17 +31,17 @@
   flex-wrap: wrap;
   padding: 20px;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--shadow-md);
 }
 
 .sideCard {
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--surface);
   padding: 12px;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .actionButtons {
@@ -78,10 +78,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: var(--accent);
+  background: var(--primary);
   color: #fff;
   padding: 10px 14px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-size: 0.82rem;
   font-weight: 700;
   text-align: center;
@@ -102,7 +102,7 @@
 .dangerBtn,
 .quickBtn,
 .applyBtn {
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   font-weight: 700;
   border: 1px solid transparent;
   cursor: pointer;
@@ -111,8 +111,8 @@
 }
 
 .primaryBtn {
-  border-color: var(--accent);
-  background: var(--accent);
+  border-color: var(--primary);
+  background: var(--primary);
   color: #fff;
   padding: 10px 16px;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
@@ -131,8 +131,8 @@
 }
 
 .lightBtn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  color: var(--primary);
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
@@ -144,14 +144,14 @@
 }
 
 .secondaryBtn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  color: var(--primary);
   box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
 }
 
 .dangerBtn {
-  border-color: #d92c3a;
-  background: #d92c3a;
+  border-color: var(--danger);
+  background: var(--danger);
   color: #fff;
   padding: 10px 16px;
   box-shadow: 0 12px 24px rgba(217, 44, 58, 0.2);
@@ -164,10 +164,10 @@
 
 .calendarCard {
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--surface);
   padding: 18px;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.1);
+  box-shadow: var(--shadow-md);
 }
 
 .metricsRow {
@@ -184,9 +184,9 @@
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 14px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   text-align: left;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .metricCard span {
@@ -216,8 +216,8 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  border-radius: 4px;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .cardHeader {
@@ -236,7 +236,7 @@
 .nextBadge {
   font-size: 0.7rem;
   background: rgba(99, 102, 241, 0.12);
-  color: var(--accent);
+  color: var(--primary);
   padding: 4px 10px;
   border-radius: 4px;
   text-transform: uppercase;
@@ -269,16 +269,16 @@
 }
 
 .applyBtn {
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
   background: var(--bg);
-  color: var(--accent);
+  color: var(--primary);
   padding: 8px 12px;
   font-size: 0.82rem;
   white-space: nowrap;
 }
 
 .applyBtn:hover {
-  background: var(--accent);
+  background: var(--primary);
   color: #fff;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14);
   transform: translateY(-1px);
@@ -326,7 +326,7 @@
 
 .sessionMeta small {
   font-size: 0.75rem;
-  color: var(--accent);
+  color: var(--primary);
   font-style: italic;
 }
 
@@ -340,7 +340,7 @@
   color: var(--text-soft);
   background: var(--surface);
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 999px;
   align-self: flex-start;
   border: 1px solid var(--border);
 }
@@ -359,12 +359,12 @@
   color: var(--text-strong);
   padding: 10px 14px;
   font-size: 0.92rem;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .quickBtn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  color: var(--primary);
   transform: translateY(-1px);
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
 }
@@ -437,7 +437,7 @@
   padding: 14px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
 }
 
 .moduleInfo h4 {
@@ -450,7 +450,7 @@
   padding: 10px 12px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   margin-bottom: 8px;
 }
 
@@ -460,7 +460,7 @@
 }
 
 .moduleCard small {
-  color: var(--accent);
+  color: var(--primary);
   font-style: italic;
 }
 
@@ -469,7 +469,7 @@
   padding: 12px;
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
 }
 
 .eventDetails div {
@@ -491,7 +491,8 @@
 .modalOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -508,8 +509,8 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
-  border-radius: 4px;
-  box-shadow: 0 24px 44px rgba(15, 23, 42, 0.22);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
 }
 
 .modalHeader {
@@ -521,7 +522,7 @@
 
 .modalHeader .kicker {
   font-size: 0.9rem;
-  color: var(--accent);
+  color: var(--primary);
   font-weight: 650;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -547,13 +548,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   transition: all 0.15s ease;
 }
 
 .iconBtn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
 }
 
@@ -571,7 +572,7 @@
 
 .fieldCard {
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius);
   padding: 10px 12px;
   background: var(--bg);
   display: flex;
@@ -587,7 +588,7 @@
 .fieldCard input,
 .fieldCard select {
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 9px 10px;
   background: var(--surface);
 }
@@ -618,13 +619,13 @@
   justify-content: space-between;
   align-items: center;
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   background: var(--surface);
 }
 
 .courseRowSelected {
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 50%, var(--border));
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
 
@@ -647,9 +648,9 @@
 
 .orderBadge {
   padding: 4px 8px;
-  border-radius: 4px;
-  background: rgba(99, 102, 241, 0.12);
-  color: var(--accent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: var(--primary);
   font-weight: 700;
   font-size: 0.9rem;
 }
@@ -664,7 +665,7 @@
   background: var(--surface);
   color: var(--text-strong);
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
 }
 
@@ -689,14 +690,14 @@
   background: var(--surface);
   color: var(--text-strong);
   font-size: 0.92rem;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .modalForm input:focus,
 .modalForm select:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
 
@@ -717,26 +718,26 @@
 
 .errorMessage {
   padding: 12px;
-  border: 1px solid #ff7b7b;
-  background: #fff2f2;
-  color: #b42318;
-  border-radius: 4px;
+  border: 1px solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger-foreground);
+  border-radius: var(--radius);
   font-size: 0.92rem;
 }
 
 .progressError {
   margin-top: 8px;
-  color: #d92c3a;
+  color: var(--danger);
   font-size: 0.9rem;
 }
 
 /* Notification styles */
 .notification {
-  background: #ffebee;
-  color: #c62828;
+  background: var(--danger-bg);
+  color: var(--danger-foreground);
   padding: 12px 16px;
-  border-radius: 4px;
-  border: 1px solid #ffcdd2;
+  border-radius: var(--radius);
+  border: 1px solid var(--danger-border);
   margin-bottom: 4px;
   font-size: 0.9rem;
   animation: slideIn 0.3s ease-out;
@@ -769,11 +770,11 @@
   --fc-border-color: var(--border);
   --fc-neutral-bg-color: var(--bg);
   --fc-page-bg-color: var(--surface);
-  --fc-today-bg-color: rgba(99, 102, 241, 0.08);
+  --fc-today-bg-color: color-mix(in srgb, var(--primary) 10%, transparent);
 }
 
 :global(.fc-toolbar-chunk button) {
-  border-radius: 4px !important;
+  border-radius: var(--radius-sm) !important;
   border: 1px solid var(--border) !important;
   background: var(--surface) !important;
   color: var(--text-strong) !important;
@@ -781,12 +782,16 @@
 }
 
 :global(.fc-toolbar-chunk button:hover) {
-  border-color: var(--accent) !important;
-  color: var(--accent) !important;
+  border-color: color-mix(
+    in srgb,
+    var(--primary) 45%,
+    var(--border)
+  ) !important;
+  color: var(--primary) !important;
 }
 
 :global(.fc-event) {
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   border: none;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
 }
@@ -803,7 +808,7 @@
 
 :global(.fc-daygrid-event),
 :global(.fc-timegrid-event) {
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   border: none;
 }
 

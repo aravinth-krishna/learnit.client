@@ -9,18 +9,18 @@ import { NextSessions } from "./schedule/NextSessions";
 import styles from "./Schedule.module.css";
 
 const colorPalette = [
-  "#2563eb",
-  "#16a34a",
-  "#db2777",
-  "#ea580c",
-  "#7c3aed",
-  "#0ea5e9",
-  "#d97706",
-  "#22c55e",
+  "var(--course-color-1)",
+  "var(--course-color-2)",
+  "var(--course-color-3)",
+  "var(--course-color-4)",
+  "var(--course-color-5)",
+  "var(--course-color-6)",
+  "var(--course-color-7)",
+  "var(--course-color-8)",
 ];
 
 const getCourseColor = (courseId) => {
-  if (courseId === null || courseId === undefined) return "#1eaf53";
+  if (courseId === null || courseId === undefined) return "var(--primary)";
   const idx = Math.abs(courseId) % colorPalette.length;
   return colorPalette[idx];
 };
@@ -31,7 +31,7 @@ const decorateEventColors = (event) => {
       ...event,
       backgroundColor: undefined,
       borderColor: undefined,
-      textColor: "#fff",
+      textColor: "var(--event-text)",
     };
   }
 
@@ -39,13 +39,13 @@ const decorateEventColors = (event) => {
   const isCompleted = event.courseModule?.isCompleted;
   const baseColor = getCourseColor(courseId);
 
-  const color = isCompleted ? "#94a3b8" : baseColor;
+  const color = isCompleted ? "var(--event-muted)" : baseColor;
 
   return {
     ...event,
     backgroundColor: color,
     borderColor: color,
-    textColor: "#fff",
+    textColor: "var(--event-text)",
   };
 };
 

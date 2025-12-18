@@ -57,9 +57,9 @@ export function ScheduleCalendar({
         snapDuration="00:15:00"
         height="70vh"
         eventDisplay="block"
-        eventBackgroundColor="#1eaf53"
-        eventBorderColor="#1eaf53"
-        eventTextColor="white"
+        eventBackgroundColor="var(--primary)"
+        eventBorderColor="var(--primary)"
+        eventTextColor="var(--primary-foreground)"
         dayHeaderFormat={{ weekday: "short" }}
         slotLabelFormat={{
           hour: "numeric",

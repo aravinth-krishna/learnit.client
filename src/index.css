@@ -1,1 +1,199 @@
+:root {
+  /* Base tokens (used by landing/home too) */
+  --bg: #f4f4f4;
+  --surface: #ffffff;
+  --muted: #6b6b6b;
+  --text-soft: #6b6b6b;
+  --border: #e2e2e2;
+  --text-strong: #111;
 
+  /* Brand (keep green as-is to avoid landing changes) */
+  --accent: #1eaf53;
+  --accent-dark: #129341;
+
+  --font-sans: "Inter", "Suisse Intl", system-ui, -apple-system, sans-serif;
+
+  /* App theme tokens (internal dashboard UI) */
+  --app-bg: var(--bg);
+  --text: var(--text-strong);
+  --background: var(--bg);
+
+  --primary: #4f46e5;
+  --primary-dark: #4338ca;
+  --primary-foreground: #ffffff;
+
+  --danger: #e11d48;
+  --danger-foreground: #9f1239;
+  --danger-bg: #fff1f2;
+  --danger-border: #fecdd3;
+
+  --success: #16a34a;
+  --success-foreground: #166534;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+
+  --warning: #f59e0b;
+  --warning-foreground: #92400e;
+  --warning-bg: #fffbeb;
+  --warning-border: #fde68a;
+
+  --info: #0ea5e9;
+
+  --radius-sm: 10px;
+  --radius: 14px;
+
+  --shadow-sm: 0 1px 2px rgba(2, 6, 23, 0.06);
+  --shadow-md: 0 8px 24px rgba(2, 6, 23, 0.1);
+  --shadow-lg: 0 16px 48px rgba(2, 6, 23, 0.14);
+
+  --ring: color-mix(in srgb, var(--primary) 28%, transparent);
+
+  /* Schedule/course palette (CSS vars so we don't hardcode colors in JS) */
+  --course-color-1: #4f46e5;
+  --course-color-2: #16a34a;
+  --course-color-3: #db2777;
+  --course-color-4: #ea580c;
+  --course-color-5: #7c3aed;
+  --course-color-6: #0ea5e9;
+  --course-color-7: #d97706;
+  --course-color-8: #14b8a6;
+
+  --event-muted: #94a3b8;
+  --event-text: #ffffff;
+}
+
+/* Dark mode variables */
+[data-theme="dark"] {
+  /* Neutral “pure dark” palette (avoid blue-tinted slate) */
+  --bg: #0b0b0d;
+  --surface: #121216;
+  --muted: #a1a1aa;
+  --text-soft: #a1a1aa;
+  --border: #27272a;
+  --text-strong: #fafafa;
+
+  /* Preserve prior behavior for landing/home in dark mode */
+  --accent: #22d3ee;
+  --accent-dark: #0891b2;
+
+  --app-bg: var(--bg);
+  --text: var(--text-strong);
+  --background: var(--bg);
+
+  --primary: #818cf8;
+  --primary-dark: #6366f1;
+  --primary-foreground: #0b0b0d;
+
+  --danger: #fb7185;
+  --danger-foreground: #fecdd3;
+  --danger-bg: rgba(251, 113, 133, 0.12);
+  --danger-border: rgba(251, 113, 133, 0.35);
+
+  --success: #22c55e;
+  --success-foreground: #bbf7d0;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --success-border: rgba(34, 197, 94, 0.35);
+
+  --warning: #fbbf24;
+  --warning-foreground: #fde68a;
+  --warning-bg: rgba(251, 191, 36, 0.12);
+  --warning-border: rgba(251, 191, 36, 0.35);
+
+  --info: #38bdf8;
+
+  --ring: color-mix(in srgb, var(--primary) 34%, transparent);
+
+  --course-color-1: #818cf8;
+  --course-color-2: #22c55e;
+  --course-color-3: #fb7185;
+  --course-color-4: #fb923c;
+  --course-color-5: #c4b5fd;
+  --course-color-6: #38bdf8;
+  --course-color-7: #fbbf24;
+  --course-color-8: #2dd4bf;
+
+  --event-muted: #71717a;
+  --event-text: #0b0b0d;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  line-height: 1.45;
+  background-color: var(--bg);
+  color: var(--text-strong);
+  overflow-x: hidden;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+input,
+textarea,
+select {
+  color: var(--text-strong);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: color-mix(in srgb, var(--primary) 60%, var(--border));
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}

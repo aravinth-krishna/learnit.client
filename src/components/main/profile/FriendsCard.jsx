@@ -47,7 +47,7 @@ export function FriendsCard({
             </div>
             <button
               type="button"
-              className={styles.linkBtn}
+              className={styles.dangerLinkBtn}
               onClick={() => onRemove(f.id)}
             >
               Remove

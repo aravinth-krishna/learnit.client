@@ -97,13 +97,17 @@ function Progress() {
   };
 
   if (loading) {
-    return <section className={styles.page}>Loading progress data...</section>;
+    return (
+      <section className={styles.page}>
+        <div className={styles.centerMessage}>Loading progress data...</div>
+      </section>
+    );
   }
 
   if (error || !dashboardData) {
     return (
       <section className={styles.page}>
-        <div style={{ textAlign: "center", padding: "40px", color: "#c33" }}>
+        <div className={styles.centerError}>
           {error || "Failed to load progress data"}
         </div>
       </section>
@@ -111,6 +115,24 @@ function Progress() {
   }
 
   const { stats, weeklyData, courseProgress, activityHeatmap } = dashboardData;
+
+  const normalizeHeatmap = (values, targetLength = 60) => {
+    const list = Array.isArray(values) ? values.slice(-targetLength) : [];
+    const padded =
+      list.length >= targetLength
+        ? list
+        : Array(targetLength - list.length)
+            .fill(0)
+            .concat(list);
+
+    return padded.map((val) => {
+      const n = Number(val);
+      if (!Number.isFinite(n)) return 0;
+      return Math.max(0, Math.min(3, Math.round(n)));
+    });
+  };
+
+  const heatmapValues = normalizeHeatmap(activityHeatmap);
 
   const weeklyScheduledTotal = weeklyData.reduce(
     (sum, d) => sum + d.scheduled,
@@ -172,20 +194,12 @@ function Progress() {
           <div className={styles.section}>
             <h2>Study Activity Heatmap</h2>
             <div className={styles.heatmap}>
-              {activityHeatmap.map((val, i) => (
+              {heatmapValues.map((val, i) => (
                 <div
                   key={i}
-                  className={styles.heatBox}
-                  style={{
-                    background:
-                      val === 0
-                        ? "#e0e0e0"
-                        : val === 1
-                        ? "#b6e0ff"
-                        : val === 2
-                        ? "#64c0f0"
-                        : "#008dd0",
-                  }}
+                  className={`${styles.heatBox} ${
+                    styles[`heat${val}`] || styles.heat0
+                  }`}
                   title={`Activity level: ${val}`}
                 />
               ))}
@@ -218,8 +232,8 @@ function Progress() {
               <XAxis dataKey="day" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="scheduled" fill="#007bff" />
-              <Bar dataKey="completed" fill="#00b894" />
+              <Bar dataKey="scheduled" fill="var(--primary)" />
+              <Bar dataKey="completed" fill="var(--success)" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -234,9 +248,9 @@ function Progress() {
               <Tooltip />
               <Line
                 dataKey="completed"
-                stroke="#00b894"
+                stroke="var(--success)"
                 strokeWidth={2}
-                dot={{ fill: "#00b894", r: 4 }}
+                dot={{ fill: "var(--success)", r: 4 }}
               />
             </LineChart>
           </ResponsiveContainer>

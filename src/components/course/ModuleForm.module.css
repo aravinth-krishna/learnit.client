@@ -6,6 +6,8 @@
   border: 1px solid var(--border);
   background: var(--surface);
   padding: 14px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
 }
 
 .header {
@@ -30,11 +32,12 @@
   align-items: center;
   gap: 6px;
   padding: 8px 12px;
-  background: var(--accent);
+  background: var(--primary);
   border: none;
   color: #fff;
   font-weight: 700;
   cursor: pointer;
+  border-radius: var(--radius-sm);
 }
 
 .tree {
@@ -84,7 +87,7 @@
 .inlineForm input {
   padding: 8px 10px;
   border: 1px solid var(--border);
-  background: var(--background);
+  background: var(--bg);
   font-family: inherit;
 }
 
@@ -96,7 +99,7 @@
 
 .actions button {
   border: 1px solid var(--border);
-  background: var(--background);
+  background: var(--surface);
   color: var(--muted);
   cursor: pointer;
   padding: 6px 8px;
@@ -106,13 +109,13 @@
 }
 
 .actions button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+  color: var(--primary);
 }
 
 .danger {
-  color: #c0392b;
-  border-color: #c0392b;
+  color: var(--danger);
+  border-color: var(--danger);
 }
 
 .children {
@@ -126,7 +129,8 @@
   text-align: center;
   border: 1px dashed var(--border);
   color: var(--muted);
-  background: var(--background);
+  background: var(--bg);
+  border-radius: var(--radius);
 }
 
 @media (max-width: 640px) {

@@ -78,6 +78,8 @@
 
 .chatPanel {
   width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
 }
 
 .tabs {
@@ -118,6 +120,8 @@
   flex-direction: column;
   min-height: 520px;
   box-shadow: var(--shadow-md);
+  overflow: hidden;
+  max-height: calc(100vh - 220px);
 }
 
 .messages {
@@ -129,6 +133,7 @@
   gap: 10px;
   background: var(--bg);
   border-radius: var(--radius) var(--radius) 0 0;
+  overscroll-behavior: contain;
 }
 
 .message {
@@ -138,6 +143,7 @@
   background: var(--surface);
   line-height: 1.4;
   box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+  max-width: 78ch;
 }
 
 .message p {
@@ -180,6 +186,10 @@
   border-top: 1px solid var(--border);
   background: var(--surface);
   border-radius: 0 0 var(--radius) var(--radius);
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  box-shadow: 0 -10px 22px rgba(15, 23, 42, 0.06);
 }
 
 .quickActions {
@@ -203,6 +213,12 @@
   background: var(--bg);
 }
 
+.inputRow input:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--primary) 55%, var(--border));
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
 .inputRow button {
   padding: 10px 14px;
   border: 1px solid var(--border);
@@ -216,10 +232,32 @@
   gap: 6px;
 }
 
+.inputRow button:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
 .sideColumn {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.compareWrap {
+  width: 100%;
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.compareLayout {
+  display: grid;
+  grid-template-columns: clamp(300px, 340px, 380px) minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.compareLayout > * {
+  min-width: 0;
 }
 
 .compareGrid {
@@ -261,6 +299,12 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.friendList {
+  max-height: 320px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .friendList li {
@@ -317,6 +361,7 @@
 .muted {
   color: var(--text-soft);
   font-style: italic;
+  overflow-wrap: anywhere;
 }
 
 .fieldRow {
@@ -358,6 +403,13 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  justify-content: center;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .friendList li {
@@ -372,6 +424,12 @@
   gap: 8px;
   align-items: center;
   width: 100%;
+}
+
+@media (max-width: 960px) {
+  .compareLayout {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 960px) {

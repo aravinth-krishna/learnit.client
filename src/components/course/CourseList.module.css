@@ -10,6 +10,13 @@
   gap: 20px;
 }
 
+.filtersPanel {
+  position: sticky;
+  top: 24px;
+  align-self: start;
+  height: fit-content;
+}
+
 .mainColumn {
   display: flex;
   flex-direction: column;
@@ -114,8 +121,6 @@
   gap: 18px;
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
-  position: sticky;
-  top: 24px;
 }
 
 .filtersBar > span {
@@ -221,6 +226,7 @@
 
   .filtersPanel {
     order: 2;
+    position: static;
   }
 
   .cardsSection {

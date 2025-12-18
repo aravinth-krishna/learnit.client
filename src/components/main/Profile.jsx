@@ -42,11 +42,6 @@ function Profile() {
     loadFriends();
   }, []);
 
-  // Sync theme context when preferences are loaded
-  useEffect(() => {
-    setDarkMode(preferences.darkMode);
-  }, [preferences.darkMode, setDarkMode]);
-
   const loadProfile = async () => {
     try {
       setLoading(true);

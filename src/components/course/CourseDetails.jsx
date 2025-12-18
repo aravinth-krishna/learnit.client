@@ -190,6 +190,7 @@ function CourseDetails() {
             </h2>
             <ModuleTree
               modules={flatModules}
+              courseTitle={course?.title || ""}
               onUpdate={async (moduleId, updates) => {
                 await courseApi.updateModule(moduleId, updates);
                 fetchCourse();

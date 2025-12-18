@@ -1,0 +1,67 @@
+.panel {
+  width: min(820px, 100%);
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 6px 10px;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.successBanner {
+  padding: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.questionCard {
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 12px;
+}
+
+.questionText {
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.optionRow {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.optionRow input {
+  margin-top: 2px;
+}
+
+.muted {
+  color: var(--muted);
+  margin: 0;
+}

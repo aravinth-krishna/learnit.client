@@ -8,19 +8,27 @@ import {
   FaRegFile,
 } from "react-icons/fa";
 import styles from "./ModuleTree.module.css";
+import McqQuizModal from "./McqQuizModal";
 
 const emptyModule = {
   title: "",
   estimatedHours: "",
 };
 
-function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
+function ModuleTree({
+  modules = [],
+  courseTitle = "",
+  onUpdate,
+  onToggleCompletion,
+  onAdd,
+}) {
   const [editingId, setEditingId] = useState(null);
   const [formValues, setFormValues] = useState(emptyModule);
   const [addTarget, setAddTarget] = useState(undefined);
   const [addValues, setAddValues] = useState(emptyModule);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
+  const [quizTarget, setQuizTarget] = useState(null);
 
   const sortByOrder = (list) =>
     [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -175,6 +183,16 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
     const handleToggle = () => {
       const childIds = depth === 0 ? children.map((c) => c.id) : [];
       const targetState = !node.isCompleted;
+
+      // Only gate marking as complete. Un-completing should remain instant.
+      if (targetState) {
+        setQuizTarget({
+          moduleTitle: node.title,
+          moduleIds: [node.id, ...childIds],
+        });
+        return;
+      }
+
       onToggleCompletion([node.id, ...childIds], targetState);
     };
 
@@ -300,6 +318,29 @@ function ModuleTree({ modules = [], onUpdate, onToggleCompletion, onAdd }) {
         <div className={styles.empty}>No modules yet.</div>
       ) : (
         <ul className={styles.tree}>{roots.map((root) => renderNode(root))}</ul>
+      )}
+
+      {quizTarget && (
+        <McqQuizModal
+          courseTitle={courseTitle}
+          moduleTitle={quizTarget.moduleTitle}
+          questionCount={5}
+          durationSeconds={60}
+          busy={pending}
+          onClose={() => setQuizTarget(null)}
+          onMarkComplete={async () => {
+            setPending(true);
+            setError("");
+            try {
+              await onToggleCompletion(quizTarget.moduleIds, true);
+            } catch (err) {
+              setError(err?.message || "Failed to update module");
+            } finally {
+              setPending(false);
+              setQuizTarget(null);
+            }
+          }}
+        />
       )}
     </div>
   );

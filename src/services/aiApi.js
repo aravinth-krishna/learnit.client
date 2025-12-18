@@ -10,6 +10,9 @@ export const aiApi = {
   createCourse(prompt) {
     return http.post("/api/ai/create-course", { prompt });
   },
+  moduleQuiz(payload) {
+    return http.post("/api/ai/module-quiz", payload);
+  },
   scheduleInsights(prompt = "") {
     return http.post("/api/ai/schedule-insights", { prompt });
   },

@@ -284,12 +284,25 @@ function CourseDetails() {
               <Button
                 variant="primary"
                 onClick={async () => {
-                  await courseApi.addExternalLink(id, {
-                    platform: "Website",
-                    title: "",
-                    url: "",
-                  });
-                  fetchCourse();
+                  setError("");
+                  try {
+                    const created = await courseApi.addExternalLink(id, {
+                      platform: "Website",
+                      title: "",
+                      url: "",
+                    });
+
+                    setCourse((prev) => {
+                      if (!prev) return prev;
+                      const existing = prev.externalLinks || [];
+                      return {
+                        ...prev,
+                        externalLinks: [...existing, created],
+                      };
+                    });
+                  } catch (err) {
+                    setError(err?.message || "Failed to add external link");
+                  }
                 }}
               >
                 + Add
